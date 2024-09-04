@@ -55,11 +55,6 @@ exports.signIn = async (req, res) => {
             console.error('Incorrect password');
             return res.status(401).json({ message: "Incorrect password" });
         }
-
-        if (!user.isActive) {
-            console.error('Access denied');
-            return res.status(403).json({ message: "Access denied" });
-        }
         
         const token = signToken(user.id, user);
 
@@ -69,7 +64,8 @@ exports.signIn = async (req, res) => {
             user: {
                 id: user.id,
                 username: user.name,
-                email: user.email
+                email: user.email,
+                role: user.role
             }
         });
     } catch (error) {
