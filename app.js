@@ -10,6 +10,7 @@ const path = require('path');
 // const moviesRouter = require('./routes/movies')
 
 const authRoutes = require('./routes/auth');
+const categories = require('./routes/items/categoryRoutes');
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -32,8 +33,11 @@ if (!fs.existsSync(uploadsDir)) {
 }
 
 //ROUTES: 
-// 1. auth (registration, signin, and logout )
+// I. auth (registration, signin, and logout): 
 app.use('/api/auth', authRoutes);
+
+// II. Admin:  
+app.use('/api/admin/v1/categories', categories);
 
 
 // EXPORTING APP TO SERVER.JS

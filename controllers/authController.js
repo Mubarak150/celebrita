@@ -28,7 +28,7 @@ const signToken = (id, user) => {
         },
         process.env.KEY,
         {
-            expiresIn: 3600 // 1 hour
+           expiresIn: 5 * 24 * 60 * 60 // 5 days periodd for expiry (set in seconds) 
         }
     );
 };
