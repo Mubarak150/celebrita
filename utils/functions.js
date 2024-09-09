@@ -1,159 +1,199 @@
 const { Op } = require('sequelize'); // Sequelize operators
 const { sanitize } = require('express-validator');
+const {sequelize} = require('../config/db'); 
+const { QueryTypes } = require('sequelize');
 
-
-// Create a new record in the database
-const createOne = async (Model, data) => {
+// Create a new record with raw SQL query
+const handleCreate = (rawQuery) => async (req, res) => {
     try {
-        const doc = await Model.create(data);
-        return doc;
+        let data = req.body;
+        
+        // Process the thumbnail image
+        if (req.file) {
+            const image = `/uploads/products/${req.file.filename}`;
+            data.thumbnail = image; 
+            console.log("thumbnail:", data.thumbnail)
+        }
+
+        // Process additional array of images
+        if (req.files) {
+            const thumbnailFile = req.files.thumbnail[0];
+            const image = `/uploads/products/${thumbnailFile.filename}`;
+            data.thumbnail = image; 
+
+            const imagesArray = req.files.images.map(file => `/uploads/products/${file.filename}`);
+            data.images = JSON.stringify(imagesArray);
+        }
+
+        // Execute the raw SQL query with replacements (sanitization)
+        const [result] = await sequelize.query(rawQuery, {
+            replacements: data,
+            type: QueryTypes.INSERT 
+        });
+
+        // Send the result
+        res.status(201).json({ success: true, data: result });
     } catch (error) {
-        throw new Error(error.message);
+        console.log(error, error.message)
+        console.log(req.body)
+        console.log(req.file)
+        res.status(400).json({ error: error.message });
     }
 };
 
-// Read all records with pagination and filters
-const readAll = async (Model, query = {}) => {
+const handleReadAll = (rawQuery, table) => async (req, res) => {
     try {
-        const { page = 1, limit = 20, ...filters } = query;
-        const skip = (page - 1) * limit;
+        const { page = 1, limit = 20, ...filters } = req.query;
+        const parsedLimit = parseInt(limit, 10) || 20; // Default to 20 if limit is invalid
+        const skip = (page - 1) * parsedLimit;
+        console.log(parsedLimit, skip)
 
-        // Apply filters to the Sequelize query
-        const docs = await Model.findAll({
-            where: filters,
-            offset: skip,
-            limit: parseInt(limit, 10)
+        // Prepare replacements for the main query
+        const replacements = { limit: parsedLimit, offset: skip, ...filters };
+
+        // Execute the main query with replacements
+        const docs = await sequelize.query(rawQuery, {
+            replacements: replacements,
+            type: QueryTypes.SELECT
         });
 
-        // Count total records
-        const totalItems = await Model.count({
-            where: filters
-        });
-        const totalPages = Math.ceil(totalItems / limit);
+        // Prepare the count query
+        const countQuery = `
+            SELECT COUNT(*) as totalItems 
+            FROM (${table})
+        `;
 
-        return {
-            status: true,
+        // Execute the count query with filters
+        const [countResult] = await sequelize.query(countQuery, {
+            replacements: { ...filters },
+            type: QueryTypes.SELECT
+        });
+
+        const totalItems = parseInt(countResult.totalItems, 10);
+        const totalPages = Math.ceil(totalItems / parsedLimit);
+
+        // Respond with data and pagination info
+        res.status(200).json({
+            success: true,
             data: docs,
             pagination: {
                 totalItems,
                 totalPages,
                 currentPage: parseInt(page, 10),
-                pageSize: parseInt(limit, 10)
+                pageSize: parsedLimit
             }
-        };
+        });
     } catch (error) {
-        throw new Error(error.message);
+        console.error('Error reading records:', error);
+        res.status(400).json({ error: error.message });
     }
 };
 
 
-// Find a document by ID
-const readById = async (Model, id) => {
+// Read a document by ID using raw SQL
+const handleReadById = (rawQuery) => async (req, res) => {
     try {
-        const doc = await Model.findByPk(id);
+        const { id } = req.params;
+
+        
+
+        // Execute the query with the ID
+        const [doc] = await sequelize.query(rawQuery, {
+            replacements: { id },
+            type: QueryTypes.SELECT
+        });
+
         if (!doc) throw new Error('Document not found');
-        return doc;
-    } catch (error) {
-        throw new Error(error.message);
-    }
-};
 
-// Update a document by ID
-const updateById = async (Model, id, data) => {
-    try {
-        // Perform the update operation
-        const [affectedRows] = await Model.update(data, { where: { id } });
-
-        // Check if any rows were affected
-        if (affectedRows === 0) throw new Error('Document not found');
-
-        // Fetch the updated record
-        const updatedRecord = await Model.findByPk(id);
-        if (!updatedRecord) throw new Error('Failed to retrieve updated document');
-
-        return updatedRecord;
-    } catch (error) {
-        // Log and rethrow the error
-        console.error('Error updating record:', error.message);
-        throw new Error(error.message);
-    }
-};
-
-
-// Delete a document by ID
-const deleteById = async (Model, id) => {
-    try {
-        const doc = await readById(Model, id);
-        await doc.destroy();
-        return doc;
-    } catch (error) {
-        throw new Error(error.message);
-    }
-};
-
-// Handler for creating a document
-const handleCreate = (Model) => async (req, res) => {
-    try {
-
-        const doc = await createOne(Model, req.body);
-        res.status(201).json(doc);
+        res.status(200).json({ success: true, data: doc });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
-// Handler for reading all documents
-const handleReadAll = (Model) => {
-    return async (req, res) => {
-        try {
-            // console.log('Received query parameters:', req.query);
+const handleUpdateById = (table) => async (req, res) => {
+    try {
+        const { id } = req.params;
+        const updates = req.body;
 
-            // Call readAll with the query parameters
-            const result = await readAll(Model, req.query);
-            res.status(200).json(result);
-        } catch (error) {
-            res.status(400).json({ error: error });
+        if (!id) {
+            return res.status(400).json({ error: 'ID parameter is required' });
         }
-    };
+
+        // Process the thumbnail image
+        if (req.file) {
+            const image = `/uploads/products/${req.file.filename}`;
+            updates.thumbnail = image; 
+            console.log("thumbnail:", updates.thumbnail)
+        }
+
+        // thumbnail with images. 
+        if (req.files) {
+            const thumbnailFile = req.files.thumbnail[0];
+            const image = `/uploads/products/${thumbnailFile.filename}`;
+            updates.thumbnail = image; 
+
+            const imagesArray = req.files.images.map(file => `/uploads/products/${file.filename}`);
+            updates.images = JSON.stringify(imagesArray);
+        }
+
+        // Build the SET clause dynamically
+        const updateKeys = Object.keys(updates);
+        if (updateKeys.length === 0 ) {
+            return res.status(400).json({ error: 'No fields to update' });
+        }
+
+        const setClause = updateKeys.map(key => `${key} = :${key}`).join(', ');
+        const query = `
+            UPDATE ${table} 
+            SET ${setClause}
+            WHERE id = :id
+        `;
+
+        // Add the ID to the updates object for replacement
+        const replacements = { id, ...updates };
+
+        // Execute the query
+        await sequelize.query(query, {
+            replacements,
+            type: QueryTypes.UPDATE
+        });
+
+        res.status(200).json({ success: true, message: 'Category updated successfully' });
+    } catch (error) {
+        console.error('Error updating category:', error);
+        res.status(400).json({ error: error.message });
+    }
 };
 
-// Handler for reading a document by ID
-const handleReadById = (Model) => async (req, res) => {
+
+// Delete a document by ID using raw SQL
+const handleDeleteById = (rawQuery, table) => async (req, res) => {
     try {
-        const doc = await readById(Model, req.params.id);
-        res.status(200).json(doc);
+        const { id } = req.params;
+
+        // Read the document before deleting
+        const readDocQuery = `SELECT * FROM (${table}) WHERE id = :id`; // Adjust table name
+        const [doc] = await sequelize.query(readDocQuery, {
+            replacements: { id },
+            type: QueryTypes.SELECT
+        });
+
+        if (!doc) throw new Error('Document not found');
+
+        // Delete the document
+        await sequelize.query(rawQuery, {
+            replacements: { id },
+            type: QueryTypes.DELETE
+        });
+
+        res.status(200).json({ success: true, data: doc });
     } catch (error) {
         res.status(400).json({ error: error.message });
     }
 };
 
-// Handler for updating a document by ID
-const handleUpdateById = (Model) => async (req, res) => {
-    try {
-        const doc = await updateById(Model, req.params.id, req.body);
-        res.status(200).json(doc);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
-// Handler for deleting a document by ID
-const handleDeleteById = (Model) => async (req, res) => {
-    try {
-        const doc = await deleteById(Model, req.params.id);
-        res.status(200).json(doc);
-    } catch (error) {
-        res.status(400).json({ error: error.message });
-    }
-};
-
-// Export functions
 module.exports = {
-    createOne,
-    readAll,
-    readById,
-    updateById,
-    deleteById,
     handleCreate,
     handleReadAll,
     handleReadById,

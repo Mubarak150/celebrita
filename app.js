@@ -11,6 +11,8 @@ const path = require('path');
 
 const authRoutes = require('./routes/auth');
 const categories = require('./routes/items/categoryRoutes');
+const products = require('./routes/items/productRoutes');
+const tests = require('./routes/tests');
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -27,10 +29,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 
 // Ensure uploads directory exists
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) {
-    fs.mkdirSync(uploadsDir);
-}
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 //ROUTES: 
 // I. auth (registration, signin, and logout): 
@@ -38,6 +37,8 @@ app.use('/api/auth', authRoutes);
 
 // II. Admin:  
 app.use('/api/admin/v1/categories', categories);
+app.use('/api/admin/v1/products', products);
+app.use('/tests', tests);
 
 
 // EXPORTING APP TO SERVER.JS
