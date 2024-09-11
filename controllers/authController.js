@@ -1,9 +1,6 @@
-const multer = require('multer');
 const crypto = require('crypto'); // for random number generation
 const rateLimit = require('express-rate-limit');
-const path = require('path');
 const User = require('../models/User');
-// const Warehouse = require('../models/Warehouse');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');

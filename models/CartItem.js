@@ -13,7 +13,7 @@ const CartItem = sequelize.define('CartItem', {
   cart_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'carts',
+      model: Cart,
       key: 'id'
     },
     onUpdate: 'CASCADE',
@@ -22,7 +22,7 @@ const CartItem = sequelize.define('CartItem', {
   product_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'products',
+      model: Product,
       key: 'id'
     },
     onUpdate: 'CASCADE',
@@ -35,6 +35,7 @@ const CartItem = sequelize.define('CartItem', {
 }, {
   timestamps: true
 });
+
 CartItem.belongsTo(Cart, { foreignKey: 'cart_id' });
 CartItem.belongsTo(Product, { foreignKey: 'product_id' });
 module.exports = CartItem;

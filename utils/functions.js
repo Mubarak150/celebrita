@@ -126,12 +126,16 @@ const handleUpdateById = (table) => async (req, res) => {
 
         // thumbnail with images. 
         if (req.files) {
-            const thumbnailFile = req.files.thumbnail[0];
-            const image = `/uploads/products/${thumbnailFile.filename}`;
-            updates.thumbnail = image; 
-
-            const imagesArray = req.files.images.map(file => `/uploads/products/${file.filename}`);
-            updates.images = JSON.stringify(imagesArray);
+            if(req.files.thumbnail){
+                const thumbnailFile = req.files.thumbnail[0];
+                const image = `/uploads/products/${thumbnailFile.filename}`;
+                updates.thumbnail = image;
+            }
+             if(req.files.images){
+                const imagesArray = req.files.images.map(file => `/uploads/products/${file.filename}`);
+                updates.images = JSON.stringify(imagesArray);
+             }
+            
         }
 
         // Build the SET clause dynamically
