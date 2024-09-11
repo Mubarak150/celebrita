@@ -8,7 +8,16 @@ exports.createProduct = handleCreate(`
 `);
 
 exports.getAllProducts = handleReadAll(`
-    SELECT * FROM products 
+    SELECT 
+        products.name, 
+        products.thumbnail, 
+        products.id, 
+        products.price, 
+        products.discount, 
+        categories.category 
+    FROM products 
+    JOIN categories 
+    ON products.category_id = categories.id
     LIMIT :limit OFFSET :offset
 `, 'products');
 

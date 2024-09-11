@@ -34,6 +34,10 @@ const Product = sequelize.define('Product', {
   images: {
     type: DataTypes.JSON
   },
+  status: {
+    type: DataTypes.ENUM('active', 'inactive'),  // specific values
+    defaultValue: 'active'  // set a default value
+  },
   category_id: {
     type: DataTypes.INTEGER,
     references: {
@@ -41,7 +45,19 @@ const Product = sequelize.define('Product', {
       key: 'id'
     },
     onDelete: 'CASCADE' // Delete products when the category is deleted
+  },
+  created_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,  // Default to current timestamp on creation
+    allowNull: false,
+  },
+  updated_at: {
+    type: DataTypes.DATE,
+    defaultValue: DataTypes.NOW,  // Default to current timestamp, updated manually
+    allowNull: false,
   }
+}, {
+  timestamps: true
 });
 
 Product.belongsTo(Category, { foreignKey: 'category_id' });
