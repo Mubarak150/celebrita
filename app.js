@@ -12,7 +12,6 @@ const path = require('path');
 const authRoutes = require('./routes/auth');
 const categories = require('./routes/items/categoryRoutes');
 const products = require('./routes/items/productRoutes');
-const tests = require('./routes/tests');
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -38,7 +37,6 @@ app.use('/api/auth', authRoutes);
 // II. Admin:  
 app.use('/api/admin/v1/categories', categories);
 app.use('/api/admin/v1/products', products);
-app.use('/tests', tests);
 
 
 // EXPORTING APP TO SERVER.JS

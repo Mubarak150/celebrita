@@ -34,9 +34,6 @@ const handleCreate = (rawQuery) => async (req, res) => {
         // Send the result
         res.status(201).json({ success: true, data: result });
     } catch (error) {
-        console.log(error, error.message)
-        console.log(req.body)
-        console.log(req.file)
         res.status(400).json({ error: error.message });
     }
 };
