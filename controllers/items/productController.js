@@ -14,6 +14,7 @@ exports.getAllProducts = handleReadAll(`
         products.id, 
         products.price, 
         products.discount, 
+        products.status, 
         categories.category 
     FROM products 
     JOIN categories 
