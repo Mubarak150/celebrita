@@ -6,7 +6,7 @@ const OrderProduct = require('../../models/OrderProduct');
 
 exports.checkout = async (req, res) => {
     try {
-      const { user_id, shipping_address, payment_method } = req.body;
+      const { user_id, shipping_address, payment_method } = req.body; 
   
       // Find the user's cart
       const cart = await Cart.findOne({ where: { user_id }, include: CartItem });

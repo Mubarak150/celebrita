@@ -102,6 +102,23 @@ const handleReadById = (rawQuery) => async (req, res) => {
 
         if (!doc) throw new Error('Document not found');
 
+        // Check if the document contains the 'images' field and it's a valid JSON string
+        if (doc.images ) {
+            try {
+                // Attempt to parse the stringified JSON into an array
+                doc.images = JSON.parse(doc.images);
+
+                // Ensure that it's an array after parsing
+                if (!Array.isArray(doc.images)) {
+                    throw new Error('Images field is not an array');
+                }
+            } catch (error) {
+                // Handle any parsing errors
+                console.error('Error parsing images field:', error.message);
+                doc.images = []; // Fallback to an empty array if parsing fails
+            }
+        }
+
         res.status(200).json({ success: true, data: doc });
     } catch (error) {
         res.status(400).json({ error: error.message });

@@ -29,6 +29,7 @@ app.use(cors({
 }));
 app.use(cookieParser());
 app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
 
 // Ensure uploads directory exists
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
@@ -36,8 +37,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 //ROUTES: 
 // I. auth (registration, signin, and logout): 
 app.use('/api/auth', authRoutes);
-app.use('/api/user/v1/:user_id/cart', cart);
-app.use('/api/user/v1/:user_id/order', order);
+app.use('/api/user/v1/cart', cart);
+app.use('/api/user/v1/order', order);
 
 // II. Admin:  
 app.use('/api/admin/v1/categories', categories);
