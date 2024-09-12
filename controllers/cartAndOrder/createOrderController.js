@@ -6,7 +6,7 @@ const OrderProduct = require('../../models/OrderProduct');
 
 exports.checkout = async (req, res) => {
     try {
-      const { user_id, shipping_address, payment_method } = req.body; 
+      const { user_id, shipping_address, user_contact, payment_type,  payment_method } = req.body; 
   
       // Find the user's cart
       const cart = await Cart.findOne({ where: { user_id }, include: CartItem });
@@ -23,7 +23,7 @@ exports.checkout = async (req, res) => {
       }
   
       // Create a new order
-      const order = await Order.create({ user_id, total_amount: totalAmount, shipping_address, payment_method });
+      const order = await Order.create({ user_id, total_amount: totalAmount, shipping_address, user_contact, payment_type, payment_method });
   
       // Add products to the order
       for (let item of cartItems) {

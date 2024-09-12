@@ -15,6 +15,7 @@ const categories = require('./routes/items/categoryRoutes');
 const products = require('./routes/items/productRoutes');
 const cart = require("./routes/cartAndOrder/addToCartRoutes");
 const order = require("./routes/cartAndOrder/createOrderRoutes");
+const orderAdmin = require("./routes/cartAndOrder/orderRoutes");
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -43,6 +44,7 @@ app.use('/api/user/v1/order', order);
 // II. Admin:  
 app.use('/api/admin/v1/categories', categories);
 app.use('/api/admin/v1/products', products);
+app.use('/api/admin/v1/orders', orderAdmin);
 
 
 

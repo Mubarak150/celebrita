@@ -34,6 +34,7 @@ const OrderProduct = sequelize.define('OrderProduct', {
     allowNull: false
   }
 }, {
+  tableName: 'orderproducts',
   timestamps: true
 });
 
