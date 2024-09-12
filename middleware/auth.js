@@ -34,7 +34,6 @@ const protect = async (req, res, next) => {
         // 2. validate the token: 
         const verifyToken = await util.promisify(jwt.verify)(token, process.env.KEY);
         
-        // console.log(verifyToken.id)
         if (!verifyToken) {
             return res.status(401).json({ status: false, message: 'No valid token' });
         }
@@ -54,7 +53,6 @@ const protect = async (req, res, next) => {
         // 5. allow the user to the page: 
         req.body.user = user; // Attach decoded user data to request
         req.body.user_id = verifyToken.id; 
-        console.log(`user_id: ${req.body.user_id}`)
         next(); // Proceed to next middleware or route handler
 
     } catch (error) {
