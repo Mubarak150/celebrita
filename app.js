@@ -38,8 +38,8 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 //ROUTES: 
 // I. auth (registration, signin, and logout): 
 app.use('/api/auth', authRoutes);
-app.use('/api/user/v1/cart', cart);
-app.use('/api/user/v1/order', order);
+app.use('/api/user/v1/add-to-cart', cart);
+app.use('/api/user/v1/place-order', order);
 
 // II. Admin:  
 app.use('/api/admin/v1/categories', categories);
