@@ -61,12 +61,14 @@ const getCart = async (req, res) => {
         // Fetch product details for each cart item
         const cartDetails = await Promise.all(cart.CartItems.map(async item => {
             const product = await Product.findByPk(item.product_id, {
-                attributes: ['name', 'price', 'discount', 'thumbnail']
+                attributes: ['name', 'price', 'discount', 'quantity',  'thumbnail']
             });
             return {
                 product_name: product.name,
                 quantity: item.quantity,
+                stock: product.quantity,
                 price: product.price,
+                discount: product.discount,
                 thumbnail: product.thumbnail
             };
         }));
