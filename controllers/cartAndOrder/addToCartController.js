@@ -33,8 +33,9 @@ const addToCart = async (req, res) => {
 
         // Update quantity if the product already exists in the cart
         if (cartItem) {
-            cartItem.quantity = totalQuantity;
-            await cartItem.save();
+            return res.status(400).json({status: false, message: "item already in cart, please visit your cart to alter quantity."})
+            // cartItem.quantity = totalQuantity;
+            // await cartItem.save();
         } else {
             // Add a new cart item
             await CartItem.create({ cart_id: cart.id, product_id, quantity });
