@@ -33,7 +33,7 @@ const addToCart = async (req, res) => {
 
         // Update quantity if the product already exists in the cart
         if (cartItem) {
-            return res.status(400).json({status: false, message: "item already in cart, please visit your cart to alter quantity."})
+            return res.status(200).json({status: true, message: "item already in cart, please visit your cart to alter quantity."})
             // cartItem.quantity = totalQuantity;
             // await cartItem.save();
         } else {
@@ -59,11 +59,13 @@ const getCart = async (req, res) => {
         }
 
         // Fetch product details for each cart item
-        const cartDetails = await Promise.all(cart.CartItems.map(async item => {
+        const cartDetails = await Promise.all(cart.CartItems.map(async (item, index) => {
             const product = await Product.findByPk(item.product_id, {
                 attributes: ['name', 'price', 'discount', 'quantity',  'thumbnail']
             });
             return {
+                index: index + 1,
+                product_id: item.product_id,
                 product_name: product.name,
                 quantity: item.quantity,
                 stock: product.quantity,
