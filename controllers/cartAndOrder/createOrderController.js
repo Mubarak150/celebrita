@@ -30,11 +30,12 @@ exports.placeOrder = async (req, res) => {
         // Add products to the order and update product quantities
         for (let item of cartItems) {
             const product = await Product.findByPk(item.product_id);
+            let discountedPrice = product.price * (1 - product.discount / 100);
             await OrderProduct.create({
                 order_id: order.id,
                 product_id: item.product_id,
                 quantity: item.quantity,
-                price_at_order: product.price
+                price_at_order: discountedPrice
             });
 
             // Update product quantity in the Products table

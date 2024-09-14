@@ -19,6 +19,13 @@ Order.belongsTo(User, { foreignKey: 'user_id' });
 Order.belongsToMany(Product, { through: OrderProduct, foreignKey: 'order_id' });
 Product.belongsToMany(Order, { through: OrderProduct, foreignKey: 'product_id' });
 
+// A Product has many OrderProducts
+Product.hasMany(OrderProduct, { foreignKey: 'product_id' });
+OrderProduct.belongsTo(Product, { foreignKey: 'product_id' });
+
+
+
+
 // Sync all models (this should be done only once)
 sequelize.sync({ alter: true })
   .then(() => {
