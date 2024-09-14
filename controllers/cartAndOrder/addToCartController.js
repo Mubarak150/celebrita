@@ -65,6 +65,7 @@ const getCart = async (req, res) => {
             });
             return {
                 index: index + 1,
+                id: item.id, 
                 product_id: item.product_id,
                 product_name: product.name,
                 quantity: item.quantity,
@@ -81,6 +82,34 @@ const getCart = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+const deleteCartItem = async (req, res) => {
+    const { id } = req.params;
+
+    // Check if id is provided
+    if (!id) {
+        return res.status(400).json({ status: false, message: 'Item ID is required' });
+    }
+
+    try {
+        const deletedItem = await CartItem.destroy({
+            where: { id: id }
+        });
+
+        // Check if the item was found and deleted
+        if (deletedItem === 0) {
+            return res.status(404).json({ status: false, message: 'Item not found' });
+        }
+
+        res.status(200).json({ status: true, message: 'Item deleted successfully' });
+
+    } catch (error) {
+        res.status(500).json({ status: false, message: 'An error occurred while deleting the item', error: error.message });
+    }
+};
+
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 const checkout = async (req, res) => {
@@ -122,5 +151,6 @@ const checkout = async (req, res) => {
 module.exports = {
     addToCart, // function for adding an item to cart along with quantity... from here the cart story begins... 
     getCart, // get all items of cart of a user [obviously from the db. hah ]
+    deleteCartItem, // delete a cart item. 
     checkout // i am allowing user to make changes to the quantities of each product / delete an entire product from cart... then upon clicking checkout he can send data to the route of this handler and his modified data will be sync__ed/modified into his db data. 
 }

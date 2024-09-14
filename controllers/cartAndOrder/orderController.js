@@ -56,24 +56,73 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
-    // Update based on the status
-    if (status === 'approve') {
-      order.status = 'approved';
-      order.exp_delivery_date = exp_delivery_date || null;
-    } else if (status === 'reject') {
-      order.status = 'rejected';
-      order.rejection_reason = rejection_reason;
-    } else if (status === 'on-the-way') {
-      order.status = 'on the way';
-      order.courier_company = courier_company;
-      order.tracking_id = tracking_id;
-    } else if (status === 'receive') {
-      order.status = 'received';
-      // Logic to update receipt and invoice can go here.
+    switch (status) {
+      case 'approve':
+        order.status = 'approved';
+        order.exp_delivery_date = exp_delivery_date || null;
+        break;
+    
+      case 'reject':
+        order.status = 'rejected';
+        order.rejection_reason = rejection_reason;
+        break;
+    
+      case 'on-the-way':
+        order.status = 'on the way';
+        order.courier_company = courier_company;
+        order.tracking_id = tracking_id;
+        break;
+    
+      case 'receive': {
+        // Set status to 'received' and log receipt date
+        const currentTime = new Date();
+        order.status = 'received';
+        order.reciept_date = currentTime;
+    
+        // Set the return expiry date to 4 days after receipt date
+        const returnExpiryDate = new Date(currentTime);
+        returnExpiryDate.setDate(returnExpiryDate.getDate() + 4);
+        order.return_expiry_date = returnExpiryDate;
+    
+        // Logic for automatically marking the order as 'completed' if return status not changed within 4 days
+        setTimeout(async () => {
+          const updatedOrder = await Order.findByPk(order.id); // Fetch the latest order state
+          if (updatedOrder.status === 'received') {
+            updatedOrder.status = 'completed';
+            await updatedOrder.save(); // Save the updated status
+            console.log(`Order ID ${updatedOrder.id} automatically marked as 'completed' after return expiry.`);
+          }
+        }, 4 * 24 * 60 * 60 * 1000); // 4 days in milliseconds
+        break;
+      }
+    
+      case 'pending-return':
+        // Ensure the user provides a return reason and proof of return image
+        if (!return_reason || !return_proof_image) {
+          return res.status(400).json({ success: false, message: 'Return reason and proof image are required for return.' });
+        }
+    
+        // Set the status to 'pending-return' and save the return reason and proof
+        order.status = 'pending-return';
+        order.return_reason = return_reason;
+        order.return_proof_image = return_proof_image;
+        break;
+    
+      case 'reject-return':
+        // Admin rejects the return, setting the status to 'completed'
+        order.status = 'completed';
+        order.return_rejection_reason = return_rejection_reason || 'Return rejected by admin';
+        break;
+    
+      case 'completed':
+        // Manually mark the order as completed
+        order.status = 'completed';
+        break;
+    
+      default:
+        return res.status(400).json({ success: false, message: 'Invalid order status' });
     }
-    //  else {
-    //   return res.status(404).json({status: false, message: "page not found"})
-    // }
+    
 
     await order.save();
     res.status(200).json({ success: true, data: order });
