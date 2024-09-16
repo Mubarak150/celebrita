@@ -2,6 +2,7 @@ const User = require('../../models/User');
 const CartItem = require('../../models/CartItem');
 const Product = require('../../models/Product');
 const Order = require('../../models/Order');
+const OrderProduct = require('../../models/OrderProduct');
 
 // Get Orders by Status
 const getOrdersByStatus = async (req, res, status) => {
@@ -65,6 +66,23 @@ const updateOrderStatus = async (req, res) => {
       case 'reject':
         order.status = 'rejected';
         order.rejection_reason = rejection_reason;
+
+        // Fetch all the OrderProducts associated with this order
+        const orderProducts = await OrderProduct.findAll({ where: { order_id: order.id } });
+
+        // Iterate through each OrderProduct and update the related Product's quantity
+        for (const orderProduct of orderProducts) {
+          // Find the product related to this orderProduct
+          const product = await Product.findOne({ where: { id: orderProduct.product_id } });
+
+          if (product) {
+            // Increase the product's quantity by the orderProduct quantity
+            product.quantity += orderProduct.quantity;
+            
+            // Save the updated product quantity
+            await product.save();
+          }
+        }
         break;
     
       case 'on-the-way':

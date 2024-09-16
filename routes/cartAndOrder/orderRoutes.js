@@ -13,6 +13,8 @@ router.put('/pending/:id/:status',  protect, isUserAdmin, updateOrderStatus); //
 router.get('/approved', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'approved')); // done
 router.put('/approved/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = on-the-way // done
 
+router.get('/rejected', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'rejected')); // done
+
 // On the Way Orders
 router.get('/on-the-way',  protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'on the way')); // done
 router.put('/on-the-way/:id/:status', protect, isUserAdmin, updateOrderStatus); // status: recieve

@@ -3,6 +3,7 @@ const CartItem = require('../../models/CartItem');
 const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 const OrderProduct = require('../../models/OrderProduct');
+const { generateInvoice } = require('../../utils/invoiceGenerator');
 
 exports.placeOrder = async (req, res) => {
     try {
@@ -45,6 +46,9 @@ exports.placeOrder = async (req, res) => {
 
         // Clear the cart after checkout
         await CartItem.destroy({ where: { cart_id: cart.id } });
+
+        // Generate invoice
+        const invoiceUrl = await generateInvoice(order.id);
 
         res.status(201).json({ success: true, data: order });
     } catch (error) {
