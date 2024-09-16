@@ -47,7 +47,6 @@ const getOrderById = async (req, res) => {
 // Update Order Status (for Approve/Reject/Receive)
 const updateOrderStatus = async (req, res) => {
   const { id, status } = req.params;
-  console.log(id, status, "id", "status")
   const { rejection_reason, exp_delivery_date, courier_company, tracking_id } = req.body;
 
   try {
@@ -59,58 +58,75 @@ const updateOrderStatus = async (req, res) => {
 
     switch (status) {
       case 'approve':
-        order.status = 'approved';
-        order.exp_delivery_date = exp_delivery_date || null;
+        if(order.status == 'approved') {
+          res.status(400).json({status: false, message: "order already approved"})
+        } else {
+          order.status = 'approved';
+          order.exp_delivery_date = exp_delivery_date || null;
+        }
+        
         break;
     
       case 'reject':
-        order.status = 'rejected';
-        order.rejection_reason = rejection_reason;
+        if(order.status == 'rejected') {
+          res.status(400).json({status: false, message: "order already rejected"})
+        } else {
+          order.status = 'rejected';
+          order.rejection_reason = rejection_reason;
 
-        // Fetch all the OrderProducts associated with this order
-        const orderProducts = await OrderProduct.findAll({ where: { order_id: order.id } });
+          // Fetch all the OrderProducts associated with this order
+          const orderProducts = await OrderProduct.findAll({ where: { order_id: order.id } });
 
-        // Iterate through each OrderProduct and update the related Product's quantity
-        for (const orderProduct of orderProducts) {
-          // Find the product related to this orderProduct
-          const product = await Product.findOne({ where: { id: orderProduct.product_id } });
+          // Iterate through each OrderProduct and update the related Product's quantity
+          for (const orderProduct of orderProducts) {
+            // Find the product related to this orderProduct
+            const product = await Product.findOne({ where: { id: orderProduct.product_id } });
 
-          if (product) {
-            // Increase the product's quantity by the orderProduct quantity
-            product.quantity += orderProduct.quantity;
-            
-            // Save the updated product quantity
-            await product.save();
+            if (product) {
+              // Increase the product's quantity by the orderProduct quantity
+              product.quantity += orderProduct.quantity;
+              
+              // Save the updated product quantity
+              await product.save();
+            }
           }
         }
         break;
     
       case 'on-the-way':
-        order.status = 'on the way';
-        order.courier_company = courier_company;
-        order.tracking_id = tracking_id;
+        if(order.status == 'on-the-way') {
+          res.status(400).json({status: false, message: "order already in transit"})
+        } else {
+          order.status = 'on the way';
+          order.courier_company = courier_company;
+          order.tracking_id = tracking_id;
+        }
         break;
     
       case 'receive': {
-        // Set status to 'received' and log receipt date
-        const currentTime = new Date();
-        order.status = 'received';
-        order.reciept_date = currentTime;
-    
-        // Set the return expiry date to 4 days after receipt date
-        const returnExpiryDate = new Date(currentTime);
-        returnExpiryDate.setDate(returnExpiryDate.getDate() + 4);
-        order.return_expiry_date = returnExpiryDate;
-    
-        // Logic for automatically marking the order as 'completed' if return status not changed within 4 days
-        setTimeout(async () => {
-          const updatedOrder = await Order.findByPk(order.id); // Fetch the latest order state
-          if (updatedOrder.status === 'received') {
-            updatedOrder.status = 'completed';
-            await updatedOrder.save(); // Save the updated status
-            console.log(`Order ID ${updatedOrder.id} automatically marked as 'completed' after return expiry.`);
-          }
-        }, 4 * 24 * 60 * 60 * 1000); // 4 days in milliseconds
+        if(order.status == 'received') {
+          res.status(400).json({status: false, message: "order already received"})
+        } else {
+          // Set status to 'received' and log receipt date
+          const currentTime = new Date();
+          order.status = 'received';
+          order.reciept_date = currentTime;
+      
+          // Set the return expiry date to 4 days after receipt date
+          const returnExpiryDate = new Date(currentTime);
+          returnExpiryDate.setDate(returnExpiryDate.getDate() + 4);
+          order.return_expiry_date = returnExpiryDate;
+      
+          // Logic for automatically marking the order as 'completed' if return status not changed within 4 days
+          setTimeout(async () => {
+            const updatedOrder = await Order.findByPk(order.id); // Fetch the latest order state
+            if (updatedOrder.status === 'received') {
+              updatedOrder.status = 'completed';
+              await updatedOrder.save(); // Save the updated status
+              console.log(`Order ID ${updatedOrder.id} automatically marked as 'completed' after return expiry.`);
+            }
+          }, 4 * 24 * 60 * 60 * 1000); // 4 days in milliseconds
+        }
         break;
       }
     
