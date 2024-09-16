@@ -4,7 +4,8 @@ const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 const OrderProduct = require('../../models/OrderProduct');
 const Invoice = require('../../models/Invoice');
-const {sequelize} = require('../../config/db');
+const User = require('../../models/User');
+const { sequelize } = require('../../config/db');
 
 exports.placeOrder = async (req, res) => {
     const transaction = await sequelize.transaction();
@@ -20,6 +21,7 @@ exports.placeOrder = async (req, res) => {
         });
 
         if (!cart || cart.CartItems.length === 0) {
+            await transaction.rollback(); // Rollback before responding
             return res.status(400).json({ success: false, message: 'Cart is empty' });
         }
 
@@ -75,7 +77,7 @@ exports.placeOrder = async (req, res) => {
         }
 
         // Create the invoice for this order
-        const invoice = await Invoice.create({
+        const newInvoice = await Invoice.create({
             order_id: order.id,
             user_id,
             invoice_number: nextInvoiceNumber,
@@ -86,75 +88,53 @@ exports.placeOrder = async (req, res) => {
         // Commit the transaction
         await transaction.commit();
 
-        // Respond with success
-        res.status(201).json({ success: true, data: { order, invoice } });
+        // Fetch detailed invoice information
+        const detailedInvoice = await Invoice.findOne({
+            where: { id: newInvoice.id },
+            include: [
+                {
+                    model: Order,
+                    include: [
+                        {
+                            model: OrderProduct,
+                            include: [Product] // Include Product to get product details
+                        },
+                        User // Include User to get the user's name
+                    ]
+                }
+            ]
+        });
+
+        if (!detailedInvoice) {
+            throw new Error('Invoice not found');
+        }
+
+        // Extract required data
+        const orderDetails = detailedInvoice.Order;
+        const orderProducts = orderDetails.OrderProducts.map(orderProduct => ({
+            product_name: orderProduct.Product.name, // Assuming `name` is a field in Product model
+            quantity: orderProduct.quantity,
+            price_at_order: orderProduct.price_at_order
+        }));
+
+        const response = {
+            invoice_id: detailedInvoice.id,
+            order_id: detailedInvoice.order_id,
+            invoice_number: detailedInvoice.invoice_number,
+            user_name: orderDetails.User.name, // Get the user's name from the User model
+            payment_status: detailedInvoice.payment_status,
+            created_at: detailedInvoice.created_at,
+            total_amount: orderDetails.total_amount,
+            shipping_address: orderDetails.shipping_address,
+            products: orderProducts
+        };
+
+        res.status(201).json({ success: true, data: response });
     } catch (error) {
         // Rollback the transaction in case of an error
-        await transaction.rollback();
+        if (transaction.finished !== 'commit') {
+            await transaction.rollback();
+        }
         res.status(500).json({ success: false, error: error.message });
     }
 };
-
-
-
-
-
-
-
-
-// const Cart = require('../../models/Cart');
-// const CartItem = require('../../models/CartItem');
-// const Product = require('../../models/Product');
-// const Order = require('../../models/Order');
-// const OrderProduct = require('../../models/OrderProduct');
-
-// exports.placeOrder = async (req, res) => {
-//     try {
-//         const { user_id, shipping_address, user_contact, payment_type, payment_method } = req.body; 
-
-//         // Find the user's cart
-//         const cart = await Cart.findOne({ where: { user_id }, include: CartItem });
-//         if (!cart || cart.CartItems.length === 0) {
-//             return res.status(400).json({ success: false, message: 'Cart is empty' });
-//         }
-
-//         // Calculate total amount while considering discounts
-//         let totalAmount = 0;
-//         const cartItems = cart.CartItems;
-//         for (let item of cartItems) {
-//             const product = await Product.findByPk(item.product_id);
-//             let discount = product.discount ? product.discount : 0;
-//             let discountedPrice = product.price * (1 - discount / 100);
-//             totalAmount += discountedPrice * item.quantity;
-//         }
-
-//         // Create a new order
-//         const order = await Order.create({ user_id, total_amount: totalAmount, shipping_address, user_contact, payment_type, payment_method });
-
-//         // Add products to the order and update product quantities
-//         for (let item of cartItems) {
-//             const product = await Product.findByPk(item.product_id);
-//             let discountedPrice = product.price * (1 - product.discount / 100);
-//             await OrderProduct.create({
-//                 order_id: order.id,
-//                 product_id: item.product_id,
-//                 quantity: item.quantity,
-//                 price_at_order: discountedPrice
-//             });
-
-//             // Update product quantity in the Products table
-//             product.quantity -= item.quantity;
-//             await product.save();
-//         }
-
-//         // Clear the cart after checkout
-//         await CartItem.destroy({ where: { cart_id: cart.id } });
-
-//         // Generate invoice
-        
-
-//         res.status(201).json({ success: true, data: order });
-//     } catch (error) {
-//         res.status(500).json({ success: false, error: error.message });
-//     }
-// };

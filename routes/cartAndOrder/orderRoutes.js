@@ -6,8 +6,6 @@ const {protect, isUserAdmin} = require('../../middleware/auth')
 // Pending Orders
 router.get('/pending',  protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'pending')); // done
 router.put('/pending/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = approve || status = reject // done
-// router.put('/pending/:id/reject',  protect, isUserAdmin, updateOrderStatus); // 
-
 
 // Approved Orders
 router.get('/approved', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'approved')); // done
