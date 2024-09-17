@@ -16,6 +16,7 @@ const cart = require("./routes/cartAndOrder/addToCartRoutes");
 const deliveries = require('./routes/deliveryRoutes');
 const order = require("./routes/cartAndOrder/createOrderRoutes");
 const orderAdmin = require("./routes/cartAndOrder/orderRoutes");
+const invoicesAdmin = require("./routes/cartAndOrder/invoiceRoutes");
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -48,6 +49,7 @@ app.use('/api/deliveries', deliveries)
 app.use('/api/admin/v1/categories', categories);
 app.use('/api/admin/v1/products', products);
 app.use('/api/admin/v1/orders', orderAdmin);
+app.use('/api/admin/v1/invoices', invoicesAdmin);
 
 
 
