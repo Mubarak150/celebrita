@@ -24,9 +24,13 @@ const Order = sequelize.define('Order', {
     type: DataTypes.ENUM('pending', 'approved', 'on-the-way', 'received', 'return', 'complete', 'rejected'),  // specific values
     defaultValue: 'pending'  // set a default value
   },
+  city: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   shipping_address: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: true
   },
   user_contact: {
     type: DataTypes.STRING,

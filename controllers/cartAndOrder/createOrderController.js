@@ -4,6 +4,7 @@ const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 const OrderProduct = require('../../models/OrderProduct');
 const Invoice = require('../../models/Invoice');
+const Delivery = require('../../models/Delivery');
 const User = require('../../models/User');
 const { sequelize } = require('../../config/db');
 
@@ -11,7 +12,7 @@ exports.placeOrder = async (req, res) => {
     const transaction = await sequelize.transaction();
 
     try {
-        const { user_id, shipping_address, user_contact, payment_type, payment_method } = req.body;
+        const { user_id, city, shipping_address, user_contact, payment_type, payment_method } = req.body;
 
         // Find the user's cart
         const cart = await Cart.findOne({
@@ -35,11 +36,24 @@ exports.placeOrder = async (req, res) => {
             totalAmount += discountedPrice * item.quantity;
         }
 
+        // add delivery based on city here from deliveries table.
+        let delivery = await Delivery.findOne({ where: {city: city} }); 
+        if (!delivery) {
+            res.json({status: false, message: "selected city name not found in record"})
+        }
+
+        let deliveryCharges = delivery.charges; 
+        let AmountWithDelivery = totalAmount + deliveryCharges; 
+
+
+
+
         // Create a new order
         const order = await Order.create({
             user_id,
             total_amount: totalAmount,
             shipping_address,
+            city,
             user_contact,
             payment_type,
             payment_method
@@ -82,6 +96,7 @@ exports.placeOrder = async (req, res) => {
             user_id,
             invoice_number: nextInvoiceNumber,
             payment_status: 'pending', // or 'paid' depending on the flow
+            delivery_charges: deliveryCharges,
             created_at: new Date()
         }, { transaction });
 
@@ -125,6 +140,8 @@ exports.placeOrder = async (req, res) => {
             payment_status: detailedInvoice.payment_status,
             created_at: detailedInvoice.created_at,
             total_amount: orderDetails.total_amount,
+            delivery_charges: deliveryCharges, // added new
+            amount_with_delivery: AmountWithDelivery, // added new
             shipping_address: orderDetails.shipping_address,
             products: orderProducts
         };
