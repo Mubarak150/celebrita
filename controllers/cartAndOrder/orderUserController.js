@@ -31,7 +31,9 @@ const getOrdersByUser = async (req, res) => {
 // Update Order to return-pending Status if its current status is recieved : done by user
 const returnReceivedOrder = async (req, res) => {
     const { id } = req.params; // order id
-    const { return_reason, return_proof_image } = req.body;
+    const  return_reason  = req.body.return_reason;
+    const return_proof_image = req.files && req.files['return_proof_image'] ? req.files['return_proof_image'][0].path : null;
+    console.log(return_reason, return_proof_image)
 
     if(!return_reason || !return_proof_image) {
         return res.status(400).json({ success: false, error: 'reason for return and an image as a proof thereof are mandatory' });
@@ -43,26 +45,29 @@ const returnReceivedOrder = async (req, res) => {
       if (!order) {
         return res.status(404).json({ success: false, error: 'Order not found' });
       }
-  
 
-        if(order.status != 'received') {
+      console.log(req.body.user_id, order.user_id)
+      if(req.body.user_id != order.user_id) {
+        return res.status(404).json({ success: false, error: 'This order does not belong to you.' });
+      }
+  
+      if(order.status != 'received') {
         res.status(400).json({status: false, message: "only recieved orders can be returned"})
-        } else {
+      } else {
         
         // Process the return_proof_image 
-        if (req.file) {
-            const image = `/uploads/products/${req.file.filename}`;
+        if (req.files) {
+            const image = `/uploads/products/${req.files.return_proof_image[0].filename}`;
             req.body.return_proof_image = image; 
-            console.log("return_proof_image:", req.body.return_proof_image)
         }
         order.status = 'return-pending';
         order.return_reason = return_reason || null;
         order.return_proof_image = req.body.return_proof_image; // this is still untested and needed to be considered thoroughly...
-        }
-        // find a way to add the image link to the table of order... and add its image to /uploads
-          
-      await order.save();
-      res.status(200).json({ success: true, message: "return request placed successfully." });
+
+        await order.save();
+        res.status(200).json({ success: true, message: "return request placed successfully." });
+      }
+        
     } catch (error) {
       res.status(500).json({ success: false, error: error.message });
     }

@@ -63,7 +63,15 @@ const Order = sequelize.define('Order', {
   payment_status: {
     type: DataTypes.ENUM('pending', 'completed'),
     defaultValue: 'pending'
-  }
+  },
+  return_proof_image: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  return_reason: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
 }, {
   timestamps: true
 });
