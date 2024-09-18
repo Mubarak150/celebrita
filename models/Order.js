@@ -20,8 +20,12 @@ const Order = sequelize.define('Order', {
     type: DataTypes.FLOAT,
     allowNull: false
   },
+  amount_with_delivery: {
+    type: DataTypes.FLOAT,
+    allowNull: false
+  },
   status: {
-    type: DataTypes.ENUM('pending', 'approved', 'on-the-way', 'received', 'return', 'complete', 'rejected'),  // specific values
+    type: DataTypes.ENUM('pending', 'approved', 'on-the-way', 'received', 'return-pending', 'return-approved', 'return-on-the-way', 'completed', 'rejected'),  // specific values
     defaultValue: 'pending'  // set a default value
   },
   city: {

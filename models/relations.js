@@ -38,12 +38,12 @@ Product.hasMany(OrderProduct, { foreignKey: 'product_id' });
 
 
 // Sync all models (this should be done only once)
-sequelize.sync({ alter: true })
-  .then(() => {
-    console.log('Database synchronized');
-  })
-  .catch(error => {
-    console.error('Error syncing database:', error);
-  });
+// sequelize.sync({ alter: true })
+//   .then(() => {
+//     console.log('Database synchronized');
+//   })
+//   .catch(error => {
+//     console.error('Error syncing database:', error);
+//   });
 
 module.exports = { Cart, Product, CartItem };

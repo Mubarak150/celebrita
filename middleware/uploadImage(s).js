@@ -17,8 +17,9 @@ const upload = multer({ storage: storage });
 
 // Middleware for handling both thumbnail and multiple images
 const uploadImages = upload.fields([
-    { name: 'thumbnail', maxCount: 1 },  // Single thumbnail
-    { name: 'images', maxCount: 6 }     // Multiple images (max 6)
+    { name: 'thumbnail', maxCount: 1 },  // Single thumbnail // // for products: by admin
+    { name: 'images', maxCount: 6 },    // Multiple images (max 6) // for products: by admin
+    { name: 'return_proof_image', maxCount: 1 },    // image uploaded by :user: while returning an order once recieved
 ]);
 
 module.exports = uploadImages;

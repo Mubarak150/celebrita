@@ -125,6 +125,7 @@ const handleReadById = (rawQuery) => async (req, res) => {
     }
 };
 
+
 const handleUpdateById = (table) => async (req, res) => {
     try {
         const { id } = req.params;

@@ -15,6 +15,7 @@ const products = require('./routes/items/productRoutes');
 const cart = require("./routes/cartAndOrder/addToCartRoutes");
 const deliveries = require('./routes/deliveryRoutes');
 const order = require("./routes/cartAndOrder/createOrderRoutes");
+const orderUser = require("./routes/cartAndOrder/orderUserRoutes");
 const orderAdmin = require("./routes/cartAndOrder/orderRoutes");
 const invoicesAdmin = require("./routes/cartAndOrder/invoiceRoutes");
 
@@ -43,6 +44,7 @@ app.use('/api/auth', authRoutes);
 // II. user APIs
 app.use('/api/user/v1/cart', cart);
 app.use('/api/user/v1/place-order', order);
+app.use('/api/user/v1/orders', orderUser);
 app.use('/api/deliveries', deliveries)
 
 // III. Admin:  

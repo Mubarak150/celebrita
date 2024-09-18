@@ -52,6 +52,7 @@ exports.placeOrder = async (req, res) => {
         const order = await Order.create({
             user_id,
             total_amount: totalAmount,
+            amount_with_delivery: AmountWithDelivery,
             shipping_address,
             city,
             user_contact,
