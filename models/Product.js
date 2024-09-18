@@ -27,6 +27,10 @@ const Product = sequelize.define('Product', {
     type: DataTypes.INTEGER,
     defaultValue: 0
   },
+  returned_quantity: {
+    type: DataTypes.INTEGER,
+    defaultValue: 0
+  },
   thumbnail: {
     type: DataTypes.STRING,
     allowNull: false

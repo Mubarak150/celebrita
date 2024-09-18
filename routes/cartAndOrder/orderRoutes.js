@@ -21,12 +21,20 @@ router.put('/on-the-way/:id/:status', protect, isUserAdmin, updateOrderStatus); 
 router.get('/received', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'received')); // done
 
 
-// return and complete yet to be done.... 
-// Return Orders
-router.get('/return', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return')); // 
+// RETURN ORDERS: pending
+router.get('/return-pending', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-pending')); // 
+router.put('/return-pending/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-approve || status = return-reject
+// return-rejected dont have routes... as return once rejected is sent to completed orders categoty/status.
+
+// : accepted
+router.get('/return-accepted', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-accepted')); // 
+router.put('/return-accepted/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-receive
+
+// : received
+router.get('/return-received', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-received')); // 
 
 // Completed Orders
-router.get('/complete', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'complete')); // 
+router.get('/completed', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'completed')); // 
 
 // Get Order by ID
 router.get('/:id', protect, isUserAdmin, getOrderById); // done

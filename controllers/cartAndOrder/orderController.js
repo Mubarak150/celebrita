@@ -46,7 +46,7 @@ const getOrderById = async (req, res) => {
 // Update Order Status (for Approve/Reject/Receive)
 const updateOrderStatus = async (req, res) => {
   const { id, status } = req.params;
-  const { rejection_reason, exp_delivery_date, courier_company, tracking_id } = req.body;
+  const { rejection_reason, exp_delivery_date, courier_company, tracking_id, return_rejection_reason, return_address } = req.body;
 
   try {
     const order = await Order.findByPk(id);
@@ -129,22 +129,45 @@ const updateOrderStatus = async (req, res) => {
         break;
       }
     
-      case 'pending-return':
-        // Ensure the user provides a return reason and proof of return image
-        if (!return_reason || !return_proof_image) {
-          return res.status(400).json({ success: false, message: 'Return reason and proof image are required for return.' });
-        }
-    
-        // Set the status to 'pending-return' and save the return reason and proof
-        order.status = 'pending-return';
-        order.return_reason = return_reason;
-        order.return_proof_image = return_proof_image;
-        break;
-    
-      case 'reject-return':
+      case 'return-reject':
         // Admin rejects the return, setting the status to 'completed'
         order.status = 'completed';
         order.return_rejection_reason = return_rejection_reason || 'Return rejected by admin';
+        break;
+
+      case 'return-approve':
+        // Admin rejects the return, setting the status to 'completed'
+        order.status = 'return-approved';
+        order.return_address = return_address;
+        break;
+      
+      case 'return-receive':
+        if(order.status == "return-received") {
+          res.status(400).json({status: false, message: "order already received from return"})
+        } else {
+          // Admin rejects the return, setting the status to 'completed'
+          order.status = 'return-received';
+
+          // Find all the products associated with this order
+          const orderProducts = await OrderProduct.findAll({ where: { order_id: order.id } });
+        
+          if (orderProducts && orderProducts.length > 0) {
+            for (const orderProduct of orderProducts) {
+              // Get the product from the orderProduct
+              const product = await Product.findByPk(orderProduct.product_id);
+              
+              if (product) {
+                // Increment the returned_quantity by the quantity of the returned product
+                product.returned_quantity += orderProduct.quantity;
+                
+                // Save the updated product
+                await product.save();
+              }
+            }
+          }
+        }
+        
+    
         break;
     
       case 'completed':

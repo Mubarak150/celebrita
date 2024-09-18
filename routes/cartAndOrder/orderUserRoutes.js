@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const { getOrdersByUser, returnReceivedOrder } = require('../../controllers/cartAndOrder/orderUserController');
 const { getOrderById } = require('../../controllers/cartAndOrder/orderController');
-const {protect, isUserAdmin} = require('../../middleware/auth')
+const {protect} = require('../../middleware/auth')
 const uploadImages = require("../../middleware/uploadImage(s)")
 
 // Pending Orders
