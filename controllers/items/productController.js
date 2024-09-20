@@ -14,6 +14,8 @@ exports.getAllProducts = handleReadAll(`
         products.thumbnail, 
         products.id, 
         products.price, 
+        products.quantity,
+        products.returned_quantity, 
         products.discount, 
         products.status, 
         categories.category 
