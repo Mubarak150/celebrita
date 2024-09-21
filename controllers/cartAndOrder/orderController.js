@@ -3,7 +3,7 @@ const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 const OrderProduct = require('../../models/OrderProduct');
 const Notification = require('../../models/Notification'); 
-const io = require('../socket'); // importiiiiiiiiiing Socket.IO instance
+const io = require('../../utils/socket'); // importiiiiiiiiiing Socket.IO instance
 
 // Get Orders by Status
 const getOrdersByStatus = async (req, res, status) => {
