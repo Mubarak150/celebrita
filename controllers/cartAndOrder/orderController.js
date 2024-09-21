@@ -2,6 +2,8 @@ const User = require('../../models/User');
 const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 const OrderProduct = require('../../models/OrderProduct');
+const Notification = require('../../models/Notification'); 
+const io = require('../socket'); // importiiiiiiiiiing Socket.IO instance
 
 // Get Orders by Status
 const getOrdersByStatus = async (req, res, status) => {
@@ -55,6 +57,8 @@ const updateOrderStatus = async (req, res) => {
       return res.status(404).json({ success: false, error: 'Order not found' });
     }
 
+    let notificationMessage = '';
+
     switch (status) {
       case 'approve':
         if(order.status == 'approved') {
@@ -62,6 +66,7 @@ const updateOrderStatus = async (req, res) => {
         } else {
           order.status = 'approved';
           order.exp_delivery_date = exp_delivery_date || null;
+          notificationMessage = `Your order #${order.id} has been approved and you may expect its delivery on/before ${order.exp_delivery_date}.`;
         }
         
         break;
@@ -72,6 +77,7 @@ const updateOrderStatus = async (req, res) => {
         } else {
           order.status = 'rejected';
           order.rejection_reason = rejection_reason;
+          notificationMessage = `Your order #${order.id} has been rejected. the rejection reason provided by our team is: ${order.rejection_reason}.`;
 
           // Fetch all the OrderProducts associated with this order
           const orderProducts = await OrderProduct.findAll({ where: { order_id: order.id } });
@@ -96,9 +102,10 @@ const updateOrderStatus = async (req, res) => {
         if(order.status == 'on-the-way') {
           res.status(400).json({status: false, message: "order already in transit"})
         } else {
-          order.status = 'on the way';
+          order.status = 'on-the-way';
           order.courier_company = courier_company;
           order.tracking_id = tracking_id;
+          notificationMessage = `Your order #${order.id} has been dispatched successfully via ${order.courier_company} with the tracking ID: ${order.tracking_id}.`;
         }
         break;
     
@@ -115,6 +122,8 @@ const updateOrderStatus = async (req, res) => {
           const returnExpiryDate = new Date(currentTime);
           returnExpiryDate.setDate(returnExpiryDate.getDate() + 4);
           order.return_expiry_date = returnExpiryDate;
+
+          notificationMessage = `Your order #${order.id} has reached successfully. Thank you for shopping at Celebrita.`;
       
           // Logic for automatically marking the order as 'completed' if return status not changed within 4 days
           setTimeout(async () => {
@@ -133,12 +142,16 @@ const updateOrderStatus = async (req, res) => {
         // Admin rejects the return, setting the status to 'completed'
         order.status = 'completed';
         order.return_rejection_reason = return_rejection_reason || 'Return rejected by admin';
+
+        notificationMessage = `Your request to return order #${order.id} has been rejected because: ${order.rejection_reason}`;
         break;
 
       case 'return-approve':
         // Admin rejects the return, setting the status to 'completed'
         order.status = 'return-approved';
         order.return_address = return_address;
+
+        notificationMessage = `Your request to return order #${order.id} has been approved. you may return the order to ${order.return_address}.`;
         break;
       
       case 'return-receive':
@@ -147,6 +160,7 @@ const updateOrderStatus = async (req, res) => {
         } else {
           // Admin rejects the return, setting the status to 'completed'
           order.status = 'return-received';
+          notificationMessage = `Your return of order #${order.id} reached our warehouse.`;
 
           // Find all the products associated with this order
           const orderProducts = await OrderProduct.findAll({ where: { order_id: order.id } });
@@ -181,7 +195,17 @@ const updateOrderStatus = async (req, res) => {
     
 
     await order.save();
-    res.status(200).json({ success: true, data: order });
+
+    // Create a notification
+    const notification = await Notification.create({
+      user_id: order.user_id, 
+      message: notificationMessage,
+    });
+
+    // Emit the notification to the user via Socket.IO
+    io.to(`user_${order.user_id}`).emit('notification', notification);
+
+    res.status(200).json({ success: true, data: order, notification: {message: notificationMessage, user: order.user_id} });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

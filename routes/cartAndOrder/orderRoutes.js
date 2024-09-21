@@ -26,9 +26,9 @@ router.get('/return-pending', protect, isUserAdmin, (req, res) => getOrdersBySta
 router.put('/return-pending/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-approve || status = return-reject
 // return-rejected dont have routes... as return once rejected is sent to completed orders categoty/status.
 
-// : accepted
-router.get('/return-accepted', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-accepted')); // 
-router.put('/return-accepted/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-receive
+// : approved
+router.get('/return-approved', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-approved')); // 
+router.put('/return-approved/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-receive
 
 // : received
 router.get('/return-received', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-received')); // 
