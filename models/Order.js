@@ -88,6 +88,14 @@ const Order = sequelize.define('Order', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  return_user_account_title: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  return_user_account_bank: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
   return_payment_proof: {
     type: DataTypes.STRING,
     allowNull: true

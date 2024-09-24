@@ -138,13 +138,13 @@ const returnReceivedOrder = async (req, res) => {
 // Update Order to return-on-the-way Status if its current status is return-approved: done by user
 const returnOnTheWayOrder = async (req, res) => {
   const { id } = req.params; // order id
-  const { return_company, return_tracking_id, return_user_account } = req.body;
+  const { return_company, return_tracking_id, return_user_account, return_user_account_title, return_user_account_bank } = req.body;
 
   // Check if all required fields are provided
-  if (!return_company || !return_tracking_id || !return_user_account) {
+  if (!return_company || !return_tracking_id || !return_user_account || !return_user_account_title || !return_user_account_bank) {
       return res.status(400).json({ 
           success: false, 
-          error: 'Return company, tracking ID, and user account for the refund are mandatory.' 
+          error: 'Return company, tracking ID, and user account related details for the refund are mandatory.' 
       });
   }
 
@@ -174,6 +174,8 @@ const returnOnTheWayOrder = async (req, res) => {
           order.return_company = return_company; 
           order.return_tracking_id = return_tracking_id;
           order.return_user_account = return_user_account;
+          order.return_user_account_title = return_user_account_title; 
+          order.return_user_account_bank = return_user_account_bank;
 
           let notificationMessage = `a user has put an order in transit for return against order #${order.id}.`;
           notifyAllAdmins(order.id, notificationMessage);
