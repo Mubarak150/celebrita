@@ -3,31 +3,91 @@ const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 const OrderProduct = require('../../models/OrderProduct');
 const {notifyAllAdmins} = require('../../utils/socket');
+const { Op } = require('sequelize');
+
 
 // Get Orders by Status
-const getOrdersByUser = async (req, res) => {
-    const user_id = req.body.user_id;
+// const getOrdersByUser = async (req, res) => {
+//     const user_id = req.body.user_id;
+//   try {
+//     const orders = await Order.findAll({
+//       where: { user_id },
+//       include: [{
+//          model: User,
+//          attributes: ['id', 'name', 'email']
+//         }, 
+//         { 
+//           model: Product,
+//           attributes: ['id', 'name', 'thumbnail'],
+//           through: {
+//             attributes: ['quantity', 'price_at_order'] // Include only these attributes from the OrderProduct table
+//           }
+//          }
+//         ]
+//     });
+//     res.status(200).json({ success: true, data: orders });
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// };
+
+
+// Get orders with status containing 'return'
+const getReturnOrdersByUser = async (req, res) => {
+  const user_id = req.body.user_id;
   try {
-    const orders = await Order.findAll({
-      where: { user_id },
-      include: [{
-         model: User,
-         attributes: ['id', 'name', 'email']
-        }, 
-        { 
-          model: Product,
-          attributes: ['id', 'name', 'thumbnail'],
-          through: {
-            attributes: ['quantity', 'price_at_order'] // Include only these attributes from the OrderProduct table
-          }
-         }
-        ]
-    });
-    res.status(200).json({ success: true, data: orders });
+      const orders = await Order.findAll({
+          where: {
+              user_id,
+              status: {
+                  [Op.like]: '%return%' // Status contains the word "return"
+              }
+          },
+          include: [{
+              model: User,
+              attributes: ['id', 'name', 'email']
+          }, {
+              model: Product,
+              attributes: ['id', 'name', 'thumbnail'],
+              through: {
+                  attributes: ['quantity', 'price_at_order']
+              }
+          }]
+      });
+      res.status(200).json({ success: true, data: orders });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+      res.status(500).json({ success: false, error: error.message });
   }
 };
+
+// Get orders with status that does not contain the word 'return'
+const getNonReturnOrdersByUser = async (req, res) => {
+  const user_id = req.body.user_id;
+  try {
+      const orders = await Order.findAll({
+          where: {
+              user_id,
+              status: {
+                  [Op.notLike]: '%return%' // Status does not contain the word "return"
+              }
+          },
+          include: [{
+              model: User,
+              attributes: ['id', 'name', 'email']
+          }, {
+              model: Product,
+              attributes: ['id', 'name', 'thumbnail'],
+              through: {
+                  attributes: ['quantity', 'price_at_order']
+              }
+          }]
+      });
+      res.status(200).json({ success: true, data: orders });
+  } catch (error) {
+      res.status(500).json({ success: false, error: error.message });
+  }
+};
+
 
 // Update Order to return-pending Status if its current status is recieved : done by user
 const returnReceivedOrder = async (req, res) => {
@@ -135,7 +195,8 @@ const returnOnTheWayOrder = async (req, res) => {
 
 
 module.exports = {
-    getOrdersByUser,
+    getReturnOrdersByUser,
+    getNonReturnOrdersByUser,
     returnReceivedOrder,
     returnOnTheWayOrder,
     // getOrderById
