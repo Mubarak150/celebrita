@@ -38,4 +38,4 @@ const OrderProduct = sequelize.define('OrderProduct', {
   timestamps: true
 });
 
-module.exports = OrderProduct;
+module.exports = OrderProduct;

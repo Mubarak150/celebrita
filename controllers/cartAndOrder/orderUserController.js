@@ -2,6 +2,7 @@ const User = require('../../models/User');
 const Product = require('../../models/Product');
 const Order = require('../../models/Order');
 const OrderProduct = require('../../models/OrderProduct');
+const {notifyAllAdmins} = require('../../utils/socket');
 
 // Get Orders by Status
 const getOrdersByUser = async (req, res) => {
@@ -62,6 +63,9 @@ const returnReceivedOrder = async (req, res) => {
         order.return_reason = return_reason || null;
         order.return_proof_image = req.body.return_proof_image; // this is still untested and needed to be considered thoroughly...
 
+        let notificationMessage = `an order-return application recieved from user, against order #${order.id}.`;
+        notifyAllAdmins(order.id, notificationMessage);
+
         await order.save();
         res.status(200).json({ success: true, message: "return request placed successfully." });
       }
@@ -71,8 +75,68 @@ const returnReceivedOrder = async (req, res) => {
     }
   };
 
+// Update Order to return-on-the-way Status if its current status is return-approved: done by user
+const returnOnTheWayOrder = async (req, res) => {
+  const { id } = req.params; // order id
+  const { return_company, return_tracking_id, return_user_account } = req.body;
+
+  // Check if all required fields are provided
+  if (!return_company || !return_tracking_id || !return_user_account) {
+      return res.status(400).json({ 
+          success: false, 
+          error: 'Return company, tracking ID, and user account for the refund are mandatory.' 
+      });
+  }
+
+  try {
+      // Fetch the order by ID
+      const order = await Order.findByPk(id);
+
+      // Check if the order exists
+      if (!order) {
+          return res.status(404).json({ success: false, error: 'Order not found' });
+      }
+
+      // Verify that the order belongs to the user making the request
+      if (req.body.user_id != order.user_id) {
+          return res.status(403).json({ success: false, error: 'This order does not belong to you.' });
+      }
+
+      // Ensure that the order's current status is 'return-approved'
+      if (order.status !== 'return-approved') {
+          return res.status(403).json({ 
+              success: false, 
+              message: "Only return-approved orders can be sent back to the company." 
+          });
+      } else {
+          // Update the order with the return details and change the status
+          order.status = 'return-on-the-way';
+          order.return_company = return_company; 
+          order.return_tracking_id = return_tracking_id;
+          order.return_user_account = return_user_account;
+
+          let notificationMessage = `a user has put an order in transit for return against order #${order.id}.`;
+          notifyAllAdmins(order.id, notificationMessage);
+          // Save the updated order
+          await order.save();
+
+          // Respond with success
+          res.status(200).json({ 
+              success: true, 
+              message: "Return-on-the-way status updated successfully." 
+          });
+      }
+      
+  } catch (error) {
+      // Handle any server errors
+      res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+
 module.exports = {
     getOrdersByUser,
     returnReceivedOrder,
+    returnOnTheWayOrder,
     // getOrderById
   };

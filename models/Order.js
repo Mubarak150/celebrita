@@ -61,7 +61,7 @@ const Order = sequelize.define('Order', {
     allowNull: false
   },
   payment_status: {
-    type: DataTypes.ENUM('pending', 'completed'),
+    type: DataTypes.ENUM('pending', 'completed', 'returned'),
     defaultValue: 'pending'
   },
   return_proof_image: {
@@ -73,6 +73,22 @@ const Order = sequelize.define('Order', {
     allowNull: true
   },
   return_rejection_reason: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  return_company: {
+    type: DataTypes.STRING,
+    allowNull: true
+  }, 
+  return_tracking_id: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+   return_user_account: {
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  return_payment_proof: {
     type: DataTypes.STRING,
     allowNull: true
   },

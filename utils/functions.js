@@ -178,7 +178,7 @@ const handleUpdateById = (table) => async (req, res) => {
             type: QueryTypes.UPDATE
         });
 
-        res.status(200).json({ success: true, message: 'Category updated successfully' });
+        res.status(200).json({ success: true, message: 'update successfull' });
     } catch (error) {
         console.error('Error updating category:', error);
         res.status(400).json({ error: error.message });

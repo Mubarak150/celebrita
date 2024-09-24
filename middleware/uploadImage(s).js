@@ -19,7 +19,8 @@ const upload = multer({ storage: storage });
 const uploadImages = upload.fields([
     { name: 'thumbnail', maxCount: 1 },  // Single thumbnail // // for products: by admin
     { name: 'images', maxCount: 6 },    // Multiple images (max 6) // for products: by admin
-    { name: 'return_proof_image', maxCount: 1 },    // image uploaded by :user: while returning an order once recieved
+    { name: 'return_proof_image', maxCount: 1 },    // image uploaded by :user: while returning an order once recieved 
+    { name: 'return_payment_proof', maxCount: 1 },
 ]);
 
 module.exports = uploadImages;

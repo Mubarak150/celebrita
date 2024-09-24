@@ -1,7 +1,8 @@
 const express = require('express');
 const router = express.Router();
 const { getOrdersByStatus, updateOrderStatus, getOrderById } = require('../../controllers/cartAndOrder/orderController');
-const {protect, isUserAdmin} = require('../../middleware/auth')
+const {protect, isUserAdmin} = require('../../middleware/auth');
+const uploadImages = require("../../middleware/uploadImage(s)");
 
 // Pending Orders
 router.get('/pending',  protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'pending')); // done
@@ -33,10 +34,13 @@ router.put('/return-approved/:id/:status',  protect, isUserAdmin, updateOrderSta
 // : received
 router.get('/return-received', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-received')); // 
 
+// : return paid
+router.put('/return-received/:id/:status',  protect, isUserAdmin, uploadImages, updateOrderStatus); // status = return-payment
+
 // Completed Orders
 router.get('/completed', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'completed')); // 
 
 // Get Order by ID
-router.get('/:id', protect, isUserAdmin, getOrderById); // done
+router.get('/:id', protect, isUserAdmin, getOrderById); // done 
 
 module.exports = router;

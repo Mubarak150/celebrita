@@ -7,6 +7,7 @@ const Product = require('./Product');
 const CartItem = require('./CartItem');
 const Invoice = require('./Invoice'); 
 const Review = require('./Review'); 
+const Notification = require('./Notification'); 
 
 // Associations of:
 // cart: products, cartItems, 
@@ -46,6 +47,9 @@ Review.belongsTo(User, { foreignKey: 'user_id' });
 Product.hasMany(Review, { foreignKey: 'product_id' });
 Review.belongsTo(Product, { foreignKey: 'product_id' });
 
+// Notifications: 
+User.hasMany(Notification, { foreignKey: 'user_id' });
+Notification.belongsTo(User, { foreignKey: 'user_id' });
 
 
 // Sync all models (this should be done only once)

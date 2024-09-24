@@ -19,7 +19,8 @@ const orderUser = require("./routes/cartAndOrder/orderUserRoutes");
 const orderAdmin = require("./routes/cartAndOrder/orderRoutes");
 const invoicesAdmin = require("./routes/cartAndOrder/invoiceRoutes");
 const reviews = require('./routes/reviews/userRoutes')
-const reviewsAdmin = require('./routes/reviews/adminRoutes')
+const reviewsAdmin = require('./routes/reviews/adminRoutes');
+const notificationRoutes = require('./routes/notificationRoutes');
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -56,6 +57,9 @@ app.use('/api/admin/v1/products', products);
 app.use('/api/admin/v1/orders', orderAdmin);
 app.use('/api/admin/v1/invoices', invoicesAdmin);
 app.use('/api/admin/v1/reviews', reviewsAdmin);
+
+// IV. All: 
+app.use('/api/user/v1/notifications', notificationRoutes);
 
 
 

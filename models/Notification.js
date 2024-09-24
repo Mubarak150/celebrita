@@ -16,18 +16,20 @@ const Notification = sequelize.define('Notification', {
       key: 'id',
     },
   },
+  order_id: {
+    type: DataTypes.INTEGER,
+    allowNull: true
+  },
   message: {
     type: DataTypes.STRING,
     allowNull: false,
   },
+  
   is_seen: {
     type: DataTypes.BOOLEAN,
     defaultValue: false,
   },
-  created_at: {
-    type: DataTypes.DATE,
-    defaultValue: DataTypes.NOW,
-  },
+  
 });
 
 module.exports = Notification;
