@@ -14,7 +14,7 @@ exports.getAllProducts = handleReadAll(`
         products.thumbnail, 
         products.id, 
         products.price, 
-        products.quantity,
+        products.quantity, 
         products.returned_quantity, 
         products.discount, 
         products.status, 
@@ -22,7 +22,9 @@ exports.getAllProducts = handleReadAll(`
     FROM products 
     JOIN categories 
     ON products.category_id = categories.id
-    LIMIT :limit OFFSET :offset
+    WHERE products.status = 'active'
+    LIMIT :limit OFFSET :offset;
+
 `, 'products');
 
 // Helper function to convert kebab-case to capitalized words

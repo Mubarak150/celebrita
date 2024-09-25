@@ -25,7 +25,7 @@ const Order = sequelize.define('Order', {
     allowNull: false
   },
   status: {
-    type: DataTypes.ENUM('pending', 'approved', 'on-the-way', 'received', 'return-pending', 'return-approved', 'return-received', 'completed', 'rejected'),  // specific values
+    type: DataTypes.ENUM('pending', 'approved', 'on-the-way', 'received', 'return-pending', 'return-approved', 'return-on-the-way', 'return-received', 'completed', 'rejected'),  // specific values
     defaultValue: 'pending'  // set a default value
   },
   city: {

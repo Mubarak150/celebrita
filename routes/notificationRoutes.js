@@ -1,9 +1,10 @@
 const express = require('express');
 const { getNotifications, markNotificationAsRead, deleteNotification } = require('../controllers/notificationController');
 const router = express.Router();
+const { protect } = require('../middleware/auth');
 
 // Get notifications for a specific user
-router.get('/:user_id', getNotifications);
+router.get('/:status', protect,  getNotifications); // status === 'seen' || "unseen"; 
 
 // Mark a specific notification as read
 router.patch('/:id', markNotificationAsRead);

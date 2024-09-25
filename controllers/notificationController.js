@@ -2,9 +2,16 @@ const  Notification  = require('../models/Notification');
 
 // Fetch all notifications for a specific user
 const getNotifications = async (req, res) => {
-    const { user_id } = req.body.user_id;
+    const user_id  = req.body.user_id;
+    const { status } = req.params; 
+    let bool = 0; 
+    if(status == 'seen') {
+        bool = 0; 
+    } else {
+        bool = 1; 
+    }
     try {
-        const notifications = await Notification.findAll({ where: { user_id } });
+        const notifications = await Notification.findAll({ where: { user_id, is_seen: bool } });
         res.status(200).json({ success: true, data: notifications });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error fetching notifications' });
@@ -20,7 +27,7 @@ const markNotificationAsRead = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Notification not found' });
         }
 
-        notification.isRead = true;
+        notification.is_seen = true;
         await notification.save();
 
         res.status(200).json({ success: true, message: 'Notification marked as read' });

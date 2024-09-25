@@ -9,6 +9,7 @@ exports.createCategory = handleCreate(`
 
 exports.getAllCategories = handleReadAll(`
     SELECT * FROM categories 
+    where status = 'active'
     LIMIT :limit OFFSET :offset
 `, 'categories');
 
