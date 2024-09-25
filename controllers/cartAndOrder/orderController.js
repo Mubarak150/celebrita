@@ -183,6 +183,7 @@ const updateOrderStatus = async (req, res) => {
           }
           order.payment_status = 'returned';
           order.return_payment_proof = req.body.return_payment_proof;
+          order.status = 'completed'
 
           notificationMessage = `Your payment has been returned against return of order #${order.id}.`;
         }
@@ -193,7 +194,7 @@ const updateOrderStatus = async (req, res) => {
         break;
 
       default:
-        return res.status(400).json({ success: false, message: 'Invalid order status' });
+        return res.status(404).json({ success: false, message: `order with status ${status} not found` });
     }
 
     await order.save();

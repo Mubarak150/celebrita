@@ -29,7 +29,10 @@ router.put('/return-pending/:id/:status',  protect, isUserAdmin, updateOrderStat
 
 // : approved
 router.get('/return-approved', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-approved')); // 
-router.put('/return-approved/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-receive
+
+// : on-the-way
+router.get('/return-on-the-way', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-on-the-way')); //
+router.put('/return-on-the-way/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-received
 
 // : received
 router.get('/return-received', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-received')); // 

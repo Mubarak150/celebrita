@@ -6,32 +6,6 @@ const {notifyAllAdmins} = require('../../utils/socket');
 const { Op } = require('sequelize');
 
 
-// Get Orders by Status
-// const getOrdersByUser = async (req, res) => {
-//     const user_id = req.body.user_id;
-//   try {
-//     const orders = await Order.findAll({
-//       where: { user_id },
-//       include: [{
-//          model: User,
-//          attributes: ['id', 'name', 'email']
-//         }, 
-//         { 
-//           model: Product,
-//           attributes: ['id', 'name', 'thumbnail'],
-//           through: {
-//             attributes: ['quantity', 'price_at_order'] // Include only these attributes from the OrderProduct table
-//           }
-//          }
-//         ]
-//     });
-//     res.status(200).json({ success: true, data: orders });
-//   } catch (error) {
-//     res.status(500).json({ success: false, error: error.message });
-//   }
-// };
-
-
 // Get orders with status containing 'return'
 const getReturnOrdersByUser = async (req, res) => {
   const user_id = req.body.user_id;
@@ -166,7 +140,7 @@ const returnOnTheWayOrder = async (req, res) => {
       if (order.status !== 'return-approved') {
           return res.status(403).json({ 
               success: false, 
-              message: "Only return-approved orders can be sent back to the company." 
+              message: "Only those orders whose return is approved can be sent back to the company." 
           });
       } else {
           // Update the order with the return details and change the status
