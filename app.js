@@ -21,6 +21,7 @@ const invoicesAdmin = require("./routes/cartAndOrder/invoiceRoutes");
 const reviews = require('./routes/reviews/userRoutes')
 const reviewsAdmin = require('./routes/reviews/adminRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
+const gopayfast = require('./routes/cartAndOrder/payOrderRoutes'); 
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -60,6 +61,7 @@ app.use('/api/admin/v1/reviews', reviewsAdmin);
 
 // IV. for all APIs: 
 app.use('/api/user/v1/notifications', notificationRoutes);
+app.use('/api/user/v1/payment/gopayfast', gopayfast);
 
 
 

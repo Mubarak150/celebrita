@@ -7,6 +7,7 @@ const Invoice = require('../../models/Invoice');
 const Delivery = require('../../models/Delivery');
 const User = require('../../models/User');
 const { sequelize } = require('../../config/db');
+const {notifyAllAdmins} = require('../../utils/socket');
 
 exports.placeOrder = async (req, res) => {
     const transaction = await sequelize.transaction();
@@ -146,6 +147,9 @@ exports.placeOrder = async (req, res) => {
             shipping_address: orderDetails.shipping_address,
             products: orderProducts
         };
+
+        let notificationMessage = `a user has put an order in transit for return against order #${order.id}.`;
+        notifyAllAdmins(order.id, notificationMessage);
 
         res.status(201).json({ success: true, data: response });
     } catch (error) {
