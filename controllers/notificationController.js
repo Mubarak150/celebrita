@@ -5,7 +5,7 @@ const getNotifications = async (req, res) => {
     const user_id  = req.body.user_id;
     const { status } = req.params; 
     let bool = 0; 
-    if(status == 'seen') {
+    if(status == 'unseen') {
         bool = 0; 
     } else {
         bool = 1; 
