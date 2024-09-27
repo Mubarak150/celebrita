@@ -69,7 +69,7 @@ const deleteAllNotificationsForUser = async (req, res) => {
 
         // Delete all notifications for the user
         await Notification.destroy({
-            where: { user_id }
+            where: { user_id, is_seen: 1 }
         });
 
         res.status(200).json({ success: true, message: 'All notifications deleted successfully' });
