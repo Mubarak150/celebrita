@@ -39,7 +39,7 @@ const Invoice = sequelize.define('Invoice', {
     onDelete: 'CASCADE',
   },
   payment_status: {
-    type: DataTypes.ENUM('pending', 'paid', 'failed'),  // Payment status options
+    type: DataTypes.ENUM('pending', 'paid', 'returned'),  // Payment status options
     allowNull: false,
     defaultValue: 'pending',  // Default payment status to 'pending'
   },

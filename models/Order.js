@@ -61,14 +61,26 @@ const Order = sequelize.define('Order', {
     allowNull: false
   },
   payment_status: {
-    type: DataTypes.ENUM('pending', 'completed', 'returned'),
+    type: DataTypes.ENUM('pending', 'paid', 'returned'),
     defaultValue: 'pending'
+  },
+  transaction_id: { // added this one on 28/09/2024
+    type: DataTypes.STRING,
+    allowNull: true,  
+  },
+  transaction_date: {
+    type: DataTypes.DATE,
+    allowNull: true,
   },
   return_proof_image: {
     type: DataTypes.STRING,
     allowNull: true
   },
   return_reason: { //return_rejection_reason, return_address
+    type: DataTypes.STRING,
+    allowNull: true
+  },
+  return_address: {
     type: DataTypes.STRING,
     allowNull: true
   },
@@ -100,10 +112,7 @@ const Order = sequelize.define('Order', {
     type: DataTypes.STRING,
     allowNull: true
   },
-  return_address: {
-    type: DataTypes.STRING,
-    allowNull: true
-  },
+  
 }, {
   timestamps: true
 });

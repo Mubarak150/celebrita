@@ -69,7 +69,11 @@ exports.getInvoice = async (req, res) => {
             delivery_charges: deliveryCharges,
             amount_with_delivery: amountWithDelivery,
             shipping_address: orderDetails.shipping_address,
-            products: orderProducts
+            products: orderProducts,
+            //addded to show the transiction details. 
+            transiction_id: orderDetails.transiction_id,
+            transiction_date: orderDetails.transiction_date,
+
         };
 
         res.status(200).json({ success: true, data: response });

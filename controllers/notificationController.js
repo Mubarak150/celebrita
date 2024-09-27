@@ -53,5 +53,31 @@ const deleteNotification = async (req, res) => {
     }
 };
 
-module.exports = { getNotifications, markNotificationAsRead, deleteNotification };
+// Delete all notifications for a specific user
+const deleteAllNotificationsForUser = async (req, res) => {
+    const user_id = req.body.user_id; // user-id given by protect middleware
+
+    try {
+        // Find all notifications for the specific user
+        const notifications = await Notification.findAll({
+            where: { user_id }
+        });
+
+        if (notifications.length === 0) {
+            return res.status(404).json({ success: false, message: 'No notifications found for this user' });
+        }
+
+        // Delete all notifications for the user
+        await Notification.destroy({
+            where: { user_id }
+        });
+
+        res.status(200).json({ success: true, message: 'All notifications deleted successfully' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Error deleting notifications' });
+    }
+};
+
+
+module.exports = { getNotifications, markNotificationAsRead, deleteNotification, deleteAllNotificationsForUser };
 

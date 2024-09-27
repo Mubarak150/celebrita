@@ -64,7 +64,7 @@ exports.initiatePayment = async (orderId, amount, userContact) => {
             submit: "Pay Now"
             
         };
-// these are from php code.... kept here by me for cross checking # temporary
+// these are from php code.... kept here for cross checking # temporary
 // <input type="hidden" name="MERCHANT_ID" value="' . $merchantId . '">
 // <input type="hidden" name="MERCHANT_NAME" value="' . $params['merchant_name'] . '">
 // <input type="hidden" name="TOKEN" value="' . $token . '">
