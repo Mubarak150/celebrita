@@ -12,7 +12,7 @@ const {
 router.post('/', protect, createDelivery);
 router.get('/', protect, getAllDeliveries);
 router.get('/:id', protect, getDeliveryById);
-router.patch('/:id', protect, updateDeliveryById);
+router.patch('/:id', updateDeliveryById);
 router.delete('/:id', protect, deleteDeliveryById);
 
 module.exports = router;

@@ -54,6 +54,8 @@ exports.getAllProductsByCategoryName = async (req, res) => {
             return res.status(404).json({ success: false, message: 'No products found for this category' });
         }
 
+
+
         // Step 4: Parse the images field for each product and prepare the response
         const productsWithParsedImages = products.map(product => {
             if (product.images) {
@@ -111,6 +113,14 @@ exports.getProductById = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Product not found' });
         }
 
+        const category = await Category.findOne({
+            where: { id: foundProduct.category_id }
+        });
+        
+        if (category) {
+            foundProduct.setDataValue('category', category.category);
+        }        
+
         // Step 3: Parse the images field for the product if it exists
         if (foundProduct.images) {
             try {
@@ -133,7 +143,7 @@ exports.getProductById = async (req, res) => {
         // Handle any other errors
         res.status(500).json({ success: false, error: error.message });
     }
-};
+}; 
 
 
 exports.updateProductById = handleUpdateById("products");
