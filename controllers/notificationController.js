@@ -60,11 +60,11 @@ const deleteAllNotificationsForUser = async (req, res) => {
     try {
         // Find all notifications for the specific user
         const notifications = await Notification.findAll({
-            where: { user_id }
+            where: { user_id, is_seen: 1 }
         });
 
         if (notifications.length === 0) {
-            return res.status(404).json({ success: false, message: 'No notifications found for this user' });
+            return res.status(404).json({ success: false, message: 'No viewed notifications found for this user' });
         }
 
         // Delete all notifications for the user
@@ -72,7 +72,7 @@ const deleteAllNotificationsForUser = async (req, res) => {
             where: { user_id, is_seen: 1 }
         });
 
-        res.status(200).json({ success: true, message: 'All notifications deleted successfully' });
+        res.status(200).json({ success: true, message: 'All viewed notifications deleted successfully' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Error deleting notifications' });
     }
