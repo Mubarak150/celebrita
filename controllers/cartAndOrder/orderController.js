@@ -183,6 +183,7 @@ const updateOrderStatus = async (req, res) => {
           }
           order.payment_status = 'returned';
           order.return_payment_proof = req.body.return_payment_proof;
+          order.return_payment_date = Date.now();
           order.status = 'completed'
 
           notificationMessage = `Your payment has been returned against return of order #${order.id}.`;

@@ -112,6 +112,10 @@ const Order = sequelize.define('Order', {
     type: DataTypes.STRING,
     allowNull: true
   },
+  return_payment_date: {
+    type: DataTypes.DATE,
+    allowNull: true
+  },
   
 }, {
   timestamps: true
