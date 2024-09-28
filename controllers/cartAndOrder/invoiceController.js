@@ -71,8 +71,8 @@ exports.getInvoice = async (req, res) => {
             shipping_address: orderDetails.shipping_address,
             products: orderProducts,
             //addded to show the transiction details. 
-            transiction_id: orderDetails.transiction_id,
-            transiction_date: orderDetails.transiction_date,
+            transaction_id: orderDetails.transaction_id,
+            transaction_date: orderDetails.transaction_date,
 
         };
 
