@@ -45,12 +45,13 @@ const Product = sequelize.define('Product', {
   category_id: {
     type: DataTypes.INTEGER,
     references: {
-      model: 'categories', 
+      model: Category, 
       key: 'id'
     },
     onDelete: 'CASCADE' // Delete products when the category is deleted
   }
 }, {
+  tableName: 'products',
   timestamps: true
 });
 

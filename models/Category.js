@@ -22,6 +22,7 @@ const Category = sequelize.define('Category', {
     defaultValue: 'active'  // set a default value
   }
 }, {
+  tableName: 'categories',
   timestamps: true 
 });
 

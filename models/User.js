@@ -36,6 +36,7 @@ const User = sequelize.define('User', {
     }
     
 }, {
+    tableName: 'users',
     timestamps: true // Automatically add createdAt and updatedAt fields
 });
 

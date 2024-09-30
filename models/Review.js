@@ -45,6 +45,7 @@ const Review = sequelize.define('Review', {
         onDelete: 'CASCADE'
     }
 }, {
+    tableName: 'reviews',
     timestamps: true,
     createdAt: 'createdAt',
     updatedAt: 'updatedAt'

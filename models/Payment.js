@@ -33,6 +33,8 @@ const Payment = sequelize.define('Payment', {
     type: DataTypes.STRING, // URL to the uploaded file
     allowNull: true
   }
+}, {
+  tableName: 'payments'
 });
 
 Payment.belongsTo(Appointment, { foreignKey: 'appointment_id' });

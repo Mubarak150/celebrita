@@ -36,7 +36,7 @@ const Appointment = sequelize.define('Appointment', {
     type: DataTypes.TEXT,
     allowNull: true
   },
-});
+},{tableName: 'appointments'});
 
 Appointment.belongsTo(User, { foreignKey: 'user_id' });
 

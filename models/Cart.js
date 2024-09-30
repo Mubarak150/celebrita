@@ -17,6 +17,7 @@ const Cart = sequelize.define('Cart', {
     onDelete: 'CASCADE'
   }
 }, {
+  tableName: 'carts',
   timestamps: true
 });
 

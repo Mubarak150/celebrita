@@ -22,13 +22,31 @@ exports.getAllProducts = handleReadAll(`
     FROM products 
     JOIN categories 
     ON products.category_id = categories.id
+    LIMIT :limit OFFSET :offset;
+
+`, 'products');
+
+exports.getAllProductsForLandingPage = handleReadAll(`
+    SELECT 
+        products.name, 
+        products.thumbnail, 
+        products.id, 
+        products.price, 
+        products.quantity, 
+        products.returned_quantity, 
+        products.discount, 
+        products.status, 
+        categories.category 
+    FROM products 
+    JOIN categories 
+    ON products.category_id = categories.id
     WHERE products.status = 'active'
     LIMIT :limit OFFSET :offset;
 
 `, 'products');
 
 
-// Function to get all products by category name (in kebab-case)
+// Function to get all products by category name (in kebab-case) 
 exports.getAllProductsByCategoryName = async (req, res) => {
     try {
         const { category } = req.params;  // The category name in kebab-case from the request (e.g., 'electronics-accessories')

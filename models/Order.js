@@ -118,6 +118,7 @@ const Order = sequelize.define('Order', {
   },
   
 }, {
+  tableName: 'orders',
   timestamps: true
 });
 

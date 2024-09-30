@@ -5,6 +5,7 @@ const uploadImages = require("../../middleware/uploadImage(s)")
 const {
   createProduct,
   getAllProducts,
+  getAllProductsForLandingPage,
   getProductById,
   getAllProductsByCategoryName,
   updateProductById,
@@ -13,6 +14,7 @@ const {
 
 router.post('/', uploadImages, createProduct);
 router.get('/', getAllProducts); 
+router.get('/all/active', getAllProductsForLandingPage); 
 router.get('/:product', getProductById);
 router.get('/category/:category', getAllProductsByCategoryName);
 router.patch('/:id', uploadImages, updateProductById);

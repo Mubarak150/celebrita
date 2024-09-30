@@ -30,6 +30,8 @@ const Notification = sequelize.define('Notification', {
     defaultValue: false,
   },
   
+},{
+  tableName: 'notifications'
 });
 
 module.exports = Notification;
