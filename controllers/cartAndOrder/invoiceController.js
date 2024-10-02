@@ -84,50 +84,58 @@ exports.getInvoice = async (req, res) => {
 
 // Async function to retrieve all invoices
 exports.getAllInvoices = async (req, res) => {
+    const { page = 1, limit = 10 } = req.query;  // Default values for pagination
+    const limitValue = parseInt(limit, 10);
+    const offset = (parseInt(page, 10) - 1) * limitValue;
+
     try {
-        let invoices; 
-        if(req.body.user.role === '1') {
-            // Fetch all invoices with their associated orders and other required data
-            invoices = await Invoice.findAll({
+        let invoices;
+
+        if (req.body.user.role === '1') {
+            // Fetch all invoices with their associated orders and other required data (with pagination)
+            invoices = await Invoice.findAndCountAll({
                 include: [
                     {
                         model: Order,
                         include: [
                             {
                                 model: OrderProduct,
-                                include: [Product] // Include Product to get product details
+                                include: [Product]  // Include Product to get product details
                             },
-                            User // Include User to get user details like name
+                            User  // Include User to get user details like name
                         ]
                     }
-                ]
+                ],
+                limit: limitValue,  // Limit the number of invoices per page
+                offset: offset      // Skip (page - 1) * limit records
             });
         } else if (req.body.user.role === '2') {
-            // Fetch all invoices with their associated orders and other required data
-            invoices = await Invoice.findAll({
-                where: {user_id: req.body.user.id},
+            // Fetch all invoices for a specific user (with pagination)
+            invoices = await Invoice.findAndCountAll({
+                where: { user_id: req.body.user.id },
                 include: [
                     {
                         model: Order,
                         include: [
                             {
                                 model: OrderProduct,
-                                include: [Product] // Include Product to get product details
+                                include: [Product]
                             },
-                            User // Include User to get user details like name
+                            User
                         ]
                     }
-                ]
+                ],
+                limit: limitValue,
+                offset: offset
             });
         }
-        
 
-        if (!invoices || invoices.length === 0) {
+        if (!invoices || invoices.rows.length === 0) {
             return res.status(404).json({ success: false, message: 'No invoices found' });
         }
 
         // Map through each invoice and construct the necessary data
-        const detailedInvoices = await Promise.all(invoices.map(async (invoice) => {
+        const detailedInvoices = await Promise.all(invoices.rows.map(async (invoice) => {
             const orderDetails = invoice.Order;
 
             // Fetch the delivery charges based on the city in the order
@@ -149,15 +157,29 @@ exports.getAllInvoices = async (req, res) => {
                 order_id: invoice.order_id,
                 invoice_number: invoice.invoice_number,
                 created_at: invoice.created_at,
-                return_date: orderDetails.return_payment_date, // Assuming this exists in Order model
+                return_date: orderDetails.return_payment_date,  // Assuming this exists in Order model
                 amount: amountWithDelivery,
                 payment_status: orderDetails.payment_status,
-                payment_method: orderDetails.payment_type, // Assuming this exists in Order model
+                payment_method: orderDetails.payment_type  // Assuming this exists in Order model
             };
         }));
 
-        // Send the response with all detailed invoices
-        res.status(200).json({ success: true, data: detailedInvoices });
+        // Pagination metadata
+        const totalInvoices = invoices.count;
+        const totalPages = Math.ceil(totalInvoices / limitValue);
+        const currentPage = parseInt(page, 10);
+
+        // Send the response with paginated invoices and pagination info
+        res.status(200).json({
+            success: true,
+            data: detailedInvoices,
+            pagination: {
+                totalInvoices,
+                totalPages,
+                currentPage,
+                limit: limitValue
+            }
+        });
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }

@@ -5,25 +5,54 @@ const OrderProduct = require('../../models/OrderProduct');
 const Notification = require('../../models/Notification'); 
 const {sendNotificationToUser} = require('../../utils/socket'); // importiiiiiiiiiing Socket.IO instance
 
-// Get Orders by Status
+// Get Orders by Status with Pagination
 const getOrdersByStatus = async (req, res, status) => {
+  const { page = 1, limit = 10 } = req.query;  // Default pagination values
+  const limitValue = parseInt(limit, 10);
+  const offset = (parseInt(page, 10) - 1) * limitValue;
+
   try {
-    const orders = await Order.findAll({
+    // Fetch orders by status with pagination
+    const orders = await Order.findAndCountAll({
       where: { status },
-      include: [{
-         model: User,
-         attributes: ['id', 'name', 'email']
-        }, 
-        { 
+      include: [
+        {
+          model: User,
+          attributes: ['id', 'name', 'email']
+        },
+        {
           model: Product,
           attributes: ['id', 'name', 'thumbnail'],
           through: {
-            attributes: ['quantity', 'price_at_order'] // Include only these attributes from the OrderProduct table
+            attributes: ['quantity', 'price_at_order'] // Include these attributes from the OrderProduct table
           }
-         }
-        ]
+        }
+      ],
+      limit: limitValue,  // Limit the number of results per page
+      offset: offset      // Skip records for pagination
     });
-    res.status(200).json({ success: true, data: orders });
+
+    // If no orders found, return 404
+    if (!orders.rows.length) {
+      return res.status(404).json({ success: false, message: 'No orders found with the given status' });
+    }
+
+    // Pagination metadata
+    const totalOrders = orders.count;
+    const totalPages = Math.ceil(totalOrders / limitValue);
+    const currentPage = parseInt(page, 10);
+
+    // Send the response with paginated orders and pagination details
+    res.status(200).json({
+      success: true,
+      data: orders.rows,
+      pagination: {
+        totalOrders,
+        totalPages,
+        currentPage,
+        limit: limitValue
+      }
+    });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
   }

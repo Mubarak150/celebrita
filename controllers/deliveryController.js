@@ -6,7 +6,8 @@ exports.createDelivery = handleCreate(`
 `);
 
 exports.getAllDeliveries = handleReadAll(`
-    SELECT * FROM deliveries 
+    SELECT * FROM deliveries
+    LIMIT :limit OFFSET :offset;
 `, 'deliveries');
 
 exports.getDeliveryById = handleReadById(`
