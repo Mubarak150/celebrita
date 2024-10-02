@@ -148,7 +148,7 @@ exports.placeOrder = async (req, res) => {
             products: orderProducts
         };
 
-        let notificationMessage = `a user has put an order in transit for return against order #${order.id}.`;
+        let notificationMessage = `a user ${response.user_name} has placed an order #${order.id}.`;
         notifyAllAdmins(order.id, notificationMessage);
 
         res.status(201).json({ success: true, data: response });

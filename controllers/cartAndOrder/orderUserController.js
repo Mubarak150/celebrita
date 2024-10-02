@@ -6,61 +6,132 @@ const {notifyAllAdmins} = require('../../utils/socket');
 const { Op } = require('sequelize');
 
 
-// Get orders with status containing 'return'
+// Get orders with status containing 'return' and include pagination
 const getReturnOrdersByUser = async (req, res) => {
-  const user_id = req.body.user_id;
-  try {
-      const orders = await Order.findAll({
-          where: {
-              user_id,
-              status: {
-                  [Op.like]: '%return%' // Status contains the word "return"
-              }
-          },
-          include: [{
-              model: User,
-              attributes: ['id', 'name', 'email']
-          }, {
-              model: Product,
-              attributes: ['id', 'name', 'thumbnail'],
-              through: {
-                  attributes: ['quantity', 'price_at_order']
-              }
-          }]
-      });
-      res.status(200).json({ success: true, data: orders });
-  } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-  }
-};
+    const user_id = req.body.user_id;
+    const { page = 1, limit = 10 } = req.query;  // Default values for page and limit
+  
+    try {
+        const limitValue = parseInt(limit, 10);  // Convert limit to a number
+        const offset = (parseInt(page, 10) - 1) * limitValue;  // Calculate the offset for pagination
+  
+        // Step 1: Get the total count of return orders for the user
+        const totalOrders = await Order.count({
+            where: {
+                user_id,
+                status: {
+                    [Op.like]: '%return%' // Status contains the word "return"
+                }
+            }
+        });
+  
+        // Step 2: Fetch the paginated return orders with user and product details
+        const orders = await Order.findAll({
+            where: {
+                user_id,
+                status: {
+                    [Op.like]: '%return%' // Status contains the word "return"
+                }
+            },
+            include: [{
+                model: User,
+                attributes: ['id', 'name', 'email']
+            }, {
+                model: Product,
+                attributes: ['id', 'name', 'thumbnail'],
+                through: {
+                    attributes: ['quantity', 'price_at_order']
+                }
+            }],
+            limit: limitValue,  // Limit the number of orders per page
+            offset: offset      // Skip the first (page - 1) * limit orders
+        });
+  
+        // Step 3: Calculate pagination details
+        const totalPages = Math.ceil(totalOrders / limitValue);  // Total pages based on the order count and limit
+        const currentPage = parseInt(page, 10);
+  
+        // Step 4: Respond with orders and pagination metadata
+        res.status(200).json({
+            success: true,
+            data: orders,
+            pagination: {
+                totalOrders,  // Total number of orders with 'return' status
+                totalPages,   // Total number of pages
+                currentPage,  // Current page number
+                limit: limitValue  // Limit per page
+            }
+        });
+    } catch (error) {
+        // Handle any other errors
+        res.status(500).json({ success: false, error: error.message });
+    }
+  };
+  
 
 // Get orders with status that does not contain the word 'return'
+// Get non-return orders by user with pagination
 const getNonReturnOrdersByUser = async (req, res) => {
-  const user_id = req.body.user_id;
-  try {
-      const orders = await Order.findAll({
-          where: {
-              user_id,
-              status: {
-                  [Op.notLike]: '%return%' // Status does not contain the word "return"
-              }
-          },
-          include: [{
-              model: User,
-              attributes: ['id', 'name', 'email']
-          }, {
-              model: Product,
-              attributes: ['id', 'name', 'thumbnail'],
-              through: {
-                  attributes: ['quantity', 'price_at_order']
-              }
-          }]
-      });
-      res.status(200).json({ success: true, data: orders });
-  } catch (error) {
-      res.status(500).json({ success: false, error: error.message });
-  }
-};
+    const user_id = req.body.user_id;
+    const { page = 1, limit = 10 } = req.query;  // Default values for pagination
+  
+    try {
+        const limitValue = parseInt(limit, 10);  // Convert limit to a number
+        const offset = (parseInt(page, 10) - 1) * limitValue;  // Calculate the offset for pagination
+  
+        // Step 1: Get the total count of non-return orders for the user
+        const totalOrders = await Order.count({
+            where: {
+                user_id,
+                status: {
+                    [Op.notLike]: '%return%'  // Status does not contain the word "return"
+                }
+            }
+        });
+  
+        // Step 2: Fetch the paginated non-return orders with user and product details
+        const orders = await Order.findAll({
+            where: {
+                user_id,
+                status: {
+                    [Op.notLike]: '%return%'  // Status does not contain the word "return"
+                }
+            },
+            include: [{
+                model: User,
+                attributes: ['id', 'name', 'email']
+            }, {
+                model: Product,
+                attributes: ['id', 'name', 'thumbnail'],
+                through: {
+                    attributes: ['quantity', 'price_at_order']
+                }
+            }],
+            limit: limitValue,  // Limit the number of orders per page
+            offset: offset      // Skip the first (page - 1) * limit orders
+        });
+  
+        // Step 3: Calculate pagination details
+        const totalPages = Math.ceil(totalOrders / limitValue);  // Total pages based on order count and limit
+        const currentPage = parseInt(page, 10);
+  
+        // Step 4: Respond with orders and pagination metadata
+        res.status(200).json({
+            success: true,
+            data: orders,
+            pagination: {
+                totalOrders,   // Total number of non-return orders
+                totalPages,    // Total number of pages
+                currentPage,   // Current page number
+                limit: limitValue  // Limit per page
+            }
+        });
+    } catch (error) {
+        // Handle any other errors
+        res.status(500).json({ success: false, error: error.message });
+    }
+  };
+  
 
 
 // Update Order to return-pending Status if its current status is recieved : done by user

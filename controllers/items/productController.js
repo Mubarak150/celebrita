@@ -46,10 +46,14 @@ exports.getAllProductsForLandingPage = handleReadAll(`
 `, 'products');
 
 
-// Function to get all products by category name (in kebab-case) 
+// Function to get all products by category name (in kebab-case) with pagination
 exports.getAllProductsByCategoryName = async (req, res) => {
     try {
         const { category } = req.params;  // The category name in kebab-case from the request (e.g., 'electronics-accessories')
+        const { page = 1, limit = 10 } = req.query;  // Get page and limit from query params with default values
+
+        const limitValue = parseInt(limit, 10);  // Convert limit to a number
+        const offset = (parseInt(page, 10) - 1) * limitValue;  // Calculate the offset for the query
 
         // Step 1: Retrieve all categories from the database
         const categories = await Category.findAll();
@@ -62,9 +66,16 @@ exports.getAllProductsByCategoryName = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Category not found' });
         }
 
-        // Step 3: Get all products that have the matching category_id
-        const products = await Product.findAll({
+        // Step 3: Get the total count of products in this category for pagination
+        const totalProducts = await Product.count({
             where: { category_id: foundCategory.id }
+        });
+
+        // Step 4: Get paginated products that have the matching category_id
+        const products = await Product.findAll({
+            where: { category_id: foundCategory.id },
+            limit: limitValue,  // Limit the number of products returned
+            offset: offset      // Skip the first (page - 1) * limit products
         });
 
         // If no products found, return a 404
@@ -72,9 +83,7 @@ exports.getAllProductsByCategoryName = async (req, res) => {
             return res.status(404).json({ success: false, message: 'No products found for this category' });
         }
 
-
-
-        // Step 4: Parse the images field for each product and prepare the response
+        // Step 5: Parse the images field for each product and prepare the response
         const productsWithParsedImages = products.map(product => {
             if (product.images) {
                 try {
@@ -94,12 +103,22 @@ exports.getAllProductsByCategoryName = async (req, res) => {
             return product;
         });
 
-        // Step 5: Send the products along with the original category name in the response
-        res.status(200).json({ 
-            success: true, 
+        // Step 6: Calculate pagination details
+        const totalPages = Math.ceil(totalProducts / limitValue);  // Total pages based on product count and limit
+        const currentPage = parseInt(page, 10);
+
+        // Step 7: Send the products along with pagination metadata
+        res.status(200).json({
+            success: true,
             data: {
                 category: foundCategory.category,  // Send the original category name
-                products: productsWithParsedImages // Send the products with parsed images
+                products: productsWithParsedImages,  // Send the products with parsed images
+                pagination: {
+                    totalProducts,  // Total number of products in the category
+                    totalPages,  // Total number of pages
+                    currentPage,  // Current page
+                    limit: limitValue  // Products per page (limit)
+                }
             }
         });
     } catch (error) {
@@ -107,6 +126,7 @@ exports.getAllProductsByCategoryName = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 };
+
 
 // Utility function to convert a string to kebab-case
 const toKebabCase = (str) => {
@@ -139,21 +159,15 @@ exports.getProductById = async (req, res) => {
             foundProduct.setDataValue('category', category.category);
         }        
 
-        // Step 3: Parse the images field for the product if it exists
-        if (foundProduct.images) {
+        if (typeof foundProduct.images === 'string') {
             try {
-                // Attempt to parse the stringified JSON into an array
                 foundProduct.images = JSON.parse(foundProduct.images);
-
-                // Ensure that it's an array after parsing
-                if (!Array.isArray(foundProduct.images)) {
-                    throw new Error('Images field is not an array');
-                }
             } catch (error) {
-                console.error('Error parsing images field for foundProduct:', foundProduct.id, error.message);
-                foundProduct.images = []; // Fallback to an empty array if parsing fails
+                console.error('Error parsing images field:', foundProduct.id, error.message);
+                foundProduct.images = []; // Fallback to an empty array
             }
         }
+        // console.log(typeof foundProduct.images); 
 
         // Step 4: Send the original product details (including the original name from the database)
         res.status(200).json({ success: true, data: foundProduct });
