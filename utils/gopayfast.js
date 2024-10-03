@@ -92,15 +92,14 @@ exports.initiatePayment = async (orderId, amount, userContact) => {
         // console.log("you are in initiate payment/ step 3 :", response) // the request ended with 204 i.e. no content.
 
         // Log the full response for debugging
-        console.log('you are in initiate payment/ step 3, this is PayFast API Full Response:', response.data);
-
+        // console.log('you are in initiate payment/ step 3, this is PayFast API Full Response:', response.data);
         // Check the response for the payment URL
-        if (response.data && response.data.payment_url) {
-            return response.data.payment_url;
-        } else {
-            console.error('PayFast API Error:', response.data);
-            throw new Error(response.data.message || 'Failed to initiate payment.'); // i am currently getting this error. 
-        }
+        // if (response.data && response.data.payment_url) {
+            return response.data
+        // } else {
+        //     console.error('PayFast API Error:', response.data);
+        //     throw new Error(response.data.message || 'Failed to initiate payment.'); // i am currently getting this error. 
+        // }
     } catch (error) {
         console.error('Detailed PayFast Error:', error.message);
         if (error.response) {

@@ -61,7 +61,7 @@ app.use('/api/admin/v1/reviews', reviewsAdmin);
 
 // IV. for all APIs: 
 app.use('/api/user/v1/notifications', notificationRoutes);
-app.use('/api/user/v1/payment/gopayfast', gopayfast);
+app.use('/api/user/v1/gopayfast', gopayfast);
 
 
 

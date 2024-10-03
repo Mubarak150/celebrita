@@ -5,7 +5,6 @@ const OrderProduct = require('../../models/OrderProduct');
 const {notifyAllAdmins} = require('../../utils/socket');
 const { Op } = require('sequelize');
 
-
 // Get orders with status containing 'return' and include pagination
 const getReturnOrdersByUser = async (req, res) => {
     const user_id = req.body.user_id;
@@ -68,9 +67,7 @@ const getReturnOrdersByUser = async (req, res) => {
     }
   };
   
-
 // Get orders with status that does not contain the word 'return'
-// Get non-return orders by user with pagination
 const getNonReturnOrdersByUser = async (req, res) => {
     const user_id = req.body.user_id;
     const { page = 1, limit = 10 } = req.query;  // Default values for pagination
@@ -132,8 +129,6 @@ const getNonReturnOrdersByUser = async (req, res) => {
     }
   };
   
-
-
 // Update Order to return-pending Status if its current status is recieved : done by user
 const returnReceivedOrder = async (req, res) => {
     const { id } = req.params; // order id
@@ -246,5 +241,4 @@ module.exports = {
     getNonReturnOrdersByUser,
     returnReceivedOrder,
     returnOnTheWayOrder,
-    // getOrderById
   };
