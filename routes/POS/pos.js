@@ -2,6 +2,7 @@ const express = require('express');
 const {
     startShift,
     endShift,
+    // getProducts,
     // getSalesByDate,
     // getSalesByShift,
     // getSalesBySalesPerson
@@ -12,6 +13,8 @@ const {protect, isSalesMan} = require('../../middleware/auth')
 
 // Route to start a shift
 router.post('/start-shift', protect, isSalesMan, startShift);
+
+// router.get('/get-products', protect, isSalesMan, getProducts);
 
 // Route to end a shift
 router.post('/end-shift', protect, isSalesMan, endShift);

@@ -41,7 +41,11 @@ const startShift = async (req, res) => {
     }
 };
 
+// const getProducts = async (req, res) => {
+//     try {
 
+//     } catch (error) {}
+// }
 
 // Controller function for ending a shift
 const endShift = async (req, res) => {
@@ -145,7 +149,10 @@ const endShift = async (req, res) => {
 
 
 
+
+
 module.exports = {
     startShift,
-    endShift
+    endShift,
+    // getProducts
 };

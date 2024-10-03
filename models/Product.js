@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const {sequelize} = require('../config/db')
 const Category = require('./Category')
 
-const Product = sequelize.define('Product', {
+const Product = sequelize.define('Product', { // 
   id: {
     type: DataTypes.INTEGER,
     primaryKey: true,
@@ -12,16 +12,29 @@ const Product = sequelize.define('Product', {
     type: DataTypes.STRING,
     allowNull: false
   },
-  description: {
-    type: DataTypes.TEXT
+  company_name: {
+    type: DataTypes.STRING,
+    allowNull: false
   },
   price: {
     type: DataTypes.DECIMAL(10, 2), // future dev:  Adjust precision and scale as needed
     allowNull: false
   },
-  discount: {
+  wholesale_price: {
+    type: DataTypes.DECIMAL(10, 2), // future dev:  Adjust precision and scale as needed
+    allowNull: false
+  },
+  discount: { // only for price, that is retail price.
     type: DataTypes.INTEGER,
     defaultValue: 0
+  },
+  manufacturing_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
+  },
+  expiry_date: {
+    type: DataTypes.DATEONLY,
+    allowNull: false
   },
   quantity: {
     type: DataTypes.INTEGER,
@@ -30,6 +43,9 @@ const Product = sequelize.define('Product', {
   returned_quantity: {
     type: DataTypes.INTEGER,
     defaultValue: 0
+  },
+  description: {
+    type: DataTypes.TEXT
   },
   thumbnail: {
     type: DataTypes.STRING,

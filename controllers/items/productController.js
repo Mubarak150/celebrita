@@ -4,8 +4,8 @@ const { QueryTypes } = require('sequelize');
 const { handleCreate, handleReadAll, handleReadById, handleUpdateById, handleDeleteById } = require('../../utils/functions');
 
 exports.createProduct = handleCreate(`
-    INSERT INTO products (name, description, price, discount, quantity, thumbnail, status, images, category_id)
-    VALUES (:name, :description, :price, :discount, :quantity, :thumbnail, :status, :images, :category_id);
+    INSERT INTO products (name, description, company_name, manufacturing_date, expiry_date, wholesale_price, price, discount, quantity, thumbnail, status, images, category_id)
+    VALUES (:name, :description, :company_name, :manufacturing_date, :expiry_date, :wholesale_price, :price, :discount, :quantity, :thumbnail, :status, :images, :category_id);
 `);
 
 exports.getAllProducts = handleReadAll(`
