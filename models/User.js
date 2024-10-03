@@ -22,7 +22,7 @@ const User = sequelize.define('User', {
         allowNull: false
     },
     role: { // role not to be taken from front end... but manually insert it for admins or may come out with some other solution in admin panel. 
-        type: DataTypes.ENUM('1', '2'),
+        type: DataTypes.ENUM('1', '2', '3'),
         allowNull: false,
         defaultValue: '2'
     },

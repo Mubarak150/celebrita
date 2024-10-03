@@ -111,5 +111,14 @@ const isUserAdmin = (req, res, next) => {
     next();
 };
 
-module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin };
+// Middleware to prevent access to sign-in page if already signed in
+const isSalesMan = (req, res, next) => {
+    if (req.body.user.role != '3') {
+       return res.status(401).json({status: false, message: 'only sale-persons can access this route'})
+    }
+
+    next();
+};
+
+module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan };
 
