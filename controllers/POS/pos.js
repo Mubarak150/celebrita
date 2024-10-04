@@ -85,19 +85,27 @@ const endShift = async (req, res) => {
         );
 
         // Step 3: Update product quantities
-        for (let sale of salesData) {
-            const { id, quantity } = sale;
-
-            // Fetch the current product from the database
-            const product = await Product.findByPk(id);
-
-            // Update the product's quantity
-            if (product) {
-                await product.update({
-                    quantity: product.quantity - quantity // Decrease the product quantity
-                });
+        if(salesData.length == 0) {
+            return res.status(200).json({
+                success: true,
+                message: "Shift Ended, with no sales..."
+            })
+        } else {
+            for (let sale of salesData) {
+                const { id, quantity } = sale;
+    
+                // Fetch the current product from the database
+                const product = await Product.findByPk(id);
+    
+                // Update the product's quantity
+                if (product) {
+                    await product.update({
+                        quantity: product.quantity - quantity // Decrease the product quantity
+                    });
+                }
             }
         }
+        
 
         // Step 4: Insert sales records into ShiftSales table
         let totalShiftSale = 0; // To calculate the total sales amount in the shift
