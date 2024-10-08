@@ -1,6 +1,7 @@
 const express = require('express');
 const router = express.Router();
-const uploadImages = require("../../middleware/uploadImage(s)")
+const uploadImages = require("../../middleware/uploadImage(s)"); 
+const {generateBarcode} = require('../../middleware/generateBarcode'); 
 // const {protect, checkSignIn} = require('../middleware/auth');
 const {
   createProduct,
@@ -13,7 +14,7 @@ const {
   searchProductByName,
 } = require('../../controllers/items/productController');
 
-router.post('/', uploadImages, createProduct);
+router.post('/', uploadImages, generateBarcode, createProduct);
 router.get('/', getAllProducts); 
 router.get('/all/active', getAllProductsForLandingPage); 
 router.get('/search', searchProductByName); 
