@@ -65,6 +65,10 @@ const Product = sequelize.define('Product', { //
       key: 'id'
     },
     onDelete: 'CASCADE' // Delete products when the category is deleted
+  },
+  barcode: {
+    type: DataTypes.NUMBER,
+    allowNull: true
   }
 }, {
   tableName: 'products',

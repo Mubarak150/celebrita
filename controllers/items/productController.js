@@ -5,8 +5,8 @@ const { handleCreate, handleReadAll, handleReadById, handleUpdateById, handleDel
 const {Op} = require('sequelize'); 
 
 exports.createProduct = handleCreate(`
-    INSERT INTO products (name, description, company_name, manufacturing_date, expiry_date, wholesale_price, price, discount, quantity, thumbnail, status, images, category_id)
-    VALUES (:name, :description, :company_name, :manufacturing_date, :expiry_date, :wholesale_price, :price, :discount, :quantity, :thumbnail, :status, :images, :category_id);
+    INSERT INTO products (name, description, company_name, manufacturing_date, expiry_date, wholesale_price, price, discount, quantity, thumbnail, status, images, category_id, barcode)
+    VALUES (:name, :description, :company_name, :manufacturing_date, :expiry_date, :wholesale_price, :price, :discount, :quantity, :thumbnail, :status, :images, :category_id, :barcode);
 `);
 
 exports.getAllProducts = handleReadAll(`
@@ -18,8 +18,10 @@ exports.getAllProducts = handleReadAll(`
         products.quantity, 
         products.returned_quantity, 
         products.discount, 
+        products.barcode,
         products.status, 
         categories.category 
+
     FROM products 
     JOIN categories 
     ON products.category_id = categories.id
