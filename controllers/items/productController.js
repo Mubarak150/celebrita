@@ -184,13 +184,13 @@ const toKebabCase = (str) => {
 // search product by name or partial name:
 exports.searchProductByName = async (req, res) => {
     try {
-        const { search } = req.body;  // The search term from the request (e.g., 'panadol')
+        const { name } = req.query;  // The search term from the request (e.g., 'panadol')
 
         // Step 1: Query the database to find products where the name matches or contains the search term
         const products = await Product.findAll({
             where: {
                 name: {
-                    [Op.like]: `%${search}%`  // Use LIKE operator to find partial matches
+                    [Op.like]: `%${name}%`  // Use LIKE operator to find partial matches
                 }
             },
             attributes: ['name']  // Only select the 'name' field
