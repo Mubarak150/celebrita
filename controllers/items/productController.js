@@ -2,6 +2,7 @@ const Product = require('../../models/Product');
 const Category = require('../../models/Category');
 const { QueryTypes } = require('sequelize');
 const { handleCreate, handleReadAll, handleReadById, handleUpdateById, handleDeleteById } = require('../../utils/functions');
+const {Op} = require('sequelize'); 
 
 exports.createProduct = handleCreate(`
     INSERT INTO products (name, description, company_name, manufacturing_date, expiry_date, wholesale_price, price, discount, quantity, thumbnail, status, images, category_id)
@@ -136,7 +137,7 @@ const toKebabCase = (str) => {
         .replace(/^-+|-+$/g, '');     // Remove leading or trailing hyphens
 };
 
-exports.getProductById = async (req, res) => {
+ exports.getProductById = async (req, res) => {
     try {
         const { product } = req.params;  // The product name in kebab case from the request (e.g., 'panadol-ibrufen')
 
@@ -176,6 +177,38 @@ exports.getProductById = async (req, res) => {
         res.status(500).json({ success: false, error: error.message });
     }
 }; 
+
+
+// search product by name or partial name:
+exports.searchProductByName = async (req, res) => {
+    try {
+        const { search } = req.body;  // The search term from the request (e.g., 'panadol')
+
+        // Step 1: Query the database to find products where the name matches or contains the search term
+        const products = await Product.findAll({
+            where: {
+                name: {
+                    [Op.like]: `%${search}%`  // Use LIKE operator to find partial matches
+                }
+            },
+            attributes: ['name']  // Only select the 'name' field
+        });
+
+        // Step 2: Check if any products were found
+        if (!products.length) {
+            return res.status(404).json({ success: false, message: 'No matching products found' });
+        }
+
+        // Step 3: Extract only the product names into an array
+        const productNames = products.map(prod => prod.name);
+
+        // Step 4: Send the product names as an array
+        res.status(200).json({ success: true, data: productNames });
+    } catch (error) {
+        // Handle any errors
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
 
 
 exports.updateProductById = handleUpdateById("products");

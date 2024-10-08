@@ -156,11 +156,197 @@ const endShift = async (req, res) => {
 };
 
 
+// admin controllers: 
+
+// Controller function for getting all shifts of a salesperson on a particular date
+const getShiftsBySalespersonAndDate = async (req, res) => {
+    const { user_id } = req.params;  // Salesperson ID from URL params
+    const { date } = req.query;      // Date from query params (format: YYYY-MM-DD)
+
+    try {
+        // Step 1: Find all shifts by the given salesperson on the specified date
+        const shifts = await Shift.findAll({
+            where: {
+                user_id,  // Match the salesperson (user_id)
+                shift_start: {
+                    [Op.gte]: new Date(`${date}T00:00:00`), // Start of the day
+                    [Op.lte]: new Date(`${date}T23:59:59`)  // End of the day
+                }
+            }
+        });
+
+        // Step 2: Check if any shifts are found
+        if (shifts.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: `No shifts found for user ${user_id} on ${date}`
+            });
+        }
+
+        // Step 3: Return the found shifts
+        res.status(200).json({
+            success: true,
+            message: `Shifts for user ${user_id} on ${date}`,
+            shifts
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving shifts',
+            error: error.message
+        });
+    }
+};
+
+
+// Controller function for getting sales by a particular date (admin inquiry)
+const getSalesByDate = async (req, res) => {
+    const { date } = req.query; // Expect date in YYYY-MM-DD format
+
+    try {
+        // Step 1: Find all shifts that started or ended on the specified date
+        const shifts = await Shift.findAll({
+            where: {
+                shift_start: {
+                    [Op.gte]: new Date(`${date}T00:00:00`), // start of the day
+                    [Op.lte]: new Date(`${date}T23:59:59`)  // end of the day
+                }
+            }
+        });
+
+        if (shifts.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: 'No shifts found for the given date'
+            });
+        }
+
+        // Step 2: Collect all sales for the found shifts
+        const shiftIds = shifts.map(shift => shift.id);
+        const sales = await ShiftSale.findAll({
+            where: {
+                shift_id: shiftIds
+            },
+            include: [Product] // Include product details
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Sales data for ${date}`,
+            sales: sales
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving sales data by date',
+            error: error.message
+        });
+    }
+};
+
+// Controller function for getting sales by a particular shift (admin inquiry)
+const getSalesByShift = async (req, res) => {
+    const { shift_id } = req.params;
+
+    try {
+        // Step 1: Find the shift by its ID
+        const shift = await Shift.findByPk(shift_id);
+
+        if (!shift) {
+            return res.status(404).json({
+                success: false,
+                message: 'Shift not found'
+            });
+        }
+
+        // Step 2: Find all sales made during this shift
+        const sales = await ShiftSale.findAll({
+            where: { shift_id },
+            include: [Product] // Include product details
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Sales data for shift ${shift_id}`,
+            sales: sales
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving sales data by shift',
+            error: error.message
+        });
+    }
+};
+
+// Controller function for getting sales by a particular salesperson in a month (admin inquiry)
+const getSalesBySalesPerson = async (req, res) => {
+    const { user_id, month } = req.params; // User ID of the salesperson and month (format: MM)
+
+    try {
+        // Step 1: Validate the user (salesperson)
+        const user = await User.findByPk(user_id);
+
+        if (!user) {
+            return res.status(404).json({
+                success: false,
+                message: 'Salesperson not found'
+            });
+        }
+
+        // Step 2: Find all shifts by the salesperson in the given month
+        const shifts = await Shift.findAll({
+            where: {
+                user_id,
+                shift_start: {
+                    [Op.gte]: new Date(`2024-${month}-01T00:00:00`),  // start of the month
+                    [Op.lt]: new Date(`2024-${month + 1}-01T00:00:00`) // end of the month
+                }
+            }
+        });
+
+        if (shifts.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: `No shifts found for user ${user_id} in month ${month}`
+            });
+        }
+
+        // Step 3: Collect all sales for the found shifts
+        const shiftIds = shifts.map(shift => shift.id);
+        const sales = await ShiftSale.findAll({
+            where: {
+                shift_id: shiftIds
+            },
+            include: [Product] // Include product details
+        });
+
+        res.status(200).json({
+            success: true,
+            message: `Sales data for user ${user_id} in month ${month}`,
+            sales: sales
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving sales data by salesperson',
+            error: error.message
+        });
+    }
+};
 
 
 
 module.exports = {
     startShift,
     endShift,
-    // getProducts
+    // getProducts,
+    getShiftsBySalespersonAndDate,
+    getSalesByDate,
+    getSalesByShift,
+    getSalesBySalesPerson
 };

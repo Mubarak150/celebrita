@@ -10,11 +10,13 @@ const {
   getAllProductsByCategoryName,
   updateProductById,
   deleteProductById,
+  searchProductByName,
 } = require('../../controllers/items/productController');
 
 router.post('/', uploadImages, createProduct);
 router.get('/', getAllProducts); 
 router.get('/all/active', getAllProductsForLandingPage); 
+router.get('/search', searchProductByName); 
 router.get('/:product', getProductById);
 router.get('/category/:category', getAllProductsByCategoryName);
 router.patch('/:id', uploadImages, updateProductById);

@@ -23,6 +23,7 @@ const reviewsAdmin = require('./routes/reviews/adminRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const gopayfast = require('./routes/cartAndOrder/payOrderRoutes'); 
 const pos = require('./routes/POS/pos')
+const posAdmin = require('./routes/POS/posAdmin')
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -59,6 +60,7 @@ app.use('/api/admin/v1/products', products);
 app.use('/api/admin/v1/orders', orderAdmin);
 app.use('/api/admin/v1/invoices', invoicesAdmin);
 app.use('/api/admin/v1/reviews', reviewsAdmin);
+app.use('/api/admin/v1/sales', posAdmin);
 
 // IV. for all APIs: 
 app.use('/api/user/v1/notifications', notificationRoutes);
@@ -66,10 +68,6 @@ app.use('/api/user/v1/gopayfast', gopayfast);
 
 // V. for POS: 
 app.use('/api/pos/v1', pos);
-
-
-
-
 
 // EXPORTING APP TO SERVER.JS
 module.exports = app; 

@@ -2,10 +2,6 @@ const express = require('express');
 const {
     startShift,
     endShift,
-    // getProducts,
-    // getSalesByDate,
-    // getSalesByShift,
-    // getSalesBySalesPerson
 } = require('../../controllers/POS/pos'); // Import the controller functions
 
 const router = express.Router();
@@ -27,5 +23,7 @@ router.post('/end-shift', protect, isSalesMan, endShift);
 
 // // Route to get sales made by a particular salesperson in a particular month (admin inquiry)
 // router.get('/sales/salesperson/:user_id/month/:month', getSalesBySalesPerson);
+
+
 
 module.exports = router;
