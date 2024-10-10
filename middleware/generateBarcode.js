@@ -14,11 +14,11 @@ const generateBarcode = async (req, res, next) => {
       if (lastProduct.length > 0 && lastProduct[0].barcode) {
         // Step 2: Increment the last barcode
         const lastBarcode = parseInt(lastProduct[0].barcode, 10);
-        newBarcode = (lastBarcode + 1).toString().padStart(12, '0');  // Ensure 12 digits, padded with zeros
+        newBarcode = (lastBarcode + 1).toString().padStart(6, '0');  // Ensure 6 digits, padded with zeros
         console.log(newBarcode); 
       } else {
         // Step 3: If no previous product, start with the initial barcode
-        newBarcode = '000000000001'; // The first barcode
+        newBarcode = '000001'; // The first barcode
       }
   
       // Step 4: Attach the new barcode to the request body
