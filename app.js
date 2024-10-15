@@ -24,6 +24,8 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const gopayfast = require('./routes/cartAndOrder/payOrderRoutes'); 
 const pos = require('./routes/POS/pos')
 const posAdmin = require('./routes/POS/posAdmin')
+const contactRoutes = require('./routes/contact');
+const patientRoutes = require('./routes/reception/routes');
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -65,9 +67,13 @@ app.use('/api/admin/v1/sales', posAdmin);
 // IV. for all APIs: 
 app.use('/api/user/v1/notifications', notificationRoutes);
 app.use('/api/user/v1/gopayfast', gopayfast);
+app.use('/api/contact', contactRoutes);
 
 // V. for POS: 
 app.use('/api/pos/v1', pos);
+
+// VI. reception: 
+app.use('/api/patients', patientRoutes);
 
 // EXPORTING APP TO SERVER.JS
 module.exports = app; 

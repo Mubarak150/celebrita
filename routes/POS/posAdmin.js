@@ -1,9 +1,9 @@
 const express = require('express');
 const {
-    getShiftsBySalespersonAndDate,
+    getShiftsByVendorAndDate,
     getSalesByDate,
     getSalesByShift,
-    getSalesBySalesPerson
+    getSalesByVendor
 } = require('../../controllers/POS/pos'); // Import the controller functions
 
 const router = express.Router();
@@ -11,12 +11,15 @@ const {protect, isUserAdmin} = require('../../middleware/auth')
 
 // admin routes: 
 // shifts by a particular salesperson on a particular date. 
-router.get('/shifts/salesperson/:user_id', getShiftsBySalespersonAndDate);
+router.get('/shifts/vendor/:user_id/date/:date', protect, isUserAdmin, getShiftsByVendorAndDate); // done
 
-router.get('/date', protect, isUserAdmin, getSalesByDate);
+// total sales in a day: 
+router.get('/date', protect, isUserAdmin, getSalesByDate); // in progress.
 
+// get sales of one shift
 router.get('/shift/:shift_id', protect, isUserAdmin, getSalesByShift);
 
-router.get('/salesperson/:user_id/month/:month', protect, isUserAdmin, getSalesBySalesPerson);
+// get sales of a vendor in a month
+router.get('/vendor/:user_id/month/:month', protect, isUserAdmin, getSalesByVendor);
 
 module.exports = router;
