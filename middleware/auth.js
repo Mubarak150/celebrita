@@ -129,5 +129,14 @@ const isReceptionist = (req, res, next) => {
     next();
 };
 
-module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isReceptionist };
+// for only allowing receptionist i.e. role = 4: 
+const isDoctor = (req, res, next) => {
+    if (req.body.user.role != '5') {
+       return res.status(401).json({status: false, message: 'only the doctor can access this route'})
+    }
+
+    next();
+};
+
+module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isReceptionist, isDoctor };
 

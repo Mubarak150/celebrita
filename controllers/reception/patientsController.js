@@ -1,11 +1,11 @@
 const Patient = require('../../models/Patient');
 
 // POST: Create a new patient
-const createPatient = async (req, res) => {
-    const { name, age, gender, procedure_name, fees = 500 } = req.body;
+const createPatientByReceptionist = async (req, res) => {
+    const { name, age, gender } = req.body;
 
     // Validate mandatory fields
-    if (!name || !age || !gender || !procedure_name || !fees) {
+    if (!name || !age || !gender ) {
         return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
@@ -14,8 +14,6 @@ const createPatient = async (req, res) => {
             name,
             age,
             gender,
-            procedure_name,
-            fees,
             status: 'pending', // Default status is 'pending'
         });
 
@@ -26,9 +24,9 @@ const createPatient = async (req, res) => {
 };
 
 // PUT: Update patient with procedure charges and next appointment, change status to closed
-const updatePatient = async (req, res) => {
+const updatePatientbyDoctor = async (req, res) => {
     const { id } = req.params; // Patient ID from URL params
-    const { procedure_charges, next_appointment } = req.body;
+    const { fees, procedure_name, procedure_charges, next_appointment } = req.body;
 
     try {
         const patient = await Patient.findByPk(id);
@@ -36,6 +34,8 @@ const updatePatient = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Patient not found' });
         }
 
+        patient.fees = fees || patient.fees;
+        patient.procedure_name = procedure_name || patient.procedure_name;
         patient.procedure_charges = procedure_charges || patient.procedure_charges; // retain old value if new not provided or are problematic
         patient.next_appointment = next_appointment || patient.next_appointment;
         patient.status = 'closed'; // Update status to 'closed'
@@ -62,7 +62,7 @@ const getPendingPatients = async (req, res) => {
 };
 
 module.exports = {
-    createPatient,
-    updatePatient,
+    createPatientByReceptionist,
+    updatePatientbyDoctor,
     getPendingPatients,
 };
