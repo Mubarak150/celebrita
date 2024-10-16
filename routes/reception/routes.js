@@ -1,5 +1,5 @@
 const express = require('express');
-const { createPatientByReceptionist, updatePatientbyDoctor, getPendingPatients } = require('../../controllers/reception/patientsController');
+const { createPatientByReceptionist, updatePatientbyDoctor, getPendingPatients, getClosedPatients } = require('../../controllers/reception/patientsController');
 const {protect, isReceptionist, isDoctor} = require('../../middleware/auth')
 const router = express.Router();
  
@@ -10,7 +10,7 @@ router.post('/', protect, isReceptionist, createPatientByReceptionist);
 router.patch('/:id', protect, isDoctor, updatePatientbyDoctor);
 
 // GET: Get all  with status 'pending'
-router.get('/', protect, isReceptionist, getPendingPatients);
-router.get('/', protect, isDoctor, getPendingPatients);
+router.get('/pending', protect, getPendingPatients);
+router.get('/closed', protect, isDoctor, getClosedPatients);
 
 module.exports = router;

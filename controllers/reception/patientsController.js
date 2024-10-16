@@ -61,8 +61,22 @@ const getPendingPatients = async (req, res) => {
     }
 };
 
+// GET: Get all patients with status 'closed': for doctor only
+const getClosedPatients = async (req, res) => {
+    try {
+        const patients = await Patient.findAll({
+            where: { status: 'closed' }, // Fetch only closed patients
+        });
+
+        return res.status(200).json({ success: true, patients });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error fetching patients', error: error.message });
+    }
+};
+
 module.exports = {
     createPatientByReceptionist,
     updatePatientbyDoctor,
     getPendingPatients,
+    getClosedPatients,
 };

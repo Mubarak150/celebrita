@@ -156,6 +156,34 @@ const endShift = async (req, res) => {
     }
 };
 
+const getProductByBarcode = async (req, res) => {
+    try {
+        const { barcode } = req.body;  // The search term from the request (e.g., 'panadol')
+
+        // Step 1: Query the database to find products where the name matches or contains the search term
+        const product = await Product.findOne({
+            where: {
+                barcode
+            },
+            attributes: ['name']  // Only select the 'name' field
+        });
+
+        // Step 2: Check if any products were found
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'No matching product found' });
+        }
+
+        // Step 3: Extract only the product names into an array
+        const productName = product.name; 
+
+        // Step 4: Send the product names as an array
+        res.status(200).json({ success: true, data: productName });
+    } catch (error) {
+        // Handle any errors
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
 
 // admin controllers: 
 
@@ -345,6 +373,7 @@ const getSalesByVendor = async (req, res) => {
 module.exports = {
     startShift,
     endShift,
+    getProductByBarcode,
     // getProducts,
     getShiftsByVendorAndDate,
     getSalesByDate,
