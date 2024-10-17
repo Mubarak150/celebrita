@@ -4,9 +4,9 @@ const {Op} = require('sequelize')
 // POST: Create a new patient
 const createPatientByReceptionist = async (req, res) => { // done
     const { name, age, gender, contact, address, fee_status } = req.body;
-
+    
     // Validate mandatory fields
-    if (!name || !age || !gender || !contact || !address || !fee_status   ) {
+    if (!name || !age || !gender || !contact || !address   ) {
         return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
@@ -66,34 +66,37 @@ const getPendingPatients = async (req, res) => {
     }
 };
 
-// GET: Get all patients with status 'closed': for doctor only
-const getClosedPatients = async (req, res) => { // for today only 
-    const now = new Date(); // Get the current date and time
+const getAllPatients = async (req, res) => {
+    const { date } = req.query; // Get the date from the request body
 
     try {
-        // Create a start date for the current day (midnight)
-        const startDate = new Date(now.setHours(0, 0, 0, 0)); // Start of the current day (00:00:00.000)
-        const endDate = new Date(now.setHours(23, 59, 59, 999)); // End of the current day (23:59:59.999)
+        // If date is provided in the request body, use it, otherwise default to today's date
+        const providedDate = date ? new Date(date) : new Date();
 
+        // Create start date and end date for the provided or current day
+        const startDate = new Date(providedDate.setHours(0, 0, 0, 0)); // Start of the day (00:00:00.000)
+        const endDate = new Date(providedDate.setHours(23, 59, 59, 999)); // End of the day (23:59:59.999)
+
+        // Fetch patients with status 'closed' for the specified day
         const patients = await Patient.findAll({
             where: {
-                status: 'closed',
                 createdAt: {
                     [Op.gte]: startDate, // Greater than or equal to the start of the day
-                    [Op.lte]: endDate,   // Less than or equal to the end of the day
+                    [Op.lte]: endDate    // Less than or equal to the end of the day
                 }
             }
         });
 
-        return res.status(200).json({ success: true, totalPatientsToday: patients.length, patients });
+        return res.status(200).json({ success: true, totalPatients: patients.length, patients });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Error fetching patients', error: error.message });
     }
 };
 
+
 module.exports = {
     createPatientByReceptionist,
     updatePatientbyDoctor,
     getPendingPatients,
-    getClosedPatients,
+    getAllPatients,
 };
