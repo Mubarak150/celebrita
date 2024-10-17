@@ -93,10 +93,30 @@ const getAllPatients = async (req, res) => {
     }
 };
 
+const getPatientById = async (req, res) => {
+    const {id} = req.params;
+    try {
+                
+        const patient = await Patient.findOne({
+            where: { id }
+        }); 
+
+        if(!patient) {
+            return res.status(404).json({ success: false, message: 'No patient found with this ID', error: error.message });
+        }
+
+        return res.status(200).json({ success: true, patient });
+
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error fetching patient with this ID', error: error.message });
+    }
+}
+
 
 module.exports = {
     createPatientByReceptionist,
     updatePatientbyDoctor,
     getPendingPatients,
     getAllPatients,
+    getPatientById
 };
