@@ -45,7 +45,14 @@ app.use(bodyParser.urlencoded({ extended: true }));
 // Ensure uploads directory exists
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
+
+
 //ROUTES: 
+// test route: 
+app.get('/', (req, res) => {
+    res.status(200).send('latest update: 2024-10-16')
+})
+
 // I. auth (registration, signin, and logout): 
 app.use('/api/auth', authRoutes);
 

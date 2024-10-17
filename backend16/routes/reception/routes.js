@@ -9,8 +9,8 @@ router.post('/', protect, isReceptionist, createPatientByReceptionist);
 // PUT: Update a patient's procedure charges, next appointment, and status
 router.patch('/:id', protect, isDoctor, updatePatientbyDoctor);
 
-// // GET: Get all  with status 'pending'
-// router.get('/pending', protect, getPendingPatients);
-// router.get('/closed', protect, isDoctor, getClosedPatients);
+// GET: Get all  with status 'pending'
+router.get('/pending', protect, getPendingPatients);
+router.get('/closed', protect, isDoctor, getClosedPatients);
 
 module.exports = router;

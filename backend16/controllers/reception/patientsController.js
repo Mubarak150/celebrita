@@ -2,11 +2,11 @@ const Patient = require('../../models/Patient');
 const {Op} = require('sequelize')
 
 // POST: Create a new patient
-const createPatientByReceptionist = async (req, res) => { // done
-    const { name, age, gender, contact, address, fee_status } = req.body;
+const createPatientByReceptionist = async (req, res) => {
+    const { name, age, gender } = req.body;
 
     // Validate mandatory fields
-    if (!name || !age || !gender || !contact || !address || !fee_status   ) {
+    if (!name || !age || !gender ) {
         return res.status(400).json({ success: false, message: 'All fields are required.' });
     }
 
@@ -14,10 +14,7 @@ const createPatientByReceptionist = async (req, res) => { // done
         const newPatient = await Patient.create({
             name,
             age,
-            gender, 
-            contact, 
-            address, 
-            fee_status,
+            gender,
             status: 'pending', // Default status is 'pending'
         });
 
@@ -30,7 +27,7 @@ const createPatientByReceptionist = async (req, res) => { // done
 // PUT: Update patient with procedure charges and next appointment, change status to closed
 const updatePatientbyDoctor = async (req, res) => {
     const { id } = req.params; // Patient ID from URL params
-    const { comments, prescription, procedure_name, procedure_charges, next_appointment } = req.body;
+    const { fees, procedure_name, procedure_charges, next_appointment } = req.body;
 
     try {
         const patient = await Patient.findByPk(id);
@@ -38,8 +35,7 @@ const updatePatientbyDoctor = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Patient not found' });
         }
 
-        patient.comments = comments || patient.comments;
-        patient.prescription = prescription || patient.prescription;
+        patient.fees = fees || patient.fees;
         patient.procedure_name = procedure_name || patient.procedure_name;
         patient.procedure_charges = procedure_charges || patient.procedure_charges; // retain old value if new not provided or are problematic
         patient.next_appointment = next_appointment || patient.next_appointment;

@@ -3,11 +3,6 @@ const { sequelize } = require('../config/db');
 const moment = require('moment'); // For easier date manipulation
 
 const Patient = sequelize.define('Patient', {
-    // entries by receptionist
-    patient_number: {
-        type: DataTypes.STRING, // Example format: '001'
-        allowNull: true,
-    },
     name: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -20,24 +15,15 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.ENUM('male', 'female', 'other'),
         allowNull: false,
     },
-    contact: { // cell number. 
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
-    address: {
-        type: DataTypes.STRING,
-        allowNull: false,
-    },
     date: {
         type: DataTypes.DATE,
         allowNull: false,
         defaultValue: DataTypes.NOW,
     },
-    fee_status: {
-        type: DataTypes.BOOLEAN,
-        allowNull: false, // optional 
+    fees: {
+        type: DataTypes.INTEGER,
+        allowNull: true, // optional 
     },
-    // entry by doctor
     procedure_name: {
         type: DataTypes.STRING,
         allowNull: true, // optional 
@@ -46,24 +32,19 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.INTEGER,
         allowNull: true, // Optional field
     },
-    comments: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
-    prescription: {
-        type: DataTypes.STRING,
-        allowNull: true,
-    },
     next_appointment: {
         type: DataTypes.DATE,
         allowNull: true, // Optional field
     },
     status: {
-        type: DataTypes.ENUM('pending', 'active', 'closed'),
+        type: DataTypes.ENUM('pending', 'closed'),
         allowNull: false,
         defaultValue: 'pending',
     },
-    
+    patient_number: {
+        type: DataTypes.STRING, // Example format: '001'
+        allowNull: true,
+    },
 }, {
     tableName: 'patients',
     timestamps: true, // Adds createdAt and updatedAt
