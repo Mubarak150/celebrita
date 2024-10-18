@@ -22,7 +22,7 @@ const startShift = async (req, res) => {
         // Step 2: Get all active product details including id, quantity, price, and discount
         const products = await Product.findAll({
             where: { status: 'active' },  // Only retrieve active products
-            attributes: ['id', 'name', 'quantity', 'price', 'discount']  // Fetch these specific columns
+            attributes: ['id', 'name', 'quantity', 'price', 'discount', 'barcode']  // Fetch these specific columns
         });
 
         // Step 3: Send response back with the shift data and active product details
