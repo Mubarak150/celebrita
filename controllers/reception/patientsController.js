@@ -1,5 +1,6 @@
 const Patient = require('../../models/Patient');
-const {Op} = require('sequelize')
+const {Op} = require('sequelize'); 
+const {notifyAllReceptionists} = require('../../utils/socket'); 
 
 // POST: Create a new patient
 const createPatientByReceptionist = async (req, res) => { // done
@@ -99,6 +100,7 @@ const getPatientById = async (req, res) => {
     }
 }
 
+// with the insertion of socket, i dont think this func is needed anymore. 
 const getActivePatient = async (req, res) => {
     try {
         const activePatient = await Patient.findOne({where: {status: 'active '}});
@@ -151,6 +153,10 @@ const setPatientToActive = async (req, res) => {
 
         newActive.status = "active"; 
         await newActive.save()
+
+        // sending the current queue number as notification to all receptionists.
+        const notification = patient_in_queue; 
+        notifyAllReceptionists(notification)
 
         return res.status(200).json({
             status: true, 

@@ -12,10 +12,14 @@ router.patch('/:id', protect, isDoctor, updatePatientbyDoctor);
 // // GET: Get all  patients based on a date... set default to TODAY
 router.get('/', protect, getAllPatients);
 // router.get('/closed', protect, isDoctor, getClosedPatients);
-router.get('/:id/active', protect, isDoctor, setPatientToActive);
 
-// about queue 
+// get single patient... 
 router.get('/:id', protect, isDoctor, getPatientById);
+
+// ABOUT QUEUE:
+// doctor setting pateint as active
+router.patch('/:id/active', protect, isDoctor, setPatientToActive);
+// receptionist fetching active patient number. 
 router.get('/active/queue', protect, isReceptionist, getActivePatient);
 
 module.exports = router;
