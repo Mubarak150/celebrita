@@ -20,6 +20,6 @@ router.get('/:id', protect, isDoctor, getPatientById);
 // doctor setting pateint as active
 router.patch('/:id/active', protect, isDoctor, setPatientToActive);
 // receptionist fetching active patient number. 
-router.get('/active/queue', protect, isReceptionist, getActivePatient);
+router.get('/active/queue', protect, getActivePatient);
 
 module.exports = router;
