@@ -1,6 +1,6 @@
 const Patient = require('../../models/Patient');
 const {Op} = require('sequelize'); 
-const {notifyAllReceptionists} = require('../../utils/socket'); 
+const {notifyAllDoctors, notifyAllReceptionists} = require('../../utils/socket'); 
 
 // POST: Create a new patient
 const createPatientByReceptionist = async (req, res) => { // done
@@ -22,6 +22,11 @@ const createPatientByReceptionist = async (req, res) => { // done
             status: 'pending', // Default status is 'pending'
         });
 
+        // send a notification to doctor that  a new entry has been made..
+        const notification = 'A new patient has been added.'; 
+        await notifyAllDoctors(notification)
+
+        // finally return the json...
         return res.status(201).json({ success: true, message: 'patient registered successfully' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Error creating patient', error: error.message });
