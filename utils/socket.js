@@ -163,23 +163,15 @@ const notifyAllAdmins = async (orderId, message) => {
     }
 };
 
-// Function to notify all receptionists
 const notifyAllReceptionists = async (message) => {
-    io.to('receptionists').emit('Receptionist Notification', message); // Broadcast to all receptionists in the 'receptionists' room
+    io.to('receptionists').emit('receptionist-notification', message);
     console.log('Notification sent to all receptionists');
 
-    // Save the notification to the database for each receptionist
-    const receptionists = await User.findAll({
-        where: {
-            role: 4 // Role 4 corresponds to receptionist
-        }
-    });
-
-    // Loop through each receptionist and create a notification
+    const receptionists = await User.findAll({ where: { role: 4 } });
     for (const receptionist of receptionists) {
         await Notification.create({
             user_id: receptionist.id,
-            message,
+            content: message,
             isRead: false,
         });
     }
@@ -187,7 +179,7 @@ const notifyAllReceptionists = async (message) => {
 
 // Function to notify all doctors
 const notifyAllDoctors = async (message) => {
-    io.to('doctors').emit('Doctor Notification', message); // Broadcast to all doctors in the 'doctors' room
+    io.to('doctors').emit('doctor-notification', message); // Broadcast to all doctors in the 'doctors' room
     console.log('Notification sent to all doctors');
 
     // Save the notification to the database for each doctor

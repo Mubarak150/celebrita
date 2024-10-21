@@ -156,7 +156,7 @@ const setPatientToActive = async (req, res) => {
 
         // sending the current queue number as notification to all receptionists.
         const notification = patient_in_queue; 
-        notifyAllReceptionists(notification)
+        await notifyAllReceptionists(notification)
 
         return res.status(200).json({
             status: true, 

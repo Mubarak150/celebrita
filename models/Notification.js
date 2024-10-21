@@ -22,7 +22,7 @@ const Notification = sequelize.define('Notification', {
   },
   message: {
     type: DataTypes.STRING,
-    allowNull: false,
+    allowNull: true,
   },
   
   is_seen: {
