@@ -14,7 +14,7 @@ router.get('/', protect, getAllPatients);
 // router.get('/closed', protect, isDoctor, getClosedPatients);
 
 // get single patient... 
-router.get('/:id', protect, isDoctor, getPatientById);
+router.get('/:id', protect, getPatientById);
 
 // ABOUT QUEUE:
 // doctor setting pateint as active
