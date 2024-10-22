@@ -267,12 +267,14 @@ const getProductsSoldByDate = async (req, res) => {
         // Step 3: Aggregate sales by product
         const productSalesMap = {};
 
+        let total_sales = 0; 
         sales.forEach(sale => {
             const productId = sale.Product.id;
             const productName = sale.Product.name;
             const quantitySold = sale.sold_quantity;
             const priceAtSale = sale.price_at_sale;
             const totalAmountFromProduct = priceAtSale * quantitySold; // Calculate total amount for this sale
+            total_sales += totalAmountFromProduct; 
 
             // If the product is already in the map, accumulate the quantity and total amount
             if (productSalesMap[productId]) {
@@ -296,7 +298,9 @@ const getProductsSoldByDate = async (req, res) => {
         res.status(200).json({
             success: true,
             message: `Sales data for ${date}`,
-            sales: consolidatedSales
+            total_sales,
+            sales: consolidatedSales,
+            
         });
     } catch (error) {
         console.error(error);
@@ -428,17 +432,28 @@ const getShiftsInADay = async (req, res) => {
             });
         }
 
+
+        let total_sales = 0; // Initialize total_sales
+
         // Step 3: Format the shifts to include only time for shift_start and shift_end
-        const formattedShifts = shifts.map(shift => ({
-            ...shift.toJSON(), // Convert shift to plain object
-            shift_start: shift.shift_start.toISOString().split('T')[1].split('.')[0], // Extract time
-            shift_end: shift.shift_end.toISOString().split('T')[1].split('.')[0] // Extract time
-        }));
+        const formattedShifts = shifts.map(shift => {
+            const shiftData = shift.toJSON(); // Convert shift to plain object
+        
+            // Accumulate total sales
+            total_sales += shiftData.sale_in_shift;
+        
+            return {
+                ...shiftData, // Spread the shift data
+                shift_start: shiftData.shift_start.toISOString().split('T')[1].split('.')[0], // Extract time
+                shift_end: shiftData.shift_end ? shiftData.shift_end.toISOString().split('T')[1].split('.')[0] : null, // Check for null
+            };
+        });
 
         // Step 4: Return the formatted shifts
         res.status(200).json({
             success: true,
             message: `Shifts on ${date}`,
+            total_sales, 
             shifts: formattedShifts
         });
     } catch (error) {
