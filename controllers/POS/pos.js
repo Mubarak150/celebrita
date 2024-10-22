@@ -1,5 +1,6 @@
 const express = require('express');
 const Product = require('../../models/Product');
+const User = require('../../models/User');
 const Shift = require('../../models/Shift');
 const ShiftSale = require('../../models/ShiftSale');
 const {Op} = require('sequelize')
@@ -401,7 +402,7 @@ const getSalesByVendor = async (req, res) => {
 };
 
 const getShiftsInADay = async (req, res) => {
-    const { date } = req.query;      // Date from query  (format: YYYY-MM-DD)
+    const { date } = req.query; // Date from query (format: YYYY-MM-DD)
 
     try {
         // Step 1: Find all shifts by the given Vendor on the specified date
@@ -411,7 +412,12 @@ const getShiftsInADay = async (req, res) => {
                     [Op.gte]: new Date(`${date}T00:00:00`), // Start of the day
                     [Op.lte]: new Date(`${date}T23:59:59`)  // End of the day
                 }
-            }
+            },
+            attributes: ['id', 'user_id', 'shift_start', 'shift_end', 'sale_in_shift', 'status'],
+            include: [{
+                model: User,
+                attributes: ['name'] // Only include the name
+            }] 
         });
 
         // Step 2: Check if any shifts are found
@@ -422,11 +428,18 @@ const getShiftsInADay = async (req, res) => {
             });
         }
 
-        // Step 3: Return the found shifts
+        // Step 3: Format the shifts to include only time for shift_start and shift_end
+        const formattedShifts = shifts.map(shift => ({
+            ...shift.toJSON(), // Convert shift to plain object
+            shift_start: shift.shift_start.toISOString().split('T')[1].split('.')[0], // Extract time
+            shift_end: shift.shift_end.toISOString().split('T')[1].split('.')[0] // Extract time
+        }));
+
+        // Step 4: Return the formatted shifts
         res.status(200).json({
             success: true,
             message: `Shifts on ${date}`,
-            shifts
+            shifts: formattedShifts
         });
     } catch (error) {
         console.error(error);
@@ -436,7 +449,8 @@ const getShiftsInADay = async (req, res) => {
             error: error.message
         });
     }
-}
+};
+
 
 
 

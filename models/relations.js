@@ -88,6 +88,10 @@ User.hasMany(Ticket, {
  // Defining associations
 ShiftSale.belongsTo(Shift, { foreignKey: 'shift_id' });
 ShiftSale.belongsTo(Product, { foreignKey: 'product_id' });
+
+Shift.belongsTo(User, {
+  foreignKey: 'user_id'
+});
   
 
 
