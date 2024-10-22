@@ -69,7 +69,7 @@ app.use('/api/admin/v1/products', products);
 app.use('/api/admin/v1/orders', orderAdmin);
 app.use('/api/admin/v1/invoices', invoicesAdmin);
 app.use('/api/admin/v1/reviews', reviewsAdmin);
-app.use('/api/admin/v1/sales', posAdmin);
+app.use('/api/admin/v1/pos', posAdmin);
 
 // IV. for all APIs: 
 app.use('/api/user/v1/notifications', notificationRoutes);

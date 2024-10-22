@@ -187,7 +187,7 @@ const getProductByBarcode = async (req, res) => {
 
 // admin controllers: 
 
-// Controller function for getting all shifts of a salesperson on a particular date
+// Controller function for getting all shifts of a salesperson on a particular date // done
 const getShiftsByVendorAndDate = async (req, res) => {
     const { user_id } = req.params;  // Vendor ID from URL params
     const { date } = req.params;      // Date from query params (format: YYYY-MM-DD)
@@ -230,7 +230,7 @@ const getShiftsByVendorAndDate = async (req, res) => {
 
 
 // Controller function for getting sales by a particular date (admin inquiry)
-const getSalesByDate = async (req, res) => {
+const getProductsSoldByDate = async (req, res) => {
     const { date } = req.query; // Expect date in YYYY-MM-DD format
 
     try {
@@ -257,13 +257,45 @@ const getSalesByDate = async (req, res) => {
             where: {
                 shift_id: shiftIds
             },
-            include: [Product] // Include product details
+            include: [{
+                model: Product,
+                attributes: ['id', 'name'] // Include product id and name
+            }]
         });
 
+        // Step 3: Aggregate sales by product
+        const productSalesMap = {};
+
+        sales.forEach(sale => {
+            const productId = sale.Product.id;
+            const productName = sale.Product.name;
+            const quantitySold = sale.sold_quantity;
+            const priceAtSale = sale.price_at_sale;
+            const totalAmountFromProduct = priceAtSale * quantitySold; // Calculate total amount for this sale
+
+            // If the product is already in the map, accumulate the quantity and total amount
+            if (productSalesMap[productId]) {
+                productSalesMap[productId].quantity_sold_in_the_day += quantitySold;
+                productSalesMap[productId].total_amount_from_product += totalAmountFromProduct;
+            } else {
+                // Otherwise, add a new entry for the product
+                productSalesMap[productId] = {
+                    product_name: productName,
+                    price_at_sale: priceAtSale, // Include price at sale
+                    quantity_sold_in_the_day: quantitySold,
+                    total_amount_from_product: totalAmountFromProduct
+                };
+            }
+        });
+
+        // Convert the map to an array
+        const consolidatedSales = Object.values(productSalesMap);
+
+        // Step 4: Return the consolidated sales data
         res.status(200).json({
             success: true,
             message: `Sales data for ${date}`,
-            sales: sales
+            sales: consolidatedSales
         });
     } catch (error) {
         console.error(error);
@@ -368,6 +400,44 @@ const getSalesByVendor = async (req, res) => {
     }
 };
 
+const getShiftsInADay = async (req, res) => {
+    const { date } = req.query;      // Date from query  (format: YYYY-MM-DD)
+
+    try {
+        // Step 1: Find all shifts by the given Vendor on the specified date
+        const shifts = await Shift.findAll({
+            where: {
+                shift_start: {
+                    [Op.gte]: new Date(`${date}T00:00:00`), // Start of the day
+                    [Op.lte]: new Date(`${date}T23:59:59`)  // End of the day
+                }
+            }
+        });
+
+        // Step 2: Check if any shifts are found
+        if (shifts.length === 0) {
+            return res.status(404).json({
+                success: false,
+                message: `No shifts found on ${date}`
+            });
+        }
+
+        // Step 3: Return the found shifts
+        res.status(200).json({
+            success: true,
+            message: `Shifts on ${date}`,
+            shifts
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({
+            success: false,
+            message: 'Error retrieving shifts',
+            error: error.message
+        });
+    }
+}
+
 
 
 module.exports = {
@@ -376,7 +446,8 @@ module.exports = {
     getProductByBarcode,
     // getProducts,
     getShiftsByVendorAndDate,
-    getSalesByDate,
+    getProductsSoldByDate,
+    getShiftsInADay,
     getSalesByShift,
     getSalesByVendor
 };

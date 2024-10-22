@@ -10,6 +10,7 @@ const Review = require('./Review');
 const Notification = require('./Notification');
 const Ticket = require('./Ticket');
 const TicketMessage = require('./TicketMessage');  
+const Shift = require('./Shift');
 const ShiftSale = require('./ShiftSale');
 
 // Associations of:
@@ -84,9 +85,9 @@ User.hasMany(Ticket, {
     foreignKey: 'sender_id'
   });
 
-  // Associations
-// Product.associate({ ShiftSale });
-// ShiftSale.associate({ Product });
+ // Defining associations
+ShiftSale.belongsTo(Shift, { foreignKey: 'shift_id' });
+ShiftSale.belongsTo(Product, { foreignKey: 'product_id' });
   
 
 

@@ -27,7 +27,7 @@ const createPatientByReceptionist = async (req, res) => { // done
         await notifyAllDoctors(notification)
 
         // finally return the json...
-        return res.status(201).json({ success: true, message: 'patient registered successfully' });
+        return res.status(201).json({ success: true, message: 'A patient added successfully' });
     } catch (error) {
         return res.status(500).json({ success: false, message: 'Error creating patient', error: error.message });
     }
@@ -105,10 +105,10 @@ const getPatientById = async (req, res) => {
     }
 }
 
-// with the insertion of socket, i dont think this func is needed anymore. 
+// with the insertion of socket, it is not needed primarily... but yep.. still needed. 
 const getActivePatient = async (req, res) => {
     try {
-        const activePatient = await Patient.findOne({where: {status: 'active '}});
+        const activePatient = await Patient.findOne({where: {status: 'active'}});
         if(!activePatient) {
             return res.status(500).json({
                 status: false, 
@@ -178,7 +178,8 @@ const setPatientToActive = async (req, res) => {
     }
 }
 
-// GET: Get all patients with status 'pending'
+// GET: Get all patients with status 'pending': 
+// not in use for now... but as said.. let it be dormant for now. 
 const getPendingPatients = async (req, res) => { // let it be dormant for now... 
     try {
         const patients = await Patient.findAll({

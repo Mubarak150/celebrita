@@ -37,7 +37,7 @@ const Patient = sequelize.define('Patient', {
         type: DataTypes.BOOLEAN,
         allowNull: false, // optional 
     },
-    // entry by doctor
+    // entries by doctor
     procedure_name: {
         type: DataTypes.STRING,
         allowNull: true, // optional 
@@ -48,11 +48,11 @@ const Patient = sequelize.define('Patient', {
     },
     comments: {
         type: DataTypes.STRING,
-        allowNull: true,
+        allowNull: true, // Optional field
     },
     prescription: {
-        type: DataTypes.STRING,
-        allowNull: true,
+        type: DataTypes.TEXT,
+        allowNull: true, // Optional field
     },
     next_appointment: {
         type: DataTypes.DATE,
