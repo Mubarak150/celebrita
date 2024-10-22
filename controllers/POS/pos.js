@@ -272,7 +272,7 @@ const getProductsSoldByDate = async (req, res) => {
             const productId = sale.Product.id;
             const productName = sale.Product.name;
             const quantitySold = sale.sold_quantity;
-            const priceAtSale = sale.price_at_sale;
+            const priceAtSale = new Intl.NumberFormat().format(sale.price_at_sale).split('.')[0];
             const totalAmountFromProduct = priceAtSale * quantitySold; // Calculate total amount for this sale
             total_sales += totalAmountFromProduct; 
 
