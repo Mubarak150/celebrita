@@ -4,8 +4,20 @@ require('dotenv').config();
 // Create a new Sequelize instance
 const sequelize = new Sequelize(process.env.MYSQL_DB, process.env.MYSQL_USER, process.env.MYSQL_PASSWORD || null, {
     host: process.env.MYSQL_HOST,
-    dialect: 'mysql',
+    dialect: 'mysql', 
     port: process.env.MYSQL_PORT,
+    // from down this line: it is to ensure that time is stored in pakistan time. plus: and to ensure that the date does not undergo UTC conversions at retrieval time. 
+    timezone: '+05:00', // PST = UTC +5;
+    dialectOptions: {
+    dateStrings: true,  // Ensure dates are returned as strings
+    typeCast: function (field, next) {
+      // for reading from the database
+      if (field.type === 'DATETIME') {
+        return field.string();
+      }
+      return next();
+    }
+  }
 });
 
 // Test the connection

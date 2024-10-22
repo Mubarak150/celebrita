@@ -43,12 +43,6 @@ const startShift = async (req, res) => {
     }
 };
 
-// const getProducts = async (req, res) => {
-//     try {
-
-//     } catch (error) {}
-// }
-
 // Controller function for ending a shift
 const endShift = async (req, res) => {
     const { shift_id, salesData } = req.body; // Shift ID, and the two arrays for products and sales data
@@ -76,7 +70,7 @@ const endShift = async (req, res) => {
         if (shift.status == 'closed') {
             return res.status(403).json({
                 success: false,
-                message: 'Unauthorized: Cannor end a shift twice'
+                message: 'Unauthorized: Cannot end a shift twice'
             });
         }
 
@@ -275,6 +269,7 @@ const getProductsSoldByDate = async (req, res) => {
             const priceAtSale = new Intl.NumberFormat().format(sale.price_at_sale).split('.')[0];
             const totalAmountFromProduct = priceAtSale * quantitySold; // Calculate total amount for this sale
             total_sales += totalAmountFromProduct; 
+            // console.log(priceAtSale, totalAmountFromProduct, total_sales )
 
             // If the product is already in the map, accumulate the quantity and total amount
             if (productSalesMap[productId]) {
@@ -336,7 +331,7 @@ const getSalesByShift = async (req, res) => {
         res.status(200).json({
             success: true,
             message: `Sales data for shift ${shift_id}`,
-            sales: sales
+            sales
         });
     } catch (error) {
         console.error(error);
@@ -444,9 +439,10 @@ const getShiftsInADay = async (req, res) => {
         
             return {
                 ...shiftData, // Spread the shift data
-                shift_start: shiftData.shift_start.toISOString().split('T')[1].split('.')[0], // Extract time
-                shift_end: shiftData.shift_end ? shiftData.shift_end.toISOString().split('T')[1].split('.')[0] : null, // Check for null
+                shift_start: shiftData.shift_start.split(' ')[1], // Extract time
+                shift_end: shiftData.shift_end ? shiftData.shift_end.split(' ')[1] : null, // Check for null
             };
+            
         });
 
         // Step 4: Return the formatted shifts
