@@ -50,7 +50,7 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 //ROUTES: 
 // test route: 
 app.get('/', (req, res) => {
-    res.status(200).send('latest update: 2024-10-16')
+    res.status(200).send('latest update: 2024-10-23');
 })
 
 // I. auth (registration, signin, and logout): 
@@ -61,7 +61,7 @@ app.use('/api/user/v1/cart', cart);
 app.use('/api/user/v1/place-order', order);
 app.use('/api/user/v1/orders', orderUser);
 app.use('/api/user/v1/reviews', reviews);
-app.use('/api/deliveries', deliveries)
+app.use('/api/deliveries', deliveries);
 
 // III. Admin APIs:  
 app.use('/api/admin/v1/categories', categories);

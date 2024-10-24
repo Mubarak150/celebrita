@@ -18,7 +18,7 @@ router.get('/shifts/vendor/:user_id/date/:date', protect, isUserAdmin, getShifts
 router.get('/sales', protect, isUserAdmin, getProductsSoldByDate); // done.
 
 // total shifts in a day:
-router.get('/shifts', protect, isUserAdmin, getShiftsInADay); // in progress.
+router.get('/shifts', protect, isUserAdmin, getShiftsInADay); // done.
 
 // get sales of one shift
 router.get('/shift/:shift_id', protect, isUserAdmin, getSalesByShift); // in progress.

@@ -266,10 +266,9 @@ const getProductsSoldByDate = async (req, res) => {
             const productId = sale.Product.id;
             const productName = sale.Product.name;
             const quantitySold = sale.sold_quantity;
-            const priceAtSale = new Intl.NumberFormat().format(sale.price_at_sale).split('.')[0];
-            const totalAmountFromProduct = priceAtSale * quantitySold; // Calculate total amount for this sale
-            total_sales += totalAmountFromProduct; 
-            // console.log(priceAtSale, totalAmountFromProduct, total_sales )
+            const priceAtSale = Math.floor(sale.price_at_sale )
+            const totalAmountFromProduct = priceAtSale * quantitySold; 
+                  total_sales += totalAmountFromProduct; 
 
             // If the product is already in the map, accumulate the quantity and total amount
             if (productSalesMap[productId]) {

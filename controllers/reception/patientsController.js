@@ -139,13 +139,11 @@ const setPatientToActive = async (req, res) => {
         }); 
 
         if(oldActive) {
-            oldActive.status = "closed"; 
+            oldActive.status = "pending";  // under test... 
             await oldActive.save(); 
         }
 
-        const newActive = await Patient.findOne({
-            where: {id}
-        })
+        const newActive = await Patient.findOne({ where: {id} }) // SELECT * FROM PATIENTS WHERE ID = :ID LIMIT = 1
 
         if(!newActive) {
             return res.status(404).json({
