@@ -59,6 +59,34 @@ const updatePatientbyDoctor = async (req, res) => {
     }
 };
 
+const updatePatientAtReception = async (req, res) => {
+    const { id } = req.params; // Assume the patient ID is passed as a URL parameter
+    const updates = req.body;   // Assume the updated data is passed in the request body
+  
+    try {
+      // Find the patient by ID
+      const patient = await Patient.findByPk(id);
+  
+      // If the patient is not found, return a 404 error
+      if (!patient) {
+        return res.status(404).json({ status: false,  message: 'Patient not found' });
+      }
+  
+      // Update the patient with the data provided in the request body
+      await patient.update(updates);
+
+      // send a notification to doctor that  a new entry has been made..
+      const notification = `A patient's info. got updated.`; 
+      await notifyAllDoctors(notification)
+  
+      // Return the updated patient information
+      return res.status(200).json({ status: true,  message: 'Patient updated successfully', patient });
+    } catch (error) {
+      return res.status(500).json({ status: false,  message: 'An error occurred while updating the patient' });
+    }
+  };
+  
+
 const getAllPatients = async (req, res) => {
     const { date, status } = req.query; // Get the date from the request body.. set status to active
 
@@ -190,13 +218,44 @@ const getPendingPatients = async (req, res) => { // let it be dormant for now...
     }
 };
 
+const deletePatient = async (req, res) => {
+    const {id} = req.params; 
+    try {
+        // Find the patient by ID
+        const patient = await Patient.findByPk(id);
+    
+        // If no patient is found, return a 404 error
+        if (!patient) {
+          return res.status(404).json({ status: false, message: 'Patient not found' });
+        }
+    
+        // Delete the patient record
+        await patient.destroy();
+
+        // send a notification to doctor that  a new entry has been made..
+        const notification = 'A patient was deleted from the list.'; 
+        await notifyAllDoctors(notification)
+    
+        // Return success message
+        return res.status(200).json({status: true, message: 'Patient deleted successfully' });
+    
+    } catch (error) {
+        res.status(500).json({
+            status: false, 
+            message: 'an error occured while deleting the patient'
+        })
+    }
+}
+
 
 module.exports = {
     createPatientByReceptionist,
     updatePatientbyDoctor,
+    updatePatientAtReception,
     getPendingPatients,
     getAllPatients,
     getPatientById,
     setPatientToActive,
-    getActivePatient
+    getActivePatient,
+    deletePatient
 };
