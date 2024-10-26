@@ -51,7 +51,11 @@ const updatePatientbyDoctor = async (req, res) => {
         patient.next_appointment = next_appointment || patient.next_appointment;
         patient.status = 'billing'; // Update status to 'billing'
 
-        await patient.save();
+        await patient.save(); // 
+
+        // send a notification to doctor that  a new entry has been made..
+        const notification = `A patient was pushed into billing.`; 
+        await notifyAllReceptionists(notification)
 
         return res.status(200).json({ success: true, message: 'Patient updated successfully', patient });
     } catch (error) {

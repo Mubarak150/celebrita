@@ -13,6 +13,7 @@ router.patch('/:id', protect, isDoctor, updatePatientbyDoctor);
 // PATCH: Update a patient at reception
 router.patch('/:id/reception', protect, isReceptionist, updatePatientAtReception);
 
+// POST: close a patient isReceptionist
 router.post('/:id/close', protect, isReceptionist, updatePatientToClose);
 
 // // GET: Get all  patients based on a date... set default to TODAY
