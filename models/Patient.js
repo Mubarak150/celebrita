@@ -59,7 +59,7 @@ const Patient = sequelize.define('Patient', {
         allowNull: true, // Optional field
     },
     status: {
-        type: DataTypes.ENUM('pending', 'active', 'closed'),
+        type: DataTypes.ENUM('pending', 'active', 'billing', 'closed'),
         allowNull: false,
         defaultValue: 'pending',
     },

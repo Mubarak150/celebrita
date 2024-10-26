@@ -49,7 +49,7 @@ const updatePatientbyDoctor = async (req, res) => {
         patient.procedure_name = procedure_name || patient.procedure_name;
         patient.procedure_charges = procedure_charges || patient.procedure_charges; // retain old value if new not provided or are problematic
         patient.next_appointment = next_appointment || patient.next_appointment;
-        patient.status = 'closed'; // Update status to 'closed'
+        patient.status = 'billing'; // Update status to 'billing'
 
         await patient.save();
 
@@ -85,6 +85,38 @@ const updatePatientAtReception = async (req, res) => {
       return res.status(500).json({ status: false,  message: 'An error occurred while updating the patient' });
     }
   };
+
+const updatePatientToClose = async (req, res) => {
+    const { id } = req.params; // Assume the patient ID is passed as a URL parameter
+  
+    try {
+      // Find the patient by ID
+      const patient = await Patient.findByPk(id);
+  
+      // If the patient is not found, return a 404 error
+      if (!patient) {
+        return res.status(404).json({ status: false,  message: 'Patient not found' });
+      }
+
+      // check if patient is in billing
+      if (patient.status != 'billing') {
+        return res.status(400).json({ status: false,  message: 'Invoice can only be generated for Billed Patients' });
+      }
+  
+      // Update the patient status
+      patient.status = 'closed'
+      await patient.save();
+
+      // send a notification to doctor about the update..
+      const notification = `A patient's status was set to closed.`; 
+      await notifyAllDoctors(notification)
+  
+      // Return the updated patient information
+      return res.status(200).json({ status: true,  message: 'Patient status set closed successfully', patient });
+    } catch (error) {
+      return res.status(500).json({ status: false,  message: "An error occurred while closing the patient's status"});
+    }
+}
   
 
 const getAllPatients = async (req, res) => {
@@ -252,6 +284,7 @@ module.exports = {
     createPatientByReceptionist,
     updatePatientbyDoctor,
     updatePatientAtReception,
+    updatePatientToClose,
     getPendingPatients,
     getAllPatients,
     getPatientById,

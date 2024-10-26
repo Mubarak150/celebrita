@@ -1,5 +1,5 @@
 const express = require('express');
-const { createPatientByReceptionist, updatePatientbyDoctor, updatePatientAtReception, getPendingPatients, getAllPatients, getPatientById, setPatientToActive, getActivePatient, deletePatient } = require('../../controllers/reception/patientsController');
+const { createPatientByReceptionist, updatePatientbyDoctor, updatePatientAtReception, getPendingPatients, getAllPatients, getPatientById, setPatientToActive, getActivePatient, deletePatient, updatePatientToClose } = require('../../controllers/reception/patientsController');
 const {protect, isReceptionist, isDoctor} = require('../../middleware/auth')
 const router = express.Router();
  
@@ -10,7 +10,10 @@ router.post('/', protect, isReceptionist, createPatientByReceptionist);
 // PATCH: Update a patient's procedure charges, next appointment, and status
 router.patch('/:id', protect, isDoctor, updatePatientbyDoctor);
 
+// PATCH: Update a patient at reception
 router.patch('/:id/reception', protect, isReceptionist, updatePatientAtReception);
+
+router.post('/:id/close', protect, isReceptionist, updatePatientToClose);
 
 // // GET: Get all  patients based on a date... set default to TODAY
 router.get('/', protect, getAllPatients);
