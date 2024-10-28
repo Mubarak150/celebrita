@@ -23,6 +23,7 @@ const reviewsAdmin = require('./routes/reviews/adminRoutes');
 const notificationRoutes = require('./routes/notificationRoutes');
 const gopayfast = require('./routes/cartAndOrder/payOrderRoutes'); 
 const pos = require('./routes/POS/pos')
+const posV2ProductRoutes = require('./routes/POS-v2/productRoutes')
 const posAdmin = require('./routes/POS/posAdmin')
 const contactRoutes = require('./routes/contact');
 const patientRoutes = require('./routes/reception/routes');
@@ -81,6 +82,11 @@ app.use('/api/pos/v1', pos);
 
 // VI. reception: 
 app.use('/api/patients', patientRoutes);
+
+
+///////////////////////////////////////////////////
+// VI>> pos v2 
+app.use('/api/pos/v2/products', posV2ProductRoutes);
 
 // EXPORTING APP TO SERVER.JS
 module.exports = app; 
