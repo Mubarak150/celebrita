@@ -54,4 +54,46 @@ const addToSalesCart = async (req, res) => {
     }
 };
 
-module.exports = { addToSalesCart }; 
+
+///////////////////////////////////////////////
+
+const fetchSalesCart = async (req, res) => {
+    try {
+        const  user_id  = req.body.user_id;
+
+        const sales_cart = await SalesCart.findOne({ where: { user_id }, include: SalesCartItem });
+        if (!sales_cart || sales_cart.SalesCartItems.length === 0) {
+            return res.status(200).json({ success: true, message: 'Cart is empty' });
+        }
+
+        const salesCartDetails = await Promise.all(sales_cart.SalesCartItems.map(async (item) => {
+            const product = await Product.findByPk(item.product_id, {
+                attributes: ['name', 'price', 'discount', 'quantity']
+            });
+            const discounted_price = product.price * (1 - product.discount / 100);
+            
+            return {
+                id: item.id, 
+                product_name: product.name,
+                quantity: item.quantity,
+                stock: product.quantity,
+                discounted_price,
+                item_total_amount: discounted_price * item.quantity // Add total_amount calculation here
+            };
+        }));
+        
+        const cart_total_amount = salesCartDetails.reduce((acc, item) => acc + (item.discounted_price * item.quantity), 0);
+        
+        res.status(200).json({
+            success: true,
+            message: 'Cart details fetched successfully',
+            cart_total_amount,
+            cart: salesCartDetails
+        });
+        
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+module.exports = { addToSalesCart, fetchSalesCart }; 

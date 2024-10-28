@@ -3,8 +3,10 @@ const User = require('./User');
 const Order = require('./Order');
 const OrderProduct = require('./OrderProduct');
 const Cart = require('./Cart');
+const SalesCart = require('./SalesCart');
 const Product = require('./Product');
 const CartItem = require('./CartItem');
+const SalesCartItems = require('./SalesCartItems');
 const Invoice = require('./Invoice'); 
 const Review = require('./Review'); 
 const Notification = require('./Notification');
@@ -19,6 +21,12 @@ Cart.hasMany(CartItem, { foreignKey: 'cart_id' });
 Product.hasMany(CartItem, { foreignKey: 'product_id' });
 CartItem.belongsTo(Cart, { foreignKey: 'cart_id' });
 CartItem.belongsTo(Product, { foreignKey: 'product_id' });
+
+// cart: products, cartItems, 
+SalesCart.hasMany(SalesCartItems, { foreignKey: 'sales_cart_id' });
+Product.hasMany(SalesCartItems, { foreignKey: 'product_id' });
+SalesCartItems.belongsTo(SalesCart, { foreignKey: 'sales_cart_id' });
+SalesCartItems.belongsTo(Product, { foreignKey: 'product_id' });
 
 // order: users, products, order_products
 User.hasMany(Order, { foreignKey: 'user_id' });
