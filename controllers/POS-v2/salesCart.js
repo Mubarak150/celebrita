@@ -96,4 +96,20 @@ const fetchSalesCart = async (req, res) => {
     }
 };
 
-module.exports = { addToSalesCart, fetchSalesCart }; 
+//////////////////////////////
+
+const deleteItemFromSalesCart = async (req, res) => {
+    const { item_id } = req.params;
+    if (!item_id) return res.status(400).json({ status: false, message: 'Item ID is required' });
+
+    try {
+        const deletedItem = await SalesCartItem.destroy({where: { id: item_id }});
+        if (deletedItem === 0) return res.status(404).json({ status: true, message: 'Item not found' });
+        res.status(200).json({ status: true, message: 'Item deleted successfully' });
+
+    } catch (error) {
+        res.status(500).json({ status: false, message: 'An error occurred while deleting the item', error: error.message });
+    }
+}
+
+module.exports = { addToSalesCart, fetchSalesCart, deleteItemFromSalesCart }; 
