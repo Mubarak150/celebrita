@@ -74,7 +74,6 @@ const finalizeSale = async (req, res) => {
             next_sale_number = 'SSN-' + String(last_sale_number + 1).padStart(10, '0');
         }
 
-
         // Create a new order
         const sale = await POSSale.create({
             user_id,
@@ -107,64 +106,8 @@ const finalizeSale = async (req, res) => {
         // Clear the cart after checkout
         await SalesCartItems.destroy({ where: { sales_cart_id: sales_cart.id }, transaction });
 
-        // Create the invoice for this order
-        // const newInvoice = await Invoice.create({
-        //     order_id: order.id,
-        //     user_id,
-        //     invoice_number: nextInvoiceNumber,
-        //     payment_status: 'pending', // or 'paid' depending on the flow
-        //     delivery_charges: deliveryCharges,
-        //     created_at: new Date()
-        // }, { transaction });
-
         // Commit the transaction
         await transaction.commit();
-
-        // Fetch detailed invoice information
-        // const detailedInvoice = await Invoice.findOne({
-        //     where: { id: newInvoice.id },
-        //     include: [
-        //         {
-        //             model: Order,
-        //             include: [
-        //                 {
-        //                     model: OrderProduct,
-        //                     include: [Product] // Include Product to get product details
-        //                 },
-        //                 User // Include User to get the user's name
-        //             ]
-        //         }
-        //     ]
-        // });
-
-        // if (!detailedInvoice) {
-        //     throw new Error('Invoice not found');
-        // }
-
-        // // Extract required data
-        // const orderDetails = detailedInvoice.Order;
-        // const orderProducts = orderDetails.OrderProducts.map(orderProduct => ({
-        //     product_name: orderProduct.Product.name, // Assuming `name` is a field in Product model
-        //     quantity: orderProduct.quantity,
-        //     price_at_order: orderProduct.price_at_order
-        // }));
-
-        // const response = {
-        //     invoice_id: detailedInvoice.id,
-        //     order_id: detailedInvoice.order_id,
-        //     invoice_number: detailedInvoice.invoice_number,
-        //     user_name: orderDetails.User.name, // Get the user's name from the User model
-        //     payment_status: detailedInvoice.payment_status,
-        //     created_at: detailedInvoice.created_at,
-        //     total_amount: orderDetails.total_amount,
-        //     delivery_charges: deliveryCharges, // added new
-        //     amount_with_delivery: AmountWithDelivery, // added new
-        //     shipping_address: orderDetails.shipping_address,
-        //     products: orderProducts
-        // };
-
-        // let notificationMessage = `a user ${response.user_name} has placed an order #${order.id}.`;
-        // notifyAllAdmins(order.id, notificationMessage);
 
         res.status(201).json({ success: true, message: "sale processed successfully", invoice_id: sale.id });
     } catch (error) {

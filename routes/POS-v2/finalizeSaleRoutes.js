@@ -7,6 +7,8 @@ const router = express.Router();
 // POST: create sale from cart: 
 router.post('/', protect, isSalesMan, finalizeSale);
 
-router.get('/invoice/:id', protect, isSalesMan, getInvoice);
+
+// i wanted it to be GET..... but mudassir paki kaar pa shi ko
+router.post('/invoice/:id', protect, isSalesMan, getInvoice);
 
 module.exports = router; 
