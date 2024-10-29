@@ -14,6 +14,8 @@ const Ticket = require('./Ticket');
 const TicketMessage = require('./TicketMessage');  
 const Shift = require('./Shift');
 const ShiftSale = require('./ShiftSale');
+const POSSale = require('./POSSale'); 
+const POSSaleProduct = require("./POSSaleProduct")
 
 // Associations of:
 // cart: products, cartItems, 
@@ -47,6 +49,17 @@ Order.belongsTo(User, { foreignKey: 'user_id' });
 
 OrderProduct.belongsTo(Order, { foreignKey: 'order_id' });
 OrderProduct.belongsTo(Product, { foreignKey: 'product_id' });
+
+
+// pos sales
+POSSale.hasMany(POSSaleProduct, { foreignKey: 'sale_id', as: 'sale_products' }); // Alias added here
+
+// Assuming you also have User model
+// Order.belongsTo(User, { foreignKey: 'user_id' });
+
+POSSaleProduct.belongsTo(POSSale, { foreignKey: 'sale_id' }); // Alias for POSSale
+POSSaleProduct.belongsTo(Product, { foreignKey: 'product_id', as: 'product' }); // Alias for Product
+
 
 Product.hasMany(OrderProduct, { foreignKey: 'product_id' });
 

@@ -166,15 +166,51 @@ const finalizeSale = async (req, res) => {
         // let notificationMessage = `a user ${response.user_name} has placed an order #${order.id}.`;
         // notifyAllAdmins(order.id, notificationMessage);
 
-        res.status(201).json({ success: true, data: "sale processed successfully" });
+        res.status(201).json({ success: true, message: "sale processed successfully", invoice_id: sale.id });
     } catch (error) {
         // Rollback the transaction in case of an error
         if (transaction.finished !== 'commit') {
             await transaction.rollback();
         }
-        console.log("error: ", error, error.message)
         res.status(500).json({ success: false, error: error.message });
     }
 };
 
-module.exports = {finalizeSale}
+
+////////////////////////// GET SALE INVOICE ///////////////////////////////
+const getInvoice = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Fetch detailed invoice information
+        const detailedInvoice = await POSSale.findOne({
+            where: { id },           
+            attributes: { exclude: ['id', 'user_id', 'createdAt' ] },
+            include: [
+                {
+                    model: POSSaleProduct,
+                    as: 'sale_products',
+                    attributes: { exclude: ['id', 'sale_id', 'createdAt', 'updatedAt' ] },
+                    include: [
+                        {
+                            model: Product,
+                            as: 'product',
+                            attributes: ['name'] 
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!detailedInvoice) {
+            return res.status(404).json({ success: false, message: 'Sale Invoice not found' });
+        }
+
+        res.status(200).json({status: true, invoice: detailedInvoice}); 
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+module.exports = {finalizeSale, getInvoice}
