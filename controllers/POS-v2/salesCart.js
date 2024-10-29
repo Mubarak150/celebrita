@@ -131,7 +131,7 @@ const checkoutSaleFromCart = async (req, res) => {
         await SalesCartItem.destroy({
             where: {
                 sales_cart_id: sales_cart.id,
-                product_id: { [Op.notIn]: updatedProductIds }
+                id: { [Op.notIn]: updatedProductIds }
             }
         });
 
