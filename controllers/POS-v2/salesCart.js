@@ -1,11 +1,13 @@
 const SalesCartItem = require('../../models/SalesCartItems'); 
 const SalesCart = require('../../models/SalesCart'); 
 const Product = require('../../models/Product'); 
+const {Op} = require('sequelize')
 
 const addToSalesCart = async (req, res) => {
     try {
-        const { user_id } = req.body;
-        const { barcode } = req.params; 
+        const { user_id, barcode } = req.body;
+
+        if(!barcode) return res.status(400).json({status: false, message: 'item cannot be added without barcode'})
 
         // Find the user's cart
         let sales_cart = await SalesCart.findOne({ where: { user_id } });
@@ -35,10 +37,10 @@ const addToSalesCart = async (req, res) => {
             });
         }
 
-        // Update quantity if the product already exists in the cart
         if (salesCartItem) {
+            // Update quantity if the product already exists in the cart
             salesCartItem.quantity = newTotalQuantity;
-            await salesCartItem.save();
+            await salesCartItem.save(); // or
         } else {
             // Add a new cart item
             await SalesCartItem.create({ sales_cart_id: sales_cart.id,
@@ -53,7 +55,6 @@ const addToSalesCart = async (req, res) => {
         res.status(500).json({ status: false, error: error.message });
     }
 };
-
 
 ///////////////////////////////////////////////
 
@@ -74,6 +75,7 @@ const fetchSalesCart = async (req, res) => {
             
             return {
                 id: item.id, 
+                product_id: product.id,
                 product_name: product.name,
                 quantity: item.quantity,
                 stock: product.quantity,
@@ -112,4 +114,40 @@ const deleteItemFromSalesCart = async (req, res) => {
     }
 }
 
-module.exports = { addToSalesCart, fetchSalesCart, deleteItemFromSalesCart }; 
+const checkoutSaleFromCart = async (req, res) => {
+    try {
+        const { user_id, updatedCartItems } = req.body;
+
+        // Find the user's cart: this case is in-existant but still for an extra check i am keeping it here... 
+        const sales_cart = await SalesCart.findOne({ where: { user_id }, include: SalesCartItem });
+        if (!sales_cart || sales_cart.SalesCartItems.length === 0) {
+            return res.status(400).json({ success: false, message: 'Cart is empty' });
+        }
+
+        // Process updated cart items (quantity changes, removals)
+        const updatedProductIds = updatedCartItems.map(item => item.id);
+
+        // Step 1: Remove items from the cart if they were deleted by the user
+        await SalesCartItem.destroy({
+            where: {
+                sales_cart_id: sales_cart.id,
+                product_id: { [Op.notIn]: updatedProductIds }
+            }
+        });
+
+        // Step 2: Update existing items' quantities in the cart
+        for (let item of updatedCartItems) {
+            let cartItem = await SalesCartItem.findOne({ where: { sales_cart_id: sales_cart.id, id: item.id } });
+            if (cartItem) {
+                cartItem.quantity = item.quantity;
+                await cartItem.save();
+            }
+        }
+
+        res.status(200).json({ success: true, message: 'Sales Cart updated successfully!' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+module.exports = { addToSalesCart, fetchSalesCart, deleteItemFromSalesCart, checkoutSaleFromCart }; 
