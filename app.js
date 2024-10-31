@@ -31,6 +31,7 @@ const patientRoutes = require('./routes/reception/routes'); //
 const posV2ProductRoutes = require('./routes/POS-v2/productRoutes')
 const posV2SalesCartRoutes = require('./routes/POS-v2/salesCartRoutes') 
 const posV2FinalizeSaleRoutes = require('./routes/POS-v2/finalizeSaleRoutes') 
+const posV2ReturnSoldProductRoutes = require('./routes/POS-v2/returnSoldProductRoutes') 
 
 //  MIDDLEWARES: 
 require('dotenv').config();
@@ -93,6 +94,7 @@ app.use('/api/patients', patientRoutes);
 app.use('/api/pos/v2/products', posV2ProductRoutes);
 app.use('/api/pos/v2/sales/cart', posV2SalesCartRoutes);
 app.use('/api/pos/v2/sales', posV2FinalizeSaleRoutes);
+app.use('/api/pos/v2/return', posV2ReturnSoldProductRoutes);
 
 // EXPORTING APP TO SERVER.JS
 module.exports = app; 
