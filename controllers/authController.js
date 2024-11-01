@@ -30,6 +30,20 @@ const signToken = (id, user) => {
     );
 };
 
+const sendCookie = (res, token) => {
+  const cookieExpirationTime = 1000*60*60*24*7; // 7 days
+  const expirationDate = new Date(Date.now() + cookieExpirationTime);
+
+  let options = {
+      expires: expirationDate, // Set expiration date
+      httpOnly: true, // Helps mitigate XSS attacks
+      // secure: true
+  };
+
+
+  return res.cookie('token', token, options); 
+}
+
 // Helper function to validate email format
 function validateEmail(email) {
     const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -58,7 +72,7 @@ exports.signIn = async (req, res) => {
         }
         
         const token = signToken(user.id, user);
-
+        sendCookie(res, token); 
         return res.status(200).json({
             status: true,
             token,
