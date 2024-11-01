@@ -242,4 +242,57 @@ exports.resetPassword = async (req, res) => {
     }
 }
 
+// update me: 
+exports.updateMe = async (req, res, next) => {
+  try {
+      const { password, change_password, new_password, confirm_password } = req.body;
+
+      if (!password) {
+          return res.status(400).json({ success: false, message: 'Current password is required for updates' });
+      }
+
+      const user = await User.findOne({ where: { id: req.body.user.id } });
+      if (!user) {
+          return res.status(404).json({ success: false, message: 'User not found' });
+      }
+
+      const isPasswordCorrect = await bcrypt.compare(password, user.password);
+      if (!isPasswordCorrect) {
+          return res.status(401).json({ success: false, message: 'Incorrect password' });
+      }
+
+      const updateData = {};
+      if (req.body.name) updateData.name = req.body.name;
+      if (req.body.email) updateData.email = req.body.email;
+
+      if (change_password) {
+          if (!new_password || !confirm_password) {
+              return res.status(400).json({ success: false, message: 'New password and confirm password are required' });
+          }
+          if (new_password !== confirm_password) {
+              return res.status(400).json({ success: false, message: 'New password and confirm password do not match' });
+          }
+          updateData.password = await bcrypt.hash(new_password, 10);
+      }
+
+      const rowsUpdated = await User.update(updateData, {
+          where: { id: req.body.user.id },
+          validate: true
+      });
+
+      if (rowsUpdated[0] > 0) {
+          return res.status(200).json({ success: true, message: 'User updated successfully' });
+      } else {
+          return res.status(400).json({ success: false, message: 'User update failed' });
+      }
+  } catch (error) {
+      console.error('Error updating user:', error);
+      return res.status(500).json({ success: false, message: 'Server error' });
+  }
+};
+
+
+
+
+
 
