@@ -40,7 +40,12 @@ const POSSale = sequelize.define( 'POSSale', {
     payment_method: {
         type: DataTypes.ENUM('card', 'cash'), // Enum field with "card" or "cash" options
         allowNull: false
-    }
+    },
+    returned: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false, 
+        defaultValue: false
+    }, // true if a return is made from this sale
 }, {
     tableName: 'pos_sales',
     timestamps: true,

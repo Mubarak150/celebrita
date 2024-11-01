@@ -33,6 +33,10 @@ const getSaleBySSN = async (req, res) => {
         if (!detailedSale) {
             return res.status(404).json({ success: false, message: 'Sale not found' });
         }
+        console.log(detailedSale.returned)
+        if (detailedSale.returned) {
+            return res.status(400).json({ success: false, message: `A return has already been made from this Sale: ${ssn}` });
+        }
 
         res.status(200).json({status: true, invoice: detailedSale}); 
 
@@ -65,6 +69,7 @@ const processReturn = async (req, res) => {
             return res.status(404).json({ success: false, message: 'Sale not found' });
         }
 
+
         // Step 2: Prepare return products
         const returnProducts = [];
         const updatedSaleProducts = originalSale.sale_products.map((product) => {
@@ -77,7 +82,7 @@ const processReturn = async (req, res) => {
                 const newQuantity = originalQuantity - returnedQuantity;
 
                 // Step 3: Add to return products if quantity is greater than zero
-                if (newQuantity >= 0) {
+                if (newQuantity > 0) {
                     returnProducts.push({
                         sale_product_id: product.id,
                         return_quantity: newQuantity,
@@ -134,6 +139,10 @@ const processReturn = async (req, res) => {
         //         )
         //     )
         // );
+        await POSSale.update(
+            { returned: true },
+            { where: { sale_number: ssn }, transaction }
+        );
         await transaction.commit(); 
         res.status(200).json({ success: true, message: 'Return processed successfully' });
 
