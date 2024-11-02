@@ -3,6 +3,15 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 
 const SaleReturn = sequelize.define('SaleReturn', {
+    user_id: {
+        type: DataTypes.INTEGER,
+        references: {
+            model: 'users',
+            key: 'id'
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE'
+    },
     sale_return_number: {
         type: DataTypes.STRING,
         allowNull: false,
@@ -35,6 +44,10 @@ const SaleReturn = sequelize.define('SaleReturn', {
     total_refund: {
         type: DataTypes.DECIMAL(10, 2),
         allowNull: false // Refund amount for the entire return
+    },
+    payment_method: {
+        type: DataTypes.ENUM('card', 'cash'), // Enum field with "card" or "cash" options
+        allowNull: false
     },
     remarks: {
         type: DataTypes.TEXT,

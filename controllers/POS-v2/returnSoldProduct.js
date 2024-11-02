@@ -113,6 +113,7 @@ const processReturn = async (req, res) => {
             }
 
             const saleReturn = await SaleReturn.create({
+                user_id: req.body.user.id, 
                 sale_return_number: next_return_number,
                 sale_id: originalSale.id,
                 sales_number: ssn, 
