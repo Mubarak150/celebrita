@@ -27,7 +27,7 @@ const posAdmin = require('./routes/POS/posAdmin')
 const contactRoutes = require('./routes/contact');
 const patientRoutes = require('./routes/reception/routes'); //
 
-
+// pos v2 route handlers: 
 const posV2ProductRoutes = require('./routes/POS-v2/productRoutes')
 const posV2SalesCartRoutes = require('./routes/POS-v2/salesCartRoutes') 
 const posV2FinalizeSaleRoutes = require('./routes/POS-v2/finalizeSaleRoutes') 
@@ -44,6 +44,7 @@ app.use(cors({
     // origin: [process.env.ORIGIN], 
     credentials: true
 }));
+
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
