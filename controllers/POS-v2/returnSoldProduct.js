@@ -118,6 +118,7 @@ const processReturn = async (req, res) => {
                 sale_id: originalSale.id,
                 sales_number: ssn, 
                 total_refund: returnProducts.reduce((acc, p) => acc + p.return_amount, 0), // Calculate total return amount
+                payment_method: 'cash' // it is for test.. figure it out later.
             }, { transaction }); 
 
             // Populate SaleReturnProduct records

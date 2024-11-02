@@ -42,7 +42,7 @@ app.use(morgan('dev'));
 
 // Middleware setup
 app.use(cors({
-    // origin: [process.env.ORIGIN], 
+    origin: [process.env.ORIGIN], 
     credentials: true
 }));
 

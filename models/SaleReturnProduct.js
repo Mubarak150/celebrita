@@ -17,7 +17,7 @@ const SaleReturnProduct = sequelize.define('SaleReturnProduct', {
         type: DataTypes.INTEGER,
         allowNull: false,
         references: {
-            model: 'sale_return_products', // Reference to sale return products table
+            model: 'pos_sale_products', // Reference to sale return products table
             key: 'id'
         },
         onUpdate: 'CASCADE',

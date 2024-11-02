@@ -16,6 +16,8 @@ const Shift = require('./Shift');
 const ShiftSale = require('./ShiftSale');
 const POSSale = require('./POSSale'); 
 const POSSaleProduct = require("./POSSaleProduct")
+const SaleReturn = require('./SaleReturn')
+const SaleReturnProduct = require('./SaleReturnProduct')
 
 // Associations of:
 // cart: products, cartItems, 
@@ -62,6 +64,24 @@ POSSaleProduct.belongsTo(Product, { foreignKey: 'product_id', as: 'product' }); 
 
 
 Product.hasMany(OrderProduct, { foreignKey: 'product_id' });
+
+/////
+// SaleReturn.hasMany(SaleReturnProduct, { foreignKey: 'sale_return_id', as: 'return_products' });
+// SaleReturnProduct.belongsTo(SaleReturn, { foreignKey: 'sale_return_id' }); // Alias for POSSale
+// Product.hasMany(SaleReturnProduct, {foreignKey: 'product_id'})
+// SaleReturnProduct.belongsTo(POSSaleProduct, { foreignKey: 'product_id', as: 'product' }); // Alias for Product
+
+// SaleReturn has many SaleReturnProducts
+SaleReturn.hasMany(SaleReturnProduct, { foreignKey: 'sale_return_id', as: 'return_products' });
+SaleReturnProduct.belongsTo(SaleReturn, { foreignKey: 'sale_return_id' });
+
+// POSSaleProducts are related to SaleReturnProducts (if applicable in your schema)
+POSSaleProduct.hasMany(SaleReturnProduct, { foreignKey: 'product_id', as: 'sale_products' });
+SaleReturnProduct.belongsTo(POSSaleProduct, { foreignKey: 'product_id', as: 'sale_products' });
+
+// // Each SaleReturnProduct is related to a Product
+// Product.hasMany(SaleReturnProduct, { foreignKey: 'product_id', as: 'return_products' }); 
+// SaleReturnProduct.belongsTo(Product, { foreignKey: 'product_id', as: 'product' });
 
 // reviews: 
 // User has many Reviews, and a Review belongs to one User
