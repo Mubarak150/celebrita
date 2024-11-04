@@ -7,8 +7,8 @@ const {Op} = require('sequelize')
 
 const todaySalesAndReturns = async (req, res) => {
     try {
-        // const date = new Date().toISOString().split('T')[0];
-        const date = '2024-10-29'
+        const date = new Date().toISOString().split('T')[0];
+        // const date = '2024-10-29'
 
         // Fetch sales with product details
         const sales = await POSSales.findAll({
