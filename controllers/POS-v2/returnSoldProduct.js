@@ -50,8 +50,11 @@ const processReturn = async (req, res) => {
     const transaction = await sequelize.transaction(); 
     try {
         // const {  } = req.params; // Sale number to process return for
-        const {ssn, returnedProducts} = req.body; // Array of returned products from the frontend
+        let {ssn, payment_method, returnedProducts} = req.body; // Array of returned products from the frontend
 
+        if(!payment_method){ // setting default to cash; 
+            payment_method = 'cash'
+        }
         // Step 1: Fetch original sale and products
         const originalSale = await POSSale.findOne({
             where: { sale_number: ssn },
@@ -118,7 +121,7 @@ const processReturn = async (req, res) => {
                 sale_id: originalSale.id,
                 sales_number: ssn, 
                 total_refund: returnProducts.reduce((acc, p) => acc + p.return_amount, 0), // Calculate total return amount
-                payment_method: 'cash' // it is for test.. figure it out later.
+                payment_method: payment_method
             }, { transaction }); 
 
             // Populate SaleReturnProduct records
