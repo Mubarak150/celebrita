@@ -348,6 +348,8 @@ exports.getUsersbyRole = async( req, res) => {
       return res.status(404).json({status: true,  message: "Users not found with this role" });
     }
 
+    let roles = ['admin', 'user', 'salesman', 'receptionist', 'doctor', 'sales-manager']; 
+
     let updatedUsers = users.map(user => {
       // Convert Sequelize instance to a plain object
       let userObj = user.get({ plain: true });
@@ -355,8 +357,12 @@ exports.getUsersbyRole = async( req, res) => {
         id: userObj.id, 
         name: userObj.name,
         email: userObj.email,
-        status: userObj.status
+        status: userObj.status,
+        role: userObj.role
       }
+
+      // je maaro say
+      userObj.role = roles[Number(userObj.role) - 1]; 
       
       return userObj;
   });
