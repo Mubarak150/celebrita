@@ -1,5 +1,5 @@
 const express = require('express');
-const { signIn, register, logout, forgotPassword, verifyOTP, resetPassword, updateMe, getUsersbyRole, updateStatusByAdmin} = require('../controllers/authController');
+const { signIn, register, logout, forgotPassword, verifyOTP, resetPassword, updateMe, getUsersbyRole, updateStatusByAdmin, updateSalesmanStatusByManager} = require('../controllers/authController');
 const {protect, isUserAdmin, isUser_6, checkSignIn} = require('../middleware/auth');
 const router = express.Router();
 
@@ -17,9 +17,9 @@ router.patch('/update-profile', protect,  updateMe);
 router.get('/users', protect, isUserAdmin, getUsersbyRole);
 
 // activation/deactivation of all by admin: 
-router.patch('/update-by-admin/:id', updateStatusByAdmin);
+router.patch('/update-by-admin/:id', protect, isUserAdmin, updateStatusByAdmin);
 
 // activation/deactivation of salesman by salesmanager: 
-// router.patch('/update-by-admin', protect, isUser_6, updateStatusBySalesManager);
+router.patch('/update-by-sales-manager/:id', protect, isUser_6, updateSalesmanStatusByManager);
 
 module.exports = router;

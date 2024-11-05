@@ -393,6 +393,36 @@ exports.updateStatusByAdmin = async (req, res) => {
   }
 };
 
+exports.updateSalesmanStatusByManager = async (req, res) => {
+  try {
+      const { id } = req.params;
+
+      if (!id ) {
+          return res.status(400).json({ message: "Missing id" });
+      }
+  
+      const user = await User.findOne({ where: { id } });
+      if (!user) {
+          return res.status(404).json({ message: "User not found" });
+      }
+
+      if(user.role != '3') {
+        return res.status(404).json({ message: "unauthorized to make such modifications" });
+    }
+     
+      user.status = user.status == 'active' ? 'inactive' : 'active'; 
+      await user.save()
+      return res.status(200).json({
+          status: true,
+          message: 'status updated successfully',
+          user
+      });
+  } catch (error) {
+      console.error('Error during sign in:', error);
+      return res.status(500).json({ message: "Server error" });
+  }
+};
+
 
 
 
