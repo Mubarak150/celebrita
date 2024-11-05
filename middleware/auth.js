@@ -150,11 +150,18 @@ const isUserAdmin = (req, res, next) => {
 };
 
 // Middleware to prevent access to sign-in page if already signed in
-const isSalesMan = (req, res, next) => {
+const isSalesMan = (req, res, next) => { // 
     if (req.body.user.role != '3') {
        return res.status(401).json({status: false, message: 'only sale-persons can access this route'})
     }
 
+    next();
+};
+
+const isUser_6 = (req, res, next) => { 
+    if (req.body.user.role != '6') {
+       return res.status(401).json({status: false, message: 'unauthorized: access denied'})
+    }
     next();
 };
 
@@ -176,5 +183,5 @@ const isDoctor = (req, res, next) => {
     next();
 };
 
-module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isReceptionist, isDoctor };
+module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isUser_6, isReceptionist, isDoctor };
 

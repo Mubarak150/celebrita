@@ -1,6 +1,6 @@
 const express = require('express');
-const { signIn, register, logout, forgotPassword, verifyOTP, resetPassword, updateMe, getUsersbyRole} = require('../controllers/authController');
-const {protect, isUserAdmin, checkSignIn} = require('../middleware/auth');
+const { signIn, register, logout, forgotPassword, verifyOTP, resetPassword, updateMe, getUsersbyRole, updateStatusByAdmin} = require('../controllers/authController');
+const {protect, isUserAdmin, isUser_6, checkSignIn} = require('../middleware/auth');
 const router = express.Router();
 
 // for dev: all are defined in authController... 
@@ -15,4 +15,11 @@ router.post('/verify-otp',  verifyOTP);
 router.post('/reset-password',  resetPassword);
 router.patch('/update-profile', protect,  updateMe);
 router.get('/users', protect, isUserAdmin, getUsersbyRole);
+
+// activation/deactivation of all by admin: 
+router.patch('/update-by-admin/:id', updateStatusByAdmin);
+
+// activation/deactivation of salesman by salesmanager: 
+// router.patch('/update-by-admin', protect, isUser_6, updateStatusBySalesManager);
+
 module.exports = router;
