@@ -44,6 +44,10 @@ const protect = async (req, res, next) => {
             return res.status(404).json({ status: false, message: 'User with given token not found' });
         }
 
+        if (user.status != 'active') { // timestamp: 2024-11-05
+            return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
+        }
+
         // 4. if the user changed password after the token was issued: 
         // Example: Check if the user's password was changed after the token was issued
         // if (user.passwordChangedAt && user.passwordChangedAt > verifyToken.iat) {
@@ -81,10 +85,14 @@ const protect = async (req, res, next) => {
 //         // 3. Check if the user exists
 //         const user = await User.findByPk(verifyToken.id);
 //         if (!user) {
-//             return res.status(404).json({ status: false, message: 'User with given token not found' });
-//         }
+        //     return res.status(404).json({ status: false, message: 'User with given token not found' });
+        // }
 
-//         // 4. Optional: Check if the user's password was changed after the token was issued
+        // if (user.status != 'active') { // timestamp: 2024-11-05
+        //     return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
+        // }
+
+        // // 4. Optional: Check if the user's password was changed after the token was issued
 //         // if (user.passwordChangedAt && user.passwordChangedAt > verifyToken.iat) {
 //         //     return res.status(401).json({ status: false, message: 'Token is invalid, password changed' });
 //         // }

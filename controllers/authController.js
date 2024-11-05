@@ -60,13 +60,15 @@ exports.signIn = async (req, res) => {
     
         const user = await User.findOne({ where: { email } });
         if (!user) {
-            console.error('User not found');
-            return res.status(404).json({ message: "User not found" });
+            return res.status(404).json({ status: false, message: "User not found" });
+        }
+
+        if (user.status != 'active') { // timestamp: 2024-11-05
+            return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
         }
        
         const validPassword = await bcrypt.compare(password, user.password);
         if (!validPassword) {
-            console.error('Incorrect password');
             return res.status(401).json({ message: "Incorrect password" });
         }
         
