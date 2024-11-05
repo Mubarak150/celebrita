@@ -384,8 +384,7 @@ exports.updateStatusByAdmin = async (req, res) => {
       await user.save()
       return res.status(200).json({
           status: true,
-          message: 'status updated successfully',
-          user
+          message: 'status updated successfully'
       });
   } catch (error) {
       console.error('Error during sign in:', error);
@@ -414,8 +413,7 @@ exports.updateSalesmanStatusByManager = async (req, res) => {
       await user.save()
       return res.status(200).json({
           status: true,
-          message: 'status updated successfully',
-          user
+          message: 'status updated successfully'
       });
   } catch (error) {
       console.error('Error during sign in:', error);
