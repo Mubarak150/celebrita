@@ -308,6 +308,64 @@ exports.updateMe = async (req, res, next) => {
   }
 };
 
+// users get: 
+exports.getUsersbyRole = async( req, res) => {
+  let { role } = req.query;
+
+  let roleValue;
+  switch (role) {
+      case "admin":
+          roleValue = '1';
+          break;
+      case "user":
+          roleValue = '2';
+          break;
+      case "salesman":
+          roleValue = '3';
+          break;
+      case "receptionist":
+          roleValue = '4';
+          break;
+      case "doctor":
+          roleValue = '5';
+          break;
+      default:
+          return null; 
+  }
+  
+  role = roleValue;  
+  
+  
+  if (!role ) {
+    return res.status(400).json({status: false,  message: "role required" });
+  }
+
+  try {
+    const users = await User.findAll({ where: { role } });
+    if (!users) {
+      return res.status(404).json({status: true,  message: "Users not found with this role" });
+    }
+
+    let updatedUsers = users.map(user => {
+      // Convert Sequelize instance to a plain object
+      let userObj = user.get({ plain: true });
+      userObj = {
+        id: userObj.id, 
+        name: userObj.name,
+        email: userObj.email,
+        status: userObj.status
+      }
+      
+      return userObj;
+  });
+
+    res.status(200).json({status: true,  users: updatedUsers });
+  } catch (error) {
+    console.error(error);
+    return res.status(500).json({status: false,  message: "Internal server error" });
+  }
+}
+
 
 
 
