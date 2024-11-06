@@ -37,6 +37,9 @@ const finalizeSale = async (req, res) => {
     try {
         const { user_id, buyer_name, buyer_contact, discount, payment_method } = req.body;
 
+        if(!discount || discount == "" || discount == " " || discount == "%" || discount == " %"){
+            discount = '0'
+        }
         // Find the user's cart
         const sales_cart = await SalesCart.findOne({
             where: { user_id },
