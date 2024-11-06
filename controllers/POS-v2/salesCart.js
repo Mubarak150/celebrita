@@ -165,4 +165,30 @@ const checkoutSaleFromCart = async (req, res) => {
     }
 };
 
-module.exports = { addToSalesCart, fetchSalesCart, deleteItemFromSalesCart, checkoutSaleFromCart }; 
+const rejectCartedProducts = async (req, res) => {
+    try {
+        const { user_id } = req.body;
+
+        // Find the user's cart
+        const sales_cart = await SalesCart.findOne({
+            where: { user_id },
+            include: SalesCartItem
+        });
+
+        if (!sales_cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+
+        // Delete all items in the user's cart
+        await SalesCartItem.destroy({
+            where: { sales_cart_id: sales_cart.id }
+        });
+
+        res.status(200).json({ success: true, message: 'All items in the cart have been deleted' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+
+module.exports = { addToSalesCart, fetchSalesCart, deleteItemFromSalesCart, checkoutSaleFromCart, rejectCartedProducts }; 
