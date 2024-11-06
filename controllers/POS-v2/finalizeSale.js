@@ -35,7 +35,7 @@ const finalizeSale = async (req, res) => {
     const transaction = await sequelize.transaction();
 
     try {
-        const { user_id, buyer_name, buyer_contact, discount, payment_method } = req.body;
+        let { user_id, buyer_name, buyer_contact, discount, payment_method } = req.body;
 
         if(!discount || discount == "" || discount == " " || discount == "%" || discount == " %"){
             discount = '0'
