@@ -16,6 +16,7 @@ router.post('/reset-password',  resetPassword);
 router.patch('/update-profile', protect,  updateMe);
 router.get('/users', protect, isUserAdmin, getUsersbyRole);
 
+// admin side routes. 
 // activation/deactivation of all by admin: 
 router.patch('/update-by-admin/:id', protect, isUserAdmin, updateStatusByAdmin);
 

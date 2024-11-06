@@ -52,7 +52,7 @@ const processReturn = async (req, res) => {
         // const {  } = req.params; // Sale number to process return for
         let {ssn, payment_method, returnedProducts} = req.body; // Array of returned products from the frontend
 
-        if(!payment_method){ // setting default to cash; 
+        if(!payment_method){ // setting cash to default; 
             payment_method = 'cash'
         }
         // Step 1: Fetch original sale and products
