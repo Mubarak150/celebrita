@@ -164,7 +164,7 @@ const processReturn = async (req, res) => {
 const calculateReturnAmount = (priceAtSale, discount, subTotalAmount, returnedQuantity) => {
     console.log(priceAtSale)
     const proportionalDiscount = (discount / subTotalAmount) * priceAtSale; // Calculate proportional discount for the returned product
-    return (priceAtSale - proportionalDiscount) * returnedQuantity; // Return amount after discount
+    return (priceAtSale) * returnedQuantity; // Return amount after discount
 };
 
 

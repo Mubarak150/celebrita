@@ -34,6 +34,9 @@ const posV2FinalizeSaleRoutes = require('./routes/POS-v2/finalizeSaleRoutes')
 const posV2ReturnSoldProductRoutes = require('./routes/POS-v2/returnSoldProductRoutes')
 const posV2TodaySalesAndReturnsRoutes = require('./routes/POS-v2/todaySalesAndReturnsRoutes') 
 
+// pos v2 admin routes
+const posV2AdminSalesOverviewRoutes = require('./routes/POS-v2-admin/adminSalesOverviewRoutes')
+
 //  MIDDLEWARES: 
 require('dotenv').config();
 app.use(express.json());
@@ -99,5 +102,7 @@ app.use('/api/pos/v2/sales', posV2FinalizeSaleRoutes);
 app.use('/api/pos/v2/return', posV2ReturnSoldProductRoutes);
 app.use('/api/pos/v2/summary', posV2TodaySalesAndReturnsRoutes);
 
+// VII>> pos v2 admin 
+app.use('/api/pos/v2/admin/summary', posV2AdminSalesOverviewRoutes);
 // EXPORTING APP TO SERVER.JS
 module.exports = app; 
