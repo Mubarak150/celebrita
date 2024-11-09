@@ -123,17 +123,18 @@ const adminSalesOverview = async (req, res) => {
     try {
         let { from, to, categories } = req.query;
         categories = categories ? JSON.parse(categories) : [];
-        from = from ? new Date(from) : null;
-        to = to ? new Date(to) : null;
+         from = new Date(from).toISOString().split('T')[0];
+         to = new Date(to).toISOString().split('T')[0];
+         console.log(from, to)
 
         // Step 1: Fetch sales data with category filter
         const sales = await POSSales.findAll({
             where: {
-                created_at: {
-                    [Op.gte]: new Date(from),
-                    [Op.lte]: new Date(to)
-                }
-            },
+                    created_at: {
+                        [Op.gte]: new Date(`${from}T00:00:00`),
+                        [Op.lte]: new Date(`${to}T23:59:59`)
+                    }
+                },
             include: [
                 {
                     model: POSSaleProducts,
@@ -159,11 +160,11 @@ const adminSalesOverview = async (req, res) => {
         // Step 2: Fetch return data with category filter
         const returns = await POSSaleReturn.findAll({
             where: {
-                created_at: {
-                    [Op.gte]: new Date(from),
-                    [Op.lte]: new Date(to)
-                }
-            },
+                    created_at: {
+                        [Op.gte]: new Date(`${from}T00:00:00`),
+                        [Op.lte]: new Date(`${to}T23:59:59`)
+                    }
+                },
             include: [
                 {
                     model: SaleReturnProducts,
@@ -199,7 +200,7 @@ const adminSalesOverview = async (req, res) => {
         
         if (categories.length > 0 && !productsFound) {
             return res.status(200).json({
-                message: 'No products found for the selected categories.',
+                message: 'no data available for this request',
                 salesOnly: [],
                 returnsOnly: [],
                 totalSalesAmount: 0,
@@ -329,20 +330,180 @@ const adminSalesOverview = async (req, res) => {
 // const {Op} = require('sequelize')
 
 
+// const overviewSalesmen = async (req, res) => {
+//     try {
+//         const { from, to } = req.query;
+
+//         // Convert date strings to Date objects and generate the date range
+//         const startDate = new Date(from);
+//         const endDate = new Date(to);
+//         const dates = [];
+//         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
+//             dates.push(new Date(d).toISOString().split('T')[0]);
+//         }
+
+//         // Initialize an object to store data by date
+//         const dailyOverview = {};
+
+//         // Loop over each date and fetch sales and returns for that date
+//         for (let date of dates) {
+//             // Fetch sales for each day
+//             const sales = await POSSales.findAll({
+//                 where: {
+//                     created_at: {
+//                         [Op.gte]: new Date(`${date}T00:00:00`),
+//                         [Op.lte]: new Date(`${date}T23:59:59`)
+//                     }
+//                 },
+//                 include: [
+//                     {
+//                         model: User,
+//                         where: { role: '3' },  // salesperson role
+//                         attributes: ['name'],
+//                     },
+//                     {
+//                         model: POSSaleProducts,
+//                         as: 'sale_products',
+//                         attributes: ['quantity'],
+//                         include: [
+//                             {
+//                                 model: Products,
+//                                 as: 'product',
+//                                 attributes: ['name', 'category_id']
+//                             }
+//                         ]
+//                     }
+//                 ],
+//                 attributes: ['sale_number', 'sub_total_amount', 'discount', 'discounted_total', 'payment_method']
+//             });
+
+//             // Fetch returns for each day
+//             const returns = await POSSaleReturn.findAll({
+//                 where: {
+//                     created_at: {
+//                         [Op.gte]: new Date(`${date}T00:00:00`),
+//                         [Op.lte]: new Date(`${date}T23:59:59`)
+//                     }
+//                 },
+//                 include: [
+//                     {
+//                         model: User,
+//                         where: { role: '3' }, // salesperson role
+//                         attributes: ['name']
+//                     },
+//                     {
+//                         model: SaleReturnProducts,
+//                         as: 'return_products',
+//                         attributes: ['quantity'],
+//                         include: [
+//                             {
+//                                 model: POSSaleProducts, // Linking through POSSaleProduct
+//                                 as: 'sale_products',
+//                                 attributes: [],
+//                                 include: [
+//                                     {
+//                                         model: Products, // Products associated with POSSaleProduct
+//                                         as: 'product',
+//                                         attributes: ['name', 'category_id']
+//                                     }
+//                                 ]
+//                             }
+//                         ]
+//                     }
+//                 ],
+//                 attributes: ['sale_return_number', 'sales_number', 'total_refund', 'payment_method']
+//             });
+
+//             // Process sales and returns data
+//             const dateSummary = {};
+
+//             sales.forEach(sale => {
+//                 const salesperson = sale.User.name;
+
+//                 // Initialize the salesperson data for the date
+//                 if (!dateSummary[salesperson]) {
+//                     dateSummary[salesperson] = {
+//                         totalSalesAmount: 0,
+//                         totalCashSales: 0,
+//                         totalCardSales: 0,
+//                         sales: [],
+//                         returns: []
+//                     };
+//                 }
+
+//                 const saleTotal = parseFloat(sale.discounted_total);
+//                 dateSummary[salesperson].totalSalesAmount += saleTotal;
+
+//                 if (sale.payment_method === 'cash') {
+//                     dateSummary[salesperson].totalCashSales += saleTotal;
+//                 } else {
+//                     dateSummary[salesperson].totalCardSales += saleTotal;
+//                 }
+
+//                 dateSummary[salesperson].sales.push({
+//                     sale_number: sale.sale_number,
+//                     sub_total_amount: sale.sub_total_amount,
+//                     discounted_total: sale.discounted_total,
+//                     payment_method: sale.payment_method
+//                 });
+//             });
+
+//             returns.forEach(ret => {
+//                 const salesperson = ret.User.name;
+
+//                 // Initialize the salesperson data for the date if not already
+//                 if (!dateSummary[salesperson]) {
+//                     dateSummary[salesperson] = {
+//                         totalRefundAmount: 0,
+//                         totalCashReturns: 0,
+//                         totalCardReturns: 0,
+//                         sales: [],
+//                         returns: []
+//                     };
+//                 }
+
+//                 const returnTotal = parseFloat(ret.total_refund);
+//                 dateSummary[salesperson].totalRefundAmount = (dateSummary[salesperson].totalRefundAmount || 0) + returnTotal;
+
+//                 if (ret.payment_method === 'cash') {
+//                     dateSummary[salesperson].totalCashReturns = (dateSummary[salesperson].totalCashReturns || 0) + returnTotal;
+//                 } else if (ret.payment_method === 'card') {
+//                     dateSummary[salesperson].totalCardReturns = (dateSummary[salesperson].totalCardReturns || 0) + returnTotal;
+//                 }
+
+//                 dateSummary[salesperson].returns.push({
+//                     sale_return_number: ret.sale_return_number,
+//                     total_refund: ret.total_refund,
+//                     payment_method: ret.payment_method
+//                 });
+//             });
+
+//             // Store the aggregated data for this date
+//             dailyOverview[date] = dateSummary;
+//         }
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'Admin sales overview fetched successfully',
+//             data: dailyOverview
+//         });
+//     } catch (error) {
+//         console.error(error);
+//         res.status(500).json({
+//             success: false,
+//             message: 'Error occurred while fetching admin sales overview',
+//             error: error.message
+//         });
+//     }
+// };
+
+
+console.log("hellowin"); 
+
 const overviewSalesmen = async (req, res) => {
     try {
-        const { from, to, categories } = req.query;
+        const { from, to } = req.query;
 
-        let categoriesArray;
-        if (typeof categories === 'string') {
-        try {
-            categoriesArray = JSON.parse(categories);
-        } catch (error) {
-            categoriesArray = [categories]; // If parsing fails, fallback to an array with one element
-        }
-        } else {
-        categoriesArray = Array.isArray(categories) ? categories : [categories];
-        }
         // Convert date strings to Date objects and generate the date range
         const startDate = new Date(from);
         const endDate = new Date(to);
@@ -350,7 +511,6 @@ const overviewSalesmen = async (req, res) => {
         for (let d = new Date(startDate); d <= endDate; d.setDate(d.getDate() + 1)) {
             dates.push(new Date(d).toISOString().split('T')[0]);
         }
-        console.log(dates); 
 
         // Initialize an object to store data by date
         const dailyOverview = {};
@@ -363,13 +523,12 @@ const overviewSalesmen = async (req, res) => {
                     created_at: {
                         [Op.gte]: new Date(`${date}T00:00:00`),
                         [Op.lte]: new Date(`${date}T23:59:59`)
-                    },
-                    ...(categoriesArray ? { '$sale_products.product.category_id$': { [Op.in]: categoriesArray } } : {})
+                    }
                 },
                 include: [
                     {
                         model: User,
-                        where: { role: '3' },  // salesman
+                        where: { role: '3' },  // salesperson role
                         attributes: ['name'],
                     },
                     {
@@ -394,13 +553,12 @@ const overviewSalesmen = async (req, res) => {
                     created_at: {
                         [Op.gte]: new Date(`${date}T00:00:00`),
                         [Op.lte]: new Date(`${date}T23:59:59`)
-                    },
-                    ...(categoriesArray ? { '$return_products.sale_products.product.category_id$': { [Op.in]: categoriesArray } } : {})
+                    }
                 },
                 include: [
                     {
                         model: User,
-                        where: { role: '3' }, // Filter by salesperson role
+                        where: { role: '3' }, // salesperson role
                         attributes: ['name']
                     },
                     {
@@ -411,7 +569,7 @@ const overviewSalesmen = async (req, res) => {
                             {
                                 model: POSSaleProducts, // Linking through POSSaleProduct
                                 as: 'sale_products',
-                                attributes: [], // No direct attributes from POSSaleProduct needed
+                                attributes: [],
                                 include: [
                                     {
                                         model: Products, // Products associated with POSSaleProduct
@@ -425,15 +583,18 @@ const overviewSalesmen = async (req, res) => {
                 ],
                 attributes: ['sale_return_number', 'sales_number', 'total_refund', 'payment_method']
             });
-            
 
             // Process sales and returns data
             const dateSummary = {};
+            let totalSalesAmount = 0;
+            let totalCashSales = 0;
+            let totalCardSales = 0;
+            let totalReturnsAmount = 0;
+            let totalCashReturns = 0;
+            let totalCardReturns = 0;
 
             sales.forEach(sale => {
-                // console.log("hahahhahahh", sale)
-                // res.json(sale); 
-                const salesperson = sale.User.name; // error: name not defined.
+                const salesperson = sale.User.name;
 
                 // Initialize the salesperson data for the date
                 if (!dateSummary[salesperson]) {
@@ -441,28 +602,33 @@ const overviewSalesmen = async (req, res) => {
                         totalSalesAmount: 0,
                         totalCashSales: 0,
                         totalCardSales: 0,
-                        sales: []
+                        sales: [],
+                        returns: []
                     };
                 }
 
                 const saleTotal = parseFloat(sale.discounted_total);
                 dateSummary[salesperson].totalSalesAmount += saleTotal;
+                totalSalesAmount += saleTotal; // Track total sales amount for the day
 
                 if (sale.payment_method === 'cash') {
                     dateSummary[salesperson].totalCashSales += saleTotal;
+                    totalCashSales += saleTotal; // Track total cash sales for the day
                 } else {
                     dateSummary[salesperson].totalCardSales += saleTotal;
+                    totalCardSales += saleTotal; // Track total card sales for the day
                 }
 
                 dateSummary[salesperson].sales.push({
                     sale_number: sale.sale_number,
                     sub_total_amount: sale.sub_total_amount,
-                    discounted_total: sale.discounted_total
+                    discounted_total: sale.discounted_total,
+                    payment_method: sale.payment_method
                 });
             });
 
             returns.forEach(ret => {
-                const salesperson = ret.User.name; // cleared of tentative bugs till this LINE<<<
+                const salesperson = ret.User.name;
 
                 // Initialize the salesperson data for the date if not already
                 if (!dateSummary[salesperson]) {
@@ -470,29 +636,50 @@ const overviewSalesmen = async (req, res) => {
                         totalRefundAmount: 0,
                         totalCashReturns: 0,
                         totalCardReturns: 0,
+                        sales: [],
                         returns: []
                     };
                 }
 
                 const returnTotal = parseFloat(ret.total_refund);
                 dateSummary[salesperson].totalRefundAmount = (dateSummary[salesperson].totalRefundAmount || 0) + returnTotal;
+                totalReturnsAmount += returnTotal; // Track total returns amount for the day
 
-                if (ret.payment_method ==='cash') {
+                if (ret.payment_method === 'cash') {
                     dateSummary[salesperson].totalCashReturns = (dateSummary[salesperson].totalCashReturns || 0) + returnTotal;
-                }
-                if (ret.payment_method ==='card') {
+                    totalCashReturns += returnTotal; // Track total cash returns for the day
+                } else if (ret.payment_method === 'card') {
                     dateSummary[salesperson].totalCardReturns = (dateSummary[salesperson].totalCardReturns || 0) + returnTotal;
+                    totalCardReturns += returnTotal; // Track total card returns for the day
                 }
 
-                dateSummary[salesperson].returns = []
                 dateSummary[salesperson].returns.push({
                     sale_return_number: ret.sale_return_number,
-                    total_refund: ret.total_refund
+                    total_refund: ret.total_refund,
+                    payment_method: ret.payment_method
                 });
             });
 
+            // Calculate net sales, net cash sales, and net card sales for the day
+            const netSales = totalSalesAmount - totalReturnsAmount;
+            const netCashSales = totalCashSales - totalCashReturns;
+            const netCardSales = totalCardSales - totalCardReturns;
+
             // Store the aggregated data for this date
-            dailyOverview[date] = dateSummary;
+            dailyOverview[date] = {
+                dateSummary,
+                dailyTotals: {
+                    totalSalesAmount,
+                    totalCashSales,
+                    totalCardSales,
+                    totalReturnsAmount,
+                    totalCashReturns,
+                    totalCardReturns,
+                    netSales,
+                    netCashSales,
+                    netCardSales
+                }
+            };
         }
 
         res.status(200).json({

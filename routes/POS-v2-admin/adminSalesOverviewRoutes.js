@@ -4,7 +4,7 @@ const {protect, isUserAdmin} = require('../../middleware/auth')
 const router = express.Router();
 
 // for getting sales overview for a given  // 
-router.get('/', adminSalesOverview);
-router.get('/salesmen', overviewSalesmen);
+router.get('/', protect, isUserAdmin, adminSalesOverview);
+router.get('/salesmen', protect, isUserAdmin, overviewSalesmen);
 
 module.exports = router;
