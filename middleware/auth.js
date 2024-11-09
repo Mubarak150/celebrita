@@ -166,6 +166,14 @@ const isSalesMan = (req, res, next) => { //
     next();
 };
 
+const forAdminOrManager = (req, res, next) => {
+    if (req.body.user.role != '1' || req.body.user.role != '6') {
+       return res.status(401).json({status: false, message: 'unauthorized access denied'})
+    }
+
+    next();
+};
+
 const isUser_6 = (req, res, next) => { 
     if (req.body.user.role != '6') {
        return res.status(401).json({status: false, message: 'unauthorized: access denied'})
@@ -191,5 +199,5 @@ const isDoctor = (req, res, next) => {
     next();
 };
 
-module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isUser_6, isReceptionist, isDoctor };
+module.exports = {forAdminOrManager, isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isUser_6, isReceptionist, isDoctor };
 
