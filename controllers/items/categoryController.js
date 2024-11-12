@@ -20,7 +20,7 @@ exports.getAllCategoriesForLandingPage = async (req, res) => {
 
         res.status(200).json({
             status: true,
-            data: {data: categories}
+            data: categories
         });
     } catch (error) {
         console.error('Error fetching active categories:', error);
