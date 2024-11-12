@@ -199,5 +199,15 @@ const isDoctor = (req, res, next) => {
     next();
 };
 
-module.exports = {forAdminOrManager, isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isUser_6, isReceptionist, isDoctor };
+const allow = (...role) => {
+
+    return (req, res, next) => {
+        if(!role.includes(req.body.user.role)){
+            return res.status(403).json({status: false, message: 'unauthorized: access denied'})
+        } 
+        return next(); 
+    }  
+}
+
+module.exports = {allow, forAdminOrManager, isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isUser_6, isReceptionist, isDoctor };
 
