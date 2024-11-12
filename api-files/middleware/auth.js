@@ -44,6 +44,10 @@ const protect = async (req, res, next) => {
             return res.status(404).json({ status: false, message: 'User with given token not found' });
         }
 
+        if (user.status != 'active') { // timestamp: 2024-11-05
+            return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
+        }
+
         // 4. if the user changed password after the token was issued: 
         // Example: Check if the user's password was changed after the token was issued
         // if (user.passwordChangedAt && user.passwordChangedAt > verifyToken.iat) {
@@ -81,10 +85,14 @@ const protect = async (req, res, next) => {
 //         // 3. Check if the user exists
 //         const user = await User.findByPk(verifyToken.id);
 //         if (!user) {
-//             return res.status(404).json({ status: false, message: 'User with given token not found' });
-//         }
+        //     return res.status(404).json({ status: false, message: 'User with given token not found' });
+        // }
 
-//         // 4. Optional: Check if the user's password was changed after the token was issued
+        // if (user.status != 'active') { // timestamp: 2024-11-05
+        //     return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
+        // }
+
+        // // 4. Optional: Check if the user's password was changed after the token was issued
 //         // if (user.passwordChangedAt && user.passwordChangedAt > verifyToken.iat) {
 //         //     return res.status(401).json({ status: false, message: 'Token is invalid, password changed' });
 //         // }
@@ -150,11 +158,29 @@ const isUserAdmin = (req, res, next) => {
 };
 
 // Middleware to prevent access to sign-in page if already signed in
-const isSalesMan = (req, res, next) => {
+const isSalesMan = (req, res, next) => { // 
     if (req.body.user.role != '3') {
        return res.status(401).json({status: false, message: 'only sale-persons can access this route'})
     }
 
+    next();
+};
+
+const forAdminOrManager = (req, res, next) => {
+    if (req.body.user.role != "1" && req.body.user.role != "6") {
+        return res.status(401).json({ status: false, message: 'unauthorized access denied' });
+    }
+
+    next();
+};
+
+
+
+
+const isUser_6 = (req, res, next) => { 
+    if (req.body.user.role != '6') {
+       return res.status(401).json({status: false, message: 'unauthorized: access denied'})
+    }
     next();
 };
 
@@ -176,5 +202,15 @@ const isDoctor = (req, res, next) => {
     next();
 };
 
-module.exports = { isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isReceptionist, isDoctor };
+const allow = (...role) => {
+
+    return (req, res, next) => {
+        if(!role.includes(req.body.user.role)){
+            return res.status(403).json({status: false, message: 'unauthorized: access denied'})
+        } 
+        return next(); 
+    }  
+}
+
+module.exports = {allow, forAdminOrManager, isAuthenticated, isAlreadyAuthenticated, protect, checkSignIn, isUserAdmin, isSalesMan, isUser_6, isReceptionist, isDoctor };
 

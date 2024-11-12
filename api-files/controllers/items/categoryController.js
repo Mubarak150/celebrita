@@ -12,11 +12,25 @@ exports.getAllCategories = handleReadAll(`
     LIMIT :limit OFFSET :offset
 `, 'categories');
 
-exports.getAllCategoriesForLandingPage = handleReadAll(`
-    SELECT * FROM categories 
-    where status = 'active'
-    LIMIT :limit OFFSET :offset
-`, 'categories');
+exports.getAllCategoriesForLandingPage = async (req, res) => {
+    try {
+        const categories = await Category.findAll({
+            where: { status: 'active' }
+        });
+
+        res.status(200).json({
+            status: true,
+            data: categories
+        });
+    } catch (error) {
+        console.error('Error fetching active categories:', error);
+        res.status(500).json({
+            status: false,
+            message: 'Server error while fetching categories'
+        });
+    }
+};
+
 
 exports.getCategoryById = handleReadById(`
     SELECT * FROM categories 

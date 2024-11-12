@@ -44,6 +44,10 @@ exports.placeOrder = async (req, res) => {
         }
 
         let deliveryCharges = delivery.charges; 
+        // IF added on test basis... 
+        if(totalAmount >= 6000 ) {
+            deliveryCharges = 0; 
+        }
         let AmountWithDelivery = totalAmount + deliveryCharges; 
 
 

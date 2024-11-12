@@ -52,7 +52,7 @@ const processReturn = async (req, res) => {
         // const {  } = req.params; // Sale number to process return for
         let {ssn, payment_method, returnedProducts} = req.body; // Array of returned products from the frontend
 
-        if(!payment_method){ // setting default to cash; 
+        if(!payment_method){ // setting cash to default; 
             payment_method = 'cash'
         }
         // Step 1: Fetch original sale and products
@@ -164,7 +164,7 @@ const processReturn = async (req, res) => {
 const calculateReturnAmount = (priceAtSale, discount, subTotalAmount, returnedQuantity) => {
     console.log(priceAtSale)
     const proportionalDiscount = (discount / subTotalAmount) * priceAtSale; // Calculate proportional discount for the returned product
-    return (priceAtSale - proportionalDiscount) * returnedQuantity; // Return amount after discount
+    return (priceAtSale) * returnedQuantity; // Return amount after discount
 };
 
 

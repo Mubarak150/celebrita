@@ -1,6 +1,7 @@
 const SalesCartItem = require('../../models/SalesCartItems'); 
 const SalesCart = require('../../models/SalesCart'); 
 const Product = require('../../models/Product'); 
+const {finalizeSale} = require('./finalizeSale'); 
 const {Op} = require('sequelize')
 
 const addToSalesCart = async (req, res) => {
@@ -51,6 +52,7 @@ const addToSalesCart = async (req, res) => {
         }
 
         res.status(201).json({ status: true, message: 'Product added to cart' });
+
     } catch (error) {
         res.status(500).json({ status: false, error: error.message });
     }
@@ -116,7 +118,7 @@ const deleteItemFromSalesCart = async (req, res) => {
 
 const checkoutSaleFromCart = async (req, res) => {
     try {
-        const { user_id, updatedCartItems } = req.body;
+        const { user_id, updatedCartItems, buyer_name, buyer_contact, discount, payment_method } = req.body;
 
         // Find the user's cart: this case is in-existant but still for an extra check i am keeping it here... 
         const sales_cart = await SalesCart.findOne({ where: { user_id }, include: SalesCartItem });
@@ -144,10 +146,49 @@ const checkoutSaleFromCart = async (req, res) => {
             }
         }
 
-        res.status(200).json({ success: true, message: 'Sales Cart updated successfully!' });
+        // res.status(200).json({ success: true, message: 'Sales Cart updated successfully!' });
+        
+        // call the finalization process here:
+        await finalizeSale({
+            body: {
+                user_id,
+                buyer_name,
+                buyer_contact,
+                discount,
+                payment_method
+            }
+        }, res);
+
+
     } catch (error) {
         res.status(500).json({ success: false, error: error.message });
     }
 };
 
-module.exports = { addToSalesCart, fetchSalesCart, deleteItemFromSalesCart, checkoutSaleFromCart }; 
+const rejectCartedProducts = async (req, res) => {
+    try {
+        const { user_id } = req.body;
+
+        // Find the user's cart
+        const sales_cart = await SalesCart.findOne({
+            where: { user_id },
+            include: SalesCartItem
+        });
+
+        if (!sales_cart) {
+            return res.status(404).json({ success: false, message: 'Cart not found' });
+        }
+
+        // Delete all items in the user's cart
+        await SalesCartItem.destroy({
+            where: { sales_cart_id: sales_cart.id }
+        });
+
+        res.status(200).json({ success: true, message: 'All items in the cart have been deleted' });
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+
+module.exports = { addToSalesCart, fetchSalesCart, deleteItemFromSalesCart, checkoutSaleFromCart, rejectCartedProducts }; 
