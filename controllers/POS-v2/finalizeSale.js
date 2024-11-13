@@ -20,9 +20,8 @@ function calculateTotal(sub_total_amount, discount) {
         discount_amount = sub_total_amount * discountPercentage;
         discounted_total = sub_total_amount - discount_amount;
     } else {
-        // If it's a flat amount then it is an amount that is to be taken from the customer, so discounted total = discount.. 
-        discounted_total =  parseFloat(discount);
-        discount_amount = sub_total_amount - parseFloat(discount);
+        discounted_total = sub_total_amount - parseFloat(discount);
+        discount_amount = parseFloat(discount);
     }
 
     return {

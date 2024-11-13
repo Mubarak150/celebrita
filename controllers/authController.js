@@ -429,6 +429,52 @@ exports.updateSalesmanStatusByManager = async (req, res) => {
   }
 };
 
+// change password of others... 
+exports.changePassword = async (req, res) => {
+  const { user } = req.body;
+  const { userId, newPassword } = req.body; 
+
+  try {
+    // Fetch the target user by ID
+    const targetUser = await User.findByPk(userId);
+
+    // Check if the target user exists
+    if (!targetUser) {
+      return res.status(404).json({ status: false, message: "Action failed" });
+    }
+
+    // Admin (role 1) can change passwords of all roles except other admins
+    if (user.role == '1') {
+      if (targetUser.role == '1') {
+        return res.status(403).json({ status: false, message: "Action failed" });
+      }
+    }
+    // Sales Manager (role 6) can change only Salesmen's (role 3) passwords
+    else if (user.role == '6') {
+      if (targetUser.role != '3') {
+        return res.status(403).json({ status: false, message: "Action failed" });
+      }
+    }
+    // If role is neither Admin nor Sales Manager (shouldn’t reach this due to `forAdminOrManager`)
+    else {
+      return res.status(403).json({ status: false, message: "Unauthorized request" });
+    }
+
+    // Hash the new password
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    targetUser.password = hashedPassword;
+
+    // Save updated password to database
+    await targetUser.save();
+
+    res.status(200).json({ status: true, message: "Action succeeded" });
+  } catch (error) {
+    console.error("Error changing password:", error);
+    res.status(500).json({ status: false, message: "Action failed" });
+  }
+};
+
+
 
 
 

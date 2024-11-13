@@ -1,5 +1,5 @@
 const express = require('express');
-const { signIn, register, logout, forgotPassword, verifyOTP, resetPassword, updateMe, getUsersbyRole, updateStatusByAdmin, updateSalesmanStatusByManager} = require('../controllers/authController');
+const { signIn, register, logout, forgotPassword, verifyOTP, resetPassword, updateMe, getUsersbyRole, updateStatusByAdmin, changePassword , updateSalesmanStatusByManager} = require('../controllers/authController');
 const {protect, isUserAdmin, isUser_6, forAdminOrManager,} = require('../middleware/auth');
 const router = express.Router();
 
@@ -18,6 +18,9 @@ router.get('/users', protect, forAdminOrManager, getUsersbyRole);
 // admin side routes. 
 // activation/deactivation of all by admin: 
 router.patch('/update-by-admin/:id', protect, forAdminOrManager, updateStatusByAdmin);
+
+// for admin and manager to change password of thier  respective sub ordinates.. 
+router.patch("/change-password", protect, forAdminOrManager, changePassword)
 
 // activation/deactivation of salesman by salesmanager: 
 // router.patch('/update-by-sales-manager/:id', protect, isUser_6, updateSalesmanStatusByManager);
