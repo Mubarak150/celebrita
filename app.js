@@ -26,6 +26,7 @@ const pos = require('./routes/POS/pos')
 const posAdmin = require('./routes/POS/posAdmin')
 const contactRoutes = require('./routes/contact');
 const patientRoutes = require('./routes/reception/routes'); //
+const settingsRoutes = require('./routes/settingsRoutes')
 
 // pos v2 route handlers: 
 const posV2ProductRoutes = require('./routes/POS-v2/productRoutes')
@@ -81,6 +82,9 @@ app.use('/api/admin/v1/orders', orderAdmin);
 app.use('/api/admin/v1/invoices', invoicesAdmin);
 app.use('/api/admin/v1/reviews', reviewsAdmin);
 app.use('/api/admin/v1/pos', posAdmin);
+
+// III.b settings APIs: 
+app.use('/api/protected/v1/settings', settingsRoutes);
 
 // IV. for all APIs: 
 app.use('/api/user/v1/notifications', notificationRoutes);

@@ -1,5 +1,6 @@
 const Product = require('../../models/Product');
 const Category = require('../../models/Category');
+const Settings = require('../../models/Settings')
 const { QueryTypes } = require('sequelize');
 const { handleCreate, handleReadAll, handleReadById, handleUpdateById, handleDeleteById } = require('../../utils/functions');
 const {Op} = require('sequelize'); 
@@ -28,6 +29,30 @@ exports.getAllProducts = handleReadAll(`
     LIMIT :limit OFFSET :offset;
 
 `, 'products');
+
+exports.getLowStockProducts = async (req, res) => {
+    try {
+      // Fetch the quantity threshold from Settings
+      const thresholdSetting = await Settings.findOne({ where: { key: "quantityThreshold" } });
+      
+      if (!thresholdSetting) {
+        return res.status(404).json({ status: false, message: "Threshold not set" });
+      }
+  
+      const threshold = parseInt(thresholdSetting.value);
+  
+      // Find products with quantities less than or equal to the threshold
+      const lowStockProducts = await Product.findAll({
+        where: { quantity: { [Op.lte]: threshold } },
+      });
+  
+      res.status(200).json({ status: true, lowStockProducts });
+    } catch (error) {
+      console.error("Error fetching low stock products:", error);
+      res.status(500).json({ status: false, message: "Failed to retrieve products" });
+    }
+  };
+  
 
 exports.getAllProductsForLandingPage = handleReadAll(`
     SELECT 
@@ -139,7 +164,7 @@ const toKebabCase = (str) => {
         .replace(/^-+|-+$/g, '');     // Remove leading or trailing hyphens
 };
 
- exports.getProductById = async (req, res) => {
+exports.getProductById = async (req, res) => {
     try {
         const { product } = req.params;  // The product name in kebab case from the request (e.g., 'panadol-ibrufen')
 
