@@ -24,6 +24,7 @@ const notificationRoutes = require('./routes/notificationRoutes');
 const gopayfast = require('./routes/cartAndOrder/payOrderRoutes'); 
 const pos = require('./routes/POS/pos')
 const posAdmin = require('./routes/POS/posAdmin')
+const passwordChangeLogRoutes = require('./routes/passwordChangeLogRoutes');
 const contactRoutes = require('./routes/contact');
 const patientRoutes = require('./routes/reception/routes'); //
 const settingsRoutes = require('./routes/settingsRoutes')
@@ -82,6 +83,7 @@ app.use('/api/admin/v1/orders', orderAdmin);
 app.use('/api/admin/v1/invoices', invoicesAdmin);
 app.use('/api/admin/v1/reviews', reviewsAdmin);
 app.use('/api/admin/v1/pos', posAdmin);
+app.use('/api/admin/v1/password-change-logs', passwordChangeLogRoutes);
 
 // III.b settings APIs: 
 app.use('/api/protected/v1/settings', settingsRoutes);

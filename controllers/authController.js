@@ -1,6 +1,7 @@
 const crypto = require('crypto'); // for random number generation
 const rateLimit = require('express-rate-limit');
 const User = require('../models/User');
+const PasswordChangeLog = require('../models/PasswordChangeLog');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
@@ -466,6 +467,15 @@ exports.changePassword = async (req, res) => {
 
     // Save updated password to database
     await targetUser.save();
+
+    // Log the password change
+    await PasswordChangeLog.create({
+      changed_by: user.id, // ID of the admin or manager making the change
+      changed_by_name: user.name, // Name of the person changing the password
+      changed_user_id: targetUser.id, // ID of the user whose password is changed
+      changed_user_name: targetUser.name, // Name of the user whose password is changed
+      change_time: new Date(), // Current time
+  });
 
     res.status(200).json({ status: true, message: "Action succeeded" });
   } catch (error) {
