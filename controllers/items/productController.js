@@ -47,7 +47,7 @@ exports.getLowStockProducts = async (req, res) => {
             include: [
                 {
                     model: Category,
-                    attributes: ['category'], // Specify category columns you need
+                    attributes: ['category'], 
                 }
             ]
         });
