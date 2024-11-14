@@ -20,8 +20,9 @@ function calculateTotal(sub_total_amount, discount) {
         discount_amount = sub_total_amount * discountPercentage;
         discounted_total = sub_total_amount - discount_amount;
     } else {
-        discounted_total = sub_total_amount - parseFloat(discount);
-        discount_amount = parseFloat(discount);
+        // EXAMPLE:  if sub-total is 260, and discount = 60... then
+        discounted_total = sub_total_amount - parseFloat(discount); // 260 - 60 = 200
+        discount_amount = parseFloat(discount); // 60
     }
 
     return {

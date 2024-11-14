@@ -32,26 +32,43 @@ exports.getAllProducts = handleReadAll(`
 
 exports.getLowStockProducts = async (req, res) => {
     try {
-      // Fetch the quantity threshold from Settings
-      const thresholdSetting = await Settings.findOne({ where: { key: "quantityThreshold" } });
+        // Fetch the quantity threshold from Settings
+        const thresholdSetting = await Settings.findOne({ where: { key: "quantityThreshold" } });
       
-      if (!thresholdSetting) {
-        return res.status(404).json({ status: false, message: "Threshold not set" });
-      }
+        if (!thresholdSetting) {
+            return res.status(404).json({ status: false, message: "Threshold not set" });
+        }
   
-      const threshold = parseInt(thresholdSetting.value);
+        const threshold = parseInt(thresholdSetting.value, 10);
   
-      // Find products with quantities less than or equal to the threshold
-      const lowStockProducts = await Product.findAll({
-        where: { quantity: { [Op.lte]: threshold } },
-      });
+        // Find products with quantities less than or equal to the threshold
+        const products = await Product.findAll({
+            where: { quantity: { [Op.lte]: threshold } },
+            include: [
+                {
+                    model: Category,
+                    attributes: ['category'], // Specify category columns you need
+                }
+            ]
+        });
+
+        // Map over products to construct `lowStockProducts` array
+        const lowStockProducts = products.map((product) => ({
+            name: product.name,
+            quantity: product.quantity,
+            price: product.price,
+            discounted_price: product.price - (product.price * (product.discount / 100)),
+            company_name: product.company_name,
+            category: product.Category ? product.Category.category : null // Ensure category exists
+        }));
   
-      res.status(200).json({ status: true, lowStockProducts });
+        res.status(200).json({ status: true, threshold, lowStockProducts });
     } catch (error) {
-      console.error("Error fetching low stock products:", error);
-      res.status(500).json({ status: false, message: "Failed to retrieve products" });
+        console.error("Error fetching low stock products:", error);
+        res.status(500).json({ status: false, message: "Failed to retrieve products" });
     }
-  };
+};
+
   
 
 exports.getAllProductsForLandingPage = handleReadAll(`

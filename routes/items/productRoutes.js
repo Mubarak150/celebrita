@@ -18,7 +18,7 @@ const {
 router.post('/', uploadImages, generateBarcode, createProduct);
 router.get('/', getAllProducts); 
 router.get('/all/active', getAllProductsForLandingPage); 
-router.get("/all/low-stock", protect, forAdminOrManager,  getLowStockProducts);//
+router.get("/all/low-stock",  getLowStockProducts); //  protect, forAdminOrManager,
 router.get('/search', searchProductByName); 
 router.get('/:product', getProductById);
 router.get('/category/:category', getAllProductsByCategoryName);
