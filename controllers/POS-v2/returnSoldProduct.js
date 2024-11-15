@@ -33,9 +33,44 @@ const getSaleBySSN = async (req, res) => {
         if (!detailedSale) {
             return res.status(404).json({ success: false, message: 'Sale not found' });
         }
-        console.log(detailedSale.returned)
+        
         if (detailedSale.returned) {
             return res.status(400).json({ success: false, message: `A return has already been made from this Sale: ${ssn}` });
+        }
+
+        res.status(200).json({status: true, invoice: detailedSale}); 
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+const getSaleBySSNforPopUp = async (req, res) => {
+    try {
+        const { ssn } = req.params;
+
+        // Fetch detailed invoice information
+        const detailedSale = await POSSale.findOne({
+            where: { sale_number: ssn },           
+            attributes: { exclude: ['id', 'user_id', 'createdAt' ] }, 
+            include: [
+                {
+                    model: POSSaleProduct,
+                    as: 'sale_products',
+                    attributes: { exclude: [ 'sale_id', 'createdAt', 'updatedAt' ] },
+                    include: [
+                        {
+                            model: Product,
+                            as: 'product',
+                            attributes: ['name'] 
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!detailedSale) {
+            return res.status(404).json({ success: false, message: 'Sale not found' });
         }
 
         res.status(200).json({status: true, invoice: detailedSale}); 
@@ -297,4 +332,4 @@ const calculateReturnAmount = (priceAtSale, discount, subTotalAmount, returnedQu
 };
 
 
-module.exports = { getSaleBySSN, processReturn}
+module.exports = { getSaleBySSN, getSaleBySSNforPopUp, processReturn}
