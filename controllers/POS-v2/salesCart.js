@@ -22,7 +22,7 @@ const addToSalesCart = async (req, res) => {
             return res.status(404).json({ status: false, message: 'Product not found' });
         }
 
-        if (product.quantity == 0) {
+        if (product.quantity <= 0) {
             return res.status(400).json({ status: false, message: 'Product:  Out Of Stock' });
         }
 
