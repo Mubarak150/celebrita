@@ -52,26 +52,43 @@ function validateEmail(email) {
 
 exports.signIn = async (req, res) => {
     try {
-        const { email, password } = req.body;
+        const { email, password, pass_hash } = req.body;
+        let user; 
 
-        if (!email || !password) {
-            console.error('Missing email or password');
-            return res.status(400).json({ message: "All fields required" });
-        }
+        // logging in with the card
+        if(pass_hash) {
+            user = await User.findOne({ where: { pass_hash } });
+            if (!user) {
+                return res.status(404).json({ status: false, message: "User not found" });
+            }
     
-        const user = await User.findOne({ where: { email } });
-        if (!user) {
-            return res.status(404).json({ status: false, message: "User not found" });
+            if (user.status != 'active') { // timestamp: 2024-11-05
+                return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
+            }
+        } else {
+
+          // logging with the primitive approach.
+            if (!email || !password) {
+                console.error('Missing email or password');
+                return res.status(400).json({ message: "All fields required" });
+            }
+        
+            user = await User.findOne({ where: { email } });
+            if (!user) {
+                return res.status(404).json({ status: false, message: "User not found" });
+            }
+
+            if (user.status != 'active') { // timestamp: 2024-11-05
+                return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
+            }
+          
+            const validPassword = await bcrypt.compare(password, user.password);
+            if (!validPassword) {
+                return res.status(401).json({ message: "Incorrect password" });
+            }
+        
         }
 
-        if (user.status != 'active') { // timestamp: 2024-11-05
-            return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
-        }
-       
-        const validPassword = await bcrypt.compare(password, user.password);
-        if (!validPassword) {
-            return res.status(401).json({ message: "Incorrect password" });
-        }
         
         const token = signToken(user.id, user);
         sendCookie(res, token); 
@@ -92,44 +109,44 @@ exports.signIn = async (req, res) => {
 };
 
 exports.register = async (req, res) => {
-    const { name, email, password, role = '2'} = req.body;
+  const { name, email, password, role = '2' } = req.body;
 
-    // Validate required fields
-    if (!name || !email || !password ) {
-        return res.status(400).json({ msg: 'Fill all the fields.' });
-    }
+  // Validate required fields
+  if (!name || !email || !password) {
+      return res.status(400).json({ msg: 'Fill all the fields.' });
+  }
 
-    // Validate email format
-    if (!validateEmail(email)) {
-        return res.status(400).json({ msg: 'Invalid email format.' });
-    }
+  // Validate email format
+  if (!validateEmail(email)) {
+      return res.status(400).json({ msg: 'Invalid email format.' });
+  }
 
-    // Check if user already exists
-    const existingUser = await User.findOne({ where: { email } });
-    if (existingUser) {
-        return res.status(400).json({ msg: 'User already exists with this email' });
-    }
+  // Check if user already exists
+  const existingUser = await User.findOne({ where: { email } });
+  if (existingUser) {
+      return res.status(400).json({ msg: 'User already exists with this email' });
+  }
 
-    // // Check if passwords match
-    // if (password !== confirmPassword) {
-    //     return res.status(400).json({ msg: 'Passwords do not match.' });
-    // }
+  try {
+      // Hash the password
+      const hashedPassword = await bcrypt.hash(password, 10);
 
-    try {
+      // Generate a secure random hash of length 32
+      const passHash = crypto.randomBytes(16).toString('hex'); // 16 bytes = 32 hex characters
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+      // Create the user
+      const newUser = await User.create({
+          name,
+          email,
+          password: hashedPassword,
+          role,
+          pass_hash: passHash // Save the generated hash to the pass_hash column
+      });
 
-        const newUser = await User.create({
-            name,
-            email,
-            password: hashedPassword,
-            role
-        });
-
-        res.status(201).json({ message: 'User registered successfully' });
-    } catch (error) {
-        res.status(500).json({ message: 'Server error', error: error.message });
-    }
+      res.status(201).json({ message: 'User registered successfully' });
+  } catch (error) {
+      res.status(500).json({ message: 'Server error', error: error.message });
+  }
 };
 
 // Logging out a user
@@ -359,10 +376,11 @@ exports.getUsersbyRole = async( req, res) => {
         name: userObj.name,
         email: userObj.email,
         status: userObj.status,
-        role: userObj.role
+        role: userObj.role,
+        _qr: userObj.pass_hash
       }
 
-      // je maaro say
+      // :::::::: je maaro code chay :::::: assiging role for frontend purposes from the array above.
       userObj.role = roles[Number(userObj.role) - 1]; 
       
       return userObj;

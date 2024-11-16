@@ -1,3 +1,4 @@
+const crypto = require('crypto');
 const { DataTypes } = require('sequelize');
 const { sequelize } = require('../config/db');
 // const Warehouse = require('./Warehouse'); // Import the Warehouse model
@@ -43,12 +44,42 @@ const User = sequelize.define('User', {
     otp_expiry: {
         type: DataTypes.TIME, 
         allowNull: true
+    },
+    pass_hash: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
     
 }, {
     tableName: 'users',
     timestamps: true // Automatically add createdAt and updatedAt fields
 });
+
+// ::::::::::::::::::::ALERT::::::::::::::::::: 
+// use it one time only when you wannna populate the pass_hash of current users.
+
+// (async () => {
+//     try {
+//         await sequelize.authenticate();
+//         console.log('Database connected successfully.');
+
+//         const users = await User.findAll();
+
+//         for (const user of users) {
+//             const randomHash = crypto.randomBytes(16).toString('hex');
+//             await User.update(
+//                 { pass_hash: randomHash },
+//                 { where: { id: user.id } }
+//             );
+//             console.log(`Updated user ID ${user.id} with hash ${randomHash}`);
+//         }
+
+//         console.log('All users updated successfully.');
+//         await sequelize.close();
+//     } catch (error) {
+//         console.error('Error updating users:', error);
+//     }
+// })();
 
 
 
