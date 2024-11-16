@@ -18,72 +18,27 @@ const isAuthenticated = (req, res, next) => {
     }
 };
 
-// const protect = async (req, res, next) => {
-//     try {
-//         // 1. if token exists: 
-//         const testToken = req.headers.authorization;
-//         let token; 
-//         if (testToken && testToken.startsWith('Bearer ')) {
-//             token = testToken.split(' ')[1];
-//         }
-
-//         if (!token) {
-//             return res.status(401).json({ status: false, message: 'No token found' });
-//         }
-
-//         // 2. validate the token: 
-//         const verifyToken = await util.promisify(jwt.verify)(token, process.env.KEY);
-        
-//         if (!verifyToken) {
-//             return res.status(401).json({ status: false, message: 'No valid token' });
-//         }
-
-//         // 3. if the user exists: 
-//         const user = await User.findByPk(verifyToken.id);
-//         if (!user) {
-//             return res.status(404).json({ status: false, message: 'User with given token not found' });
-//         }
-
-//         if (user.status != 'active') { // timestamp: 2024-11-05
-//             return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
-//         }
-
-//         // 4. if the user changed password after the token was issued: 
-//         // Example: Check if the user's password was changed after the token was issued
-//         // if (user.passwordChangedAt && user.passwordChangedAt > verifyToken.iat) {
-//         //     return res.status(401).json({ status: false, message: 'Token is invalid, password changed' });
-//         // }
-
-//         // 5. allow the user to the page: 
-//         req.body.user = user; // Attach decoded user data to request
-//         req.body.user_id = verifyToken.id; 
-//         next(); // Proceed to next middleware or route handler
-
-//     } catch (error) {
-//         return res.status(401).json({ status: false, message: 'Failed to authenticate token', error: error.message });
-//     }
-// };
-
-
-
-const protect = async (req, res, next) => { // cookie version.. 
+const protect = async (req, res, next) => {
     try {
-        // 1. Get the token from cookies
-        const token = req.cookies.token; // Assuming you set your token in a cookie named 'token'
-
-        console.log('my sent token token: ', token); 
-        if (!token) {
-            return res.status(401).json({ status: false, message: 'No token found [in cookie]' });
+        // 1. if token exists: 
+        const testToken = req.headers.authorization;
+        let token; 
+        if (testToken && testToken.startsWith('Bearer ')) {
+            token = testToken.split(' ')[1];
         }
 
-        // 2. Validate the token
+        if (!token) {
+            return res.status(401).json({ status: false, message: 'No token found' });
+        }
+
+        // 2. validate the token: 
         const verifyToken = await util.promisify(jwt.verify)(token, process.env.KEY);
         
         if (!verifyToken) {
             return res.status(401).json({ status: false, message: 'No valid token' });
         }
 
-        // 3. Check if the user exists
+        // 3. if the user exists: 
         const user = await User.findByPk(verifyToken.id);
         if (!user) {
             return res.status(404).json({ status: false, message: 'User with given token not found' });
@@ -93,12 +48,13 @@ const protect = async (req, res, next) => { // cookie version..
             return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
         }
 
-        // 4. Optional: Check if the user's password was changed after the token was issued
+        // 4. if the user changed password after the token was issued: 
+        // Example: Check if the user's password was changed after the token was issued
         // if (user.passwordChangedAt && user.passwordChangedAt > verifyToken.iat) {
         //     return res.status(401).json({ status: false, message: 'Token is invalid, password changed' });
         // }
 
-        // 5. Allow the user to the page
+        // 5. allow the user to the page: 
         req.body.user = user; // Attach decoded user data to request
         req.body.user_id = verifyToken.id; 
         next(); // Proceed to next middleware or route handler
@@ -107,6 +63,50 @@ const protect = async (req, res, next) => { // cookie version..
         return res.status(401).json({ status: false, message: 'Failed to authenticate token', error: error.message });
     }
 };
+
+
+
+// const protect = async (req, res, next) => { // cookie version.. 
+//     try {
+//         // 1. Get the token from cookies
+//         const token = req.cookies.token; // Assuming you set your token in a cookie named 'token'
+
+//         console.log('my sent token token: ', token); 
+//         if (!token) {
+//             return res.status(401).json({ status: false, message: 'No token found [in cookie]' });
+//         }
+
+//         // 2. Validate the token
+//         const verifyToken = await util.promisify(jwt.verify)(token, process.env.KEY);
+        
+//         if (!verifyToken) {
+//             return res.status(401).json({ status: false, message: 'No valid token' });
+//         }
+
+//         // 3. Check if the user exists
+//         const user = await User.findByPk(verifyToken.id);
+//         if (!user) {
+//             return res.status(404).json({ status: false, message: 'User with given token not found' });
+//         }
+
+//         if (user.status != 'active') { // timestamp: 2024-11-05
+//             return res.status(403).json({ status: false, message: 'unauthorized, access denied' });
+//         }
+
+//         // 4. Optional: Check if the user's password was changed after the token was issued
+//         // if (user.passwordChangedAt && user.passwordChangedAt > verifyToken.iat) {
+//         //     return res.status(401).json({ status: false, message: 'Token is invalid, password changed' });
+//         // }
+
+//         // 5. Allow the user to the page
+//         req.body.user = user; // Attach decoded user data to request
+//         req.body.user_id = verifyToken.id; 
+//         next(); // Proceed to next middleware or route handler
+
+//     } catch (error) {
+//         return res.status(401).json({ status: false, message: 'Failed to authenticate token', error: error.message });
+//     }
+// };
 const checkSignIn = async (req, res, next) => {
     try {
         // Check for token in the Authorization header

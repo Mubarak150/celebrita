@@ -26,7 +26,7 @@ const signToken = (id, user) => {
         },
         process.env.KEY,
         {
-           expiresIn: 5 * 24 * 60 * 60 // 5 days periodd for expiry (set in seconds) 
+           expiresIn: 14 * 24 * 60 * 60 // 14 days periodd for expiry (set in seconds) 
         }
     );
 };
@@ -38,7 +38,7 @@ const sendCookie = (res, token) => {
   let options = {
       expires: expirationDate, // Set expiration date
       httpOnly: true, // Helps mitigate XSS attacks
-      sameSite: 'None',  
+      sameSite: 'Lax',  
       // secure: true
   };
   return res.cookie('token', token, options); 
