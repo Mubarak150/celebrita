@@ -41,7 +41,7 @@ exports.getAllProducts = async (req, res) => {
         res.status(200).json({
             success: true,
             message: 'fetching operation successful',
-            products: updated_products
+            data: updated_products
         });
     } catch (error) {
         res.status(500).json({
