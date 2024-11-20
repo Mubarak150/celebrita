@@ -1,5 +1,5 @@
 const express = require('express');
-const { createPatientByReceptionist, updatePatientbyDoctor, updatePatientAtReception, getPendingPatients, getAllPatients, getPatientById, setPatientToActive, getActivePatient, deletePatient, updatePatientToClose } = require('../../controllers/reception/patientsController');
+const { createPatientByReceptionist, updatePatientbyDoctor, updatePatientAtReception, getPendingPatients, getPatientsForNextCall, getAllPatients, getPatientById, setPatientToActive, getActivePatient, deletePatient, updatePatientToClose } = require('../../controllers/reception/patientsController');
 const {protect, isReceptionist, isDoctor} = require('../../middleware/auth')
 const router = express.Router();
  
@@ -33,5 +33,7 @@ router.patch('/:id/active', protect, isDoctor, setPatientToActive);
 
 // GET: receptionist fetching active patient number. 
 router.get('/active/queue', protect, getActivePatient);
+
+router.get('/list/next-appointment',  getPatientsForNextCall); // protect,
 
 module.exports = router;

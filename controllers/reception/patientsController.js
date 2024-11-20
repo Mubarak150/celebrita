@@ -194,6 +194,42 @@ const getActivePatient = async (req, res) => {
     }
 }
 
+const getPatientsForNextCall = async (req, res) => {
+    try {
+        const today = new Date();
+        today.setHours(0, 0, 0, 0); // Normalize to start of the day
+
+        const twoDaysLater = new Date(today);
+        twoDaysLater.setDate(today.getDate() + 2);
+
+        const patients = await Patient.findAll({
+            where: {
+                next_appointment: twoDaysLater
+            },
+            attributes: ['id', 'name', 'contact', 'address', 'next_appointment']
+        });
+
+        if (!patients || patients.length === 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'No patients found with next appointment two days later'
+            });
+        }
+
+        res.status(200).json({
+            status: true,
+            patients
+        });
+    } catch (error) {
+        return res.status(500).json({
+            status: false,
+            message: 'Error fetching patients',
+            error: error.message
+        });
+    }
+};
+
+
 const setPatientToActive = async (req, res) => {
     const {id} = req.params; 
 
@@ -291,6 +327,7 @@ module.exports = {
     updatePatientToClose,
     getPendingPatients,
     getAllPatients,
+    getPatientsForNextCall,
     getPatientById,
     setPatientToActive,
     getActivePatient,
