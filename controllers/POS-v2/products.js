@@ -37,4 +37,7 @@ const getAllProductsAtPOS = async (req, res) => {
 }
 
 
+
+
+
 module.exports = { getAllProductsAtPOS }

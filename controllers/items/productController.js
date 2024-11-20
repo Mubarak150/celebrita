@@ -285,38 +285,49 @@ exports.deleteProductById = handleDeleteById(`
 `, 'products');
 
 
-// exports.getAllProductsAtPOS = async (req, res) => {
-//     try {
-        
-//         const products = await Product.findAll({
-//             where: { status: 'active' },  
-//             attributes: ['id', 'name', 'quantity', 'price', 'discount', 'barcode']  
-//         });
+exports.getProductsWithValuation = async (req, res) => {
+    try {
+        const products = await Product.findAll({
+            where: { status: 'active' },
+            attributes: ['id', 'name', 'quantity', 'wholesale_price']  
+        });
 
-//         if (!products || products.length === 0) {
-//             return res.status(404).json({
-//                 success: true,
-//                 message: 'No active products available for sale.'
-//             });
-//         }
+        if (!products || products.length === 0) {
+            return res.status(404).json({
+                success: true,
+                message: 'No active products available for sale.'
+            });
+        }
 
-//         let updated_products = products.map((product) => {
-//             // Convert each product to a plain object and add discountedPrice
-//             let productData = product.get({ plain: true });
-//             productData.discountedPrice = productData.price * (1 - productData.discount / 100);
-//             return productData;
-//         });
+        // Initialize total valuation
+        let totalValuation = 0;
 
-//         res.status(200).json({
-//             success: true,
-//             message: 'fetching operation successful',
-//             products: updated_products
-//         });
-//     } catch (error) {
-//         res.status(500).json({
-//             success: false,
-//             message: 'Error fetching products',
-//             error: error.message
-//         });
-//     }
-// }
+        // Process products to add `discountedPrice` and `totalPrice`
+        let updated_products = products.map((product) => {
+            // Convert each product to a plain object
+            let productData = product.get({ plain: true });
+
+
+            // Calculate total price (discounted price * quantity)
+            productData.totalPrice = productData.wholesale_price * productData.quantity;
+
+            // Accumulate total valuation
+            totalValuation += productData.totalPrice;
+
+            return productData;
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Fetching operation successful',
+            products: updated_products,
+            totalValuation: totalValuation.toFixed(2) // Round to 2 decimal places
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching products',
+            error: error.message
+        });
+    }
+};
