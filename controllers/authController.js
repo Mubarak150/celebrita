@@ -132,7 +132,9 @@ exports.register = async (req, res) => {
       const hashedPassword = await bcrypt.hash(password, 10);
 
       // Generate a secure random hash of length 32
-      const passHash = crypto.randomBytes(16).toString('hex'); // 16 bytes = 32 hex characters
+      const randomHash = crypto.randomBytes(16).toString('hex'); // 32 characters
+      const timestamp = Date.now().toString(); // Current timestamp as string
+      const passHash = ( timestamp + randomHash ).slice(0, 32);
 
       // Create the user
       const newUser = await User.create({
@@ -154,14 +156,11 @@ exports.logout = (req, res) => {
   return res
     .clearCookie("token")
     .status(200)
-    .json({ status: true,  message: "Successfully logged out 😏 🍀" });
-    // res.clearCookie('token'); // Removing the JWT token from cookies
-    // res.status(200).json({status: true,  message: 'Successfully logged out' });
+    .json({ status: true,  message: "Successfully logged out" });
 };
 
-
-
-
+// what if the user forgets his password 
+// STEP 1: 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body;
 
@@ -216,8 +215,7 @@ exports.forgotPassword = async (req, res) => {
   }
 };
 
-
-
+// STEP 2: ibid.
 exports.verifyOTP = async (req, res) => {
     const { email, otp } = req.body;
   
@@ -255,7 +253,7 @@ exports.verifyOTP = async (req, res) => {
   };
 
 
-// reset your password
+// STEP 3: ibid. 
 exports.resetPassword = async (req, res) => {
     
     const {password, confirmPassword, email} = req.body;
@@ -279,7 +277,7 @@ exports.resetPassword = async (req, res) => {
     }
 }
 
-// update me: 
+// update me: i.e. user updating his own account details.
 exports.updateMe = async (req, res, next) => {
   try {
       const { password, change_password, new_password, confirm_password } = req.body;
@@ -328,6 +326,8 @@ exports.updateMe = async (req, res, next) => {
   }
 };
 
+
+// ::::::::::::: ADMIN AND MANAGERS' ROUTE HANDLERS ::::::::::
 // users get: 
 exports.getUsersbyRole = async( req, res) => {
   let { role } = req.query;
@@ -392,6 +392,7 @@ exports.getUsersbyRole = async( req, res) => {
     return res.status(500).json({status: false,  message: "Internal server error" });
   }
 }
+
 
 exports.updateStatusByAdmin = async (req, res) => {
   try {
@@ -501,9 +502,3 @@ exports.changePassword = async (req, res) => {
     res.status(500).json({ status: false, message: "Action failed" });
   }
 };
-
-
-
-
-
-

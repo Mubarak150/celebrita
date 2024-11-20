@@ -5,7 +5,7 @@ const router = express.Router();
  
 
 // POST: get all active products: 
-router.get('/', protect, isSalesMan, getAllProductsAtPOS);
+router.get('/',  getAllProductsAtPOS);  //protect, isSalesMan,
 
 // // PATCH: Update a patient's procedure charges, next appointment, and status
 // router.patch('/:id', protect, isDoctor, updatePatientbyDoctor);

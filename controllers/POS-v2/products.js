@@ -1,10 +1,10 @@
 const Product = require('../../models/Product')
 
+
 const getAllProductsAtPOS = async (req, res) => {
     try {
-        
         const products = await Product.findAll({
-            where: { status: 'active' },  
+            where: { status: 'active' },
             attributes: ['id', 'name', 'quantity', 'price', 'discount', 'barcode']  
         });
 
@@ -15,17 +15,21 @@ const getAllProductsAtPOS = async (req, res) => {
             });
         }
 
+        let totalValuation = 0;
+
         let updated_products = products.map((product) => {
-            // Convert each product to a plain object and add discountedPrice
             let productData = product.get({ plain: true });
             productData.discountedPrice = productData.price * (1 - productData.discount / 100);
+            productData.totalPrice = productData.discountedPrice * productData.quantity;
+            totalValuation += productData.totalPrice;
             return productData;
         });
 
         res.status(200).json({
             success: true,
-            message: 'fetching operation successful',
-            products: updated_products
+            message: 'Fetching operation successful',
+            products: updated_products,
+            totalValuation: totalValuation.toFixed(2)
         });
     } catch (error) {
         res.status(500).json({
@@ -34,7 +38,8 @@ const getAllProductsAtPOS = async (req, res) => {
             error: error.message
         });
     }
-}
+};
+
 
 
 module.exports = { getAllProductsAtPOS }

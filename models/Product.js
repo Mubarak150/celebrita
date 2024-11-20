@@ -20,7 +20,7 @@ const Product = sequelize.define('Product', { //
     type: DataTypes.DECIMAL(10, 2), // future dev:  Adjust precision and scale as needed
     allowNull: false
   },
-  wholesale_price: {
+  wholesale_price: { // let's not change this name... and this would be THE PRICE AT WHICH THE PRICE WAS PURCHASED BY THE OWNER.
     type: DataTypes.DECIMAL(10, 2), // future dev:  Adjust precision and scale as needed
     allowNull: false
   },
