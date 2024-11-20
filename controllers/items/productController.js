@@ -10,25 +10,47 @@ exports.createProduct = handleCreate(`
     VALUES (:name, :description, :company_name, :manufacturing_date, :expiry_date, :wholesale_price, :price, :discount, :quantity, :thumbnail, :status, :images, :category_id, :barcode);
 `);
 
-exports.getAllProducts = handleReadAll(`
-    SELECT 
-        products.name, 
-        products.thumbnail, 
-        products.id, 
-        products.price, 
-        products.quantity, 
-        products.returned_quantity, 
-        products.discount, 
-        products.barcode,
-        products.status, 
-        categories.category 
+exports.getAllProducts = async (req, res) => {
+    try {
+        
+        const products = await Product.findAll({
+            include: [
+                {
+                    model: Category,
+                    attributes: ['category'], 
+                }
+            ]
+        });
 
-    FROM products 
-    JOIN categories 
-    ON products.category_id = categories.id
-    LIMIT :limit OFFSET :offset;
+        if (!products || products.length === 0) {
+            return res.status(404).json({
+                success: true,
+                message: 'No products available.'
+            });
+        }
 
-`, 'products');
+        const updated_products = products.map((product) => ({
+            name: product.name,
+            quantity: product.quantity,
+            status: product.status,
+            price: product.price,
+            discounted_price: product.price - (product.price * (product.discount / 100)),
+            category: product.Category ? product.Category.category : null // Ensure category exists
+        }));
+
+        res.status(200).json({
+            success: true,
+            message: 'fetching operation successful',
+            products: updated_products
+        });
+    } catch (error) {
+        res.status(500).json({
+            success: false,
+            message: 'Error fetching products',
+            error: error.message
+        });
+    }
+}
 
 exports.getLowStockProducts = async (req, res) => {
     try {
@@ -261,3 +283,40 @@ exports.deleteProductById = handleDeleteById(`
     DELETE FROM products 
     WHERE id = :id
 `, 'products');
+
+
+// exports.getAllProductsAtPOS = async (req, res) => {
+//     try {
+        
+//         const products = await Product.findAll({
+//             where: { status: 'active' },  
+//             attributes: ['id', 'name', 'quantity', 'price', 'discount', 'barcode']  
+//         });
+
+//         if (!products || products.length === 0) {
+//             return res.status(404).json({
+//                 success: true,
+//                 message: 'No active products available for sale.'
+//             });
+//         }
+
+//         let updated_products = products.map((product) => {
+//             // Convert each product to a plain object and add discountedPrice
+//             let productData = product.get({ plain: true });
+//             productData.discountedPrice = productData.price * (1 - productData.discount / 100);
+//             return productData;
+//         });
+
+//         res.status(200).json({
+//             success: true,
+//             message: 'fetching operation successful',
+//             products: updated_products
+//         });
+//     } catch (error) {
+//         res.status(500).json({
+//             success: false,
+//             message: 'Error fetching products',
+//             error: error.message
+//         });
+//     }
+// }
