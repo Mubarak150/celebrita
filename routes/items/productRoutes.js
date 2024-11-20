@@ -26,7 +26,7 @@ router.get('/search', searchProductByName);
 router.get('/:product', getProductById);
 router.get('/category/:category', getAllProductsByCategoryName);
 
-router.patch('/:id', uploadImages, updateProductById);
+router.patch('/:id', uploadImages, updateProductById); // upload images is a multer middleware here||||||||||
 
 router.delete('/:id', deleteProductById);
 
