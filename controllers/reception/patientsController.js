@@ -194,31 +194,46 @@ const getActivePatient = async (req, res) => {
     }
 }
 
+
 const getPatientsForNextCall = async (req, res) => {
     try {
         const today = new Date();
-        today.setHours(0, 0, 0, 0); // Normalize to start of the day
+        today.setHours(0, 0, 0, 0);
 
         const twoDaysLater = new Date(today);
         twoDaysLater.setDate(today.getDate() + 2);
 
+        const startOfDay = new Date(twoDaysLater);
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date(twoDaysLater);
+        endOfDay.setHours(23, 59, 59, 999);
+
         const patients = await Patient.findAll({
             where: {
-                next_appointment: twoDaysLater
+                next_appointment: {
+                    [Op.between]: [startOfDay, endOfDay]
+                }
             },
             attributes: ['id', 'name', 'contact', 'address', 'next_appointment']
         });
 
         if (!patients || patients.length === 0) {
-            return res.status(404).json({
-                status: false,
+            return res.status(200).json({
+                status: true,
                 message: 'No patients found with next appointment two days later'
             });
         }
 
+        const updatedPatients = patients.map((patient) => {
+            const patientData = patient.get({ plain: true });
+            patientData.next_appointment = new Date(patientData.next_appointment).toISOString().split('T')[0]; // Format to YYYY-MM-DD
+            return patientData;
+        });
+
         res.status(200).json({
             status: true,
-            patients
+            patients: updatedPatients
         });
     } catch (error) {
         return res.status(500).json({
@@ -228,6 +243,8 @@ const getPatientsForNextCall = async (req, res) => {
         });
     }
 };
+
+
 
 
 const setPatientToActive = async (req, res) => {
