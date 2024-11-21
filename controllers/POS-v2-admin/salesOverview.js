@@ -8,6 +8,7 @@ const POSSaleReturn = require('../../models/SaleReturn');
 const SaleReturnProducts = require('../../models/SaleReturnProduct');
 const Category = require('../../models/Category');
 
+// this old version shall be deleted soon
 
 // const adminSalesOverview = async (req, res) => {
 //     try {

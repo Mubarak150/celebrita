@@ -6,8 +6,8 @@ const { handleCreate, handleReadAll, handleReadById, handleUpdateById, handleDel
 const {Op} = require('sequelize'); 
 
 exports.createProduct = handleCreate(`
-    INSERT INTO products (name, description, company_name, manufacturing_date, expiry_date, wholesale_price, price, discount, quantity, thumbnail, status, images, category_id, barcode)
-    VALUES (:name, :description, :company_name, :manufacturing_date, :expiry_date, :wholesale_price, :price, :discount, :quantity, :thumbnail, :status, :images, :category_id, :barcode);
+    INSERT INTO products (name, description, company_name, manufacturing_date, expiry_date, wholesale_price, price, discount, quantity, thumbnail, status, images, category_id, barcode, supplier)
+    VALUES (:name, :description, :company_name, :manufacturing_date, :expiry_date, :wholesale_price, :price, :discount, :quantity, :thumbnail, :status, :images, :category_id, :barcode, :supplier);
 `);
 
 exports.getAllProducts = async (req, res) => {
@@ -35,7 +35,9 @@ exports.getAllProducts = async (req, res) => {
             status: product.status,
             price: product.price,
             discounted_price: product.price - (product.price * (product.discount / 100)),
-            category: product.Category ? product.Category.category : null // Ensure category exists
+            retail_price: product.wholesale_price,
+            category: product.Category ? product.Category.category : null,
+            supplier: product.supplier,
         }));
 
         res.status(200).json({

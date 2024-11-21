@@ -69,6 +69,10 @@ const Product = sequelize.define('Product', { //
   barcode: {
     type: DataTypes.STRING,
     allowNull: true
+  },
+  supplier: {
+    type: DataTypes.STRING,
+    allowNull: true
   }
 }, {
   tableName: 'products',
