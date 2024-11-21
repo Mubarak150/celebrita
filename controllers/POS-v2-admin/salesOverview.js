@@ -9,32 +9,204 @@ const SaleReturnProducts = require('../../models/SaleReturnProduct');
 const Category = require('../../models/Category');
 
 
+// const adminSalesOverview = async (req, res) => {
+//     try {
+//         let { from, to, categories } = req.query;
+//         categories = categories ? JSON.parse(categories) : [];
+//          from = new Date(from).toISOString().split('T')[0];
+//          to = new Date(to).toISOString().split('T')[0];
+//          console.log(from, to)
+
+//         // Step 1: Fetch sales data with category filter
+//         const sales = await POSSales.findAll({
+//             where: {
+//                     created_at: {
+//                         [Op.gte]: new Date(`${from}T00:00:00`),
+//                         [Op.lte]: new Date(`${to}T23:59:59`)
+//                     }
+//                 },
+//             include: [
+//                 {
+//                     model: POSSaleProducts,
+//                     as: 'sale_products',
+//                     attributes: ['quantity'],
+//                     include: [
+//                         {
+//                             model: Products,
+//                             as: 'product',
+//                             attributes: ['name', 'category_id'],
+//                             where: categories.length > 0 ? {
+//                                 category_id: {
+//                                     [Op.in]: categories
+//                                 }
+//                             } : {}
+//                         }
+//                     ]
+//                 }
+//             ],
+//             attributes: ['sale_number', 'sub_total_amount', 'discount', 'discounted_total', 'payment_method']
+//         });
+
+//         // Step 2: Fetch return data with category filter
+//         const returns = await POSSaleReturn.findAll({
+//             where: {
+//                     created_at: {
+//                         [Op.gte]: new Date(`${from}T00:00:00`),
+//                         [Op.lte]: new Date(`${to}T23:59:59`)
+//                     }
+//                 },
+//             include: [
+//                 {
+//                     model: SaleReturnProducts,
+//                     as: 'return_products',
+//                     attributes: ['quantity', 'product_id'],
+//                     include: [
+//                         {
+//                             model: POSSaleProducts,
+//                             as: 'sale_products',
+//                             attributes: ['id'],
+//                             include: [
+//                                 {
+//                                     model: Products,
+//                                     as: 'product',
+//                                     attributes: ['id', 'name', 'category_id'],
+//                                     where: categories.length > 0 ? {
+//                                         category_id: {
+//                                             [Op.in]: categories
+//                                         }
+//                                     } : {}
+//                                 }
+//                             ]
+//                         }
+//                     ]
+//                 }
+//             ],
+//             attributes: ['sale_return_number', 'sales_number', 'total_refund', 'payment_method']
+//         });
+
+//         // Check if no products match the selected categories
+//         const productsFound = sales.some(sale => sale.sale_products.some(sp => sp.product))
+//             || returns.some(ret => ret.return_products.some(rp => rp.sale_products && rp.sale_products.product));
+        
+//         if (categories.length > 0 && !productsFound) {
+//             return res.status(200).json({
+//                 message: 'no data available for this request',
+//                 salesOnly: [],
+//                 returnsOnly: [],
+//                 totalSalesAmount: 0,
+//                 totalRefundAmount: 0,
+//                 netSales: 0,
+//                 totalCashSales: 0,
+//                 totalCashReturns: 0,
+//                 totalCardSales: 0,
+//                 totalCardReturns: 0,
+//                 netCash: 0,
+//                 productSummary: []
+//             });
+//         }
+
+//         // Process sales and returns if data is found
+//         const totalSalesAmount = sales.reduce((sum, sale) => sum + parseFloat(sale.discounted_total), 0);
+//         const totalRefundAmount = returns.reduce((sum, ret) => sum + parseFloat(ret.total_refund), 0);
+//         const netSales = totalSalesAmount - totalRefundAmount;
+
+//         const totalCashSales = sales
+//             .filter(sale => sale.payment_method === 'cash')
+//             .reduce((sum, sale) => sum + parseFloat(sale.discounted_total), 0);
+
+//         const totalCashReturns = returns
+//             .filter(ret => ret.payment_method === 'cash')
+//             .reduce((sum, ret) => sum + parseFloat(ret.total_refund), 0);
+
+//         const netCash = totalCashSales - totalCashReturns;
+
+//         const productSummary = {};
+
+//         sales.forEach(sale => {
+//             sale.sale_products.forEach(saleProduct => {
+//                 if (saleProduct.product) {
+//                     const productName = saleProduct.product.name;
+//                     if (!productSummary[productName]) {
+//                         productSummary[productName] = { sold_quantity: 0, returned_quantity: 0 };
+//                     }
+//                     productSummary[productName].sold_quantity += saleProduct.quantity;
+//                 }
+//             });
+//         });
+
+//         returns.forEach(ret => {
+//             ret.return_products.forEach(returnProduct => {
+//                 if (returnProduct.sale_products && returnProduct.sale_products.product) {
+//                     const productName = returnProduct.sale_products.product.name;
+//                     if (!productSummary[productName]) {
+//                         productSummary[productName] = { sold_quantity: 0, returned_quantity: 0 };
+//                     }
+//                     productSummary[productName].returned_quantity += returnProduct.quantity;
+//                 }
+//             });
+//         });
+
+//         const productSummaryArray = Object.keys(productSummary).map(productName => ({
+//             name: productName,
+//             sold_quantity: productSummary[productName].sold_quantity,
+//             returned_quantity: productSummary[productName].returned_quantity
+//         }));
+
+//         res.status(200).json({
+//             salesOnly: sales.map(sale => {
+//                 const saleObj = sale.get({ plain: true });
+//                 delete saleObj.sale_products;
+//                 return saleObj;
+//             }),
+//             returnsOnly: returns.map(ret => {
+//                 const returnObj = ret.get({ plain: true });
+//                 delete returnObj.return_products;
+//                 return returnObj;
+//             }),
+//             totalSalesAmount,
+//             totalRefundAmount,
+//             netSales,
+//             totalCashSales,
+//             totalCashReturns,
+//             totalCardSales: totalSalesAmount - totalCashSales,
+//             totalCardReturns: totalRefundAmount - totalCashReturns,
+//             netCash,
+//             productSummary: productSummaryArray
+//         });
+//     } catch (error) {
+//         console.log(error.message, error);
+//         res.status(500).json({
+//             status: false,
+//             message: 'Error occurred while fetching your sales and returns'
+//         });
+//     }
+// };
+
+
 const adminSalesOverview = async (req, res) => {
     try {
         let { from, to, categories } = req.query;
         categories = categories ? JSON.parse(categories) : [];
-         from = new Date(from).toISOString().split('T')[0];
-         to = new Date(to).toISOString().split('T')[0];
-         console.log(from, to)
+        from = new Date(from).toISOString().split('T')[0];
+        to = new Date(to).toISOString().split('T')[0];
 
-        // Step 1: Fetch sales data with category filter
         const sales = await POSSales.findAll({
             where: {
-                    created_at: {
-                        [Op.gte]: new Date(`${from}T00:00:00`),
-                        [Op.lte]: new Date(`${to}T23:59:59`)
-                    }
-                },
+                created_at: {
+                    [Op.gte]: new Date(`${from}T00:00:00`),
+                    [Op.lte]: new Date(`${to}T23:59:59`)
+                }
+            },
             include: [
                 {
                     model: POSSaleProducts,
                     as: 'sale_products',
-                    attributes: ['quantity'],
+                    attributes: ['quantity', 'price_at_sale'],
                     include: [
                         {
                             model: Products,
                             as: 'product',
-                            attributes: ['name', 'category_id'],
+                            attributes: ['name', 'category_id', 'wholesale_price'],
                             where: categories.length > 0 ? {
                                 category_id: {
                                     [Op.in]: categories
@@ -47,14 +219,13 @@ const adminSalesOverview = async (req, res) => {
             attributes: ['sale_number', 'sub_total_amount', 'discount', 'discounted_total', 'payment_method']
         });
 
-        // Step 2: Fetch return data with category filter
         const returns = await POSSaleReturn.findAll({
             where: {
-                    created_at: {
-                        [Op.gte]: new Date(`${from}T00:00:00`),
-                        [Op.lte]: new Date(`${to}T23:59:59`)
-                    }
-                },
+                created_at: {
+                    [Op.gte]: new Date(`${from}T00:00:00`),
+                    [Op.lte]: new Date(`${to}T23:59:59`)
+                }
+            },
             include: [
                 {
                     model: SaleReturnProducts,
@@ -64,12 +235,12 @@ const adminSalesOverview = async (req, res) => {
                         {
                             model: POSSaleProducts,
                             as: 'sale_products',
-                            attributes: ['id'],
+                            attributes: ['price_at_sale'],
                             include: [
                                 {
                                     model: Products,
                                     as: 'product',
-                                    attributes: ['id', 'name', 'category_id'],
+                                    attributes: ['id', 'name', 'category_id', 'wholesale_price'],
                                     where: categories.length > 0 ? {
                                         category_id: {
                                             [Op.in]: categories
@@ -84,10 +255,9 @@ const adminSalesOverview = async (req, res) => {
             attributes: ['sale_return_number', 'sales_number', 'total_refund', 'payment_method']
         });
 
-        // Check if no products match the selected categories
         const productsFound = sales.some(sale => sale.sale_products.some(sp => sp.product))
             || returns.some(ret => ret.return_products.some(rp => rp.sale_products && rp.sale_products.product));
-        
+
         if (categories.length > 0 && !productsFound) {
             return res.status(200).json({
                 message: 'no data available for this request',
@@ -96,6 +266,9 @@ const adminSalesOverview = async (req, res) => {
                 totalSalesAmount: 0,
                 totalRefundAmount: 0,
                 netSales: 0,
+                totalProfit: 0,
+                totalDeducedProfit: 0,
+                netProfit: 0,
                 totalCashSales: 0,
                 totalCashReturns: 0,
                 totalCardSales: 0,
@@ -105,7 +278,79 @@ const adminSalesOverview = async (req, res) => {
             });
         }
 
-        // Process sales and returns if data is found
+        let totalProfit = 0;
+        let totalDeducedProfit = 0;
+
+        const salesOnly = sales.map(sale => {
+            const saleObj = sale.get({ plain: true });
+            saleObj.profit = sale.sale_products.reduce((sum, saleProduct) => {
+                if (saleProduct.product) {
+                    const profit = (saleProduct.price_at_sale - saleProduct.product.wholesale_price) * saleProduct.quantity;
+                    totalProfit += profit;
+                    return sum + profit;
+                }
+                return sum;
+            }, 0);
+            delete saleObj.sale_products;
+            return saleObj;
+        });
+
+        const returnsOnly = returns.map(ret => {
+            const returnObj = ret.get({ plain: true });
+            returnObj.deducedProfit = ret.return_products.reduce((sum, returnProduct) => {
+                if (returnProduct.sale_products && returnProduct.sale_products.product) {
+                    const deducedProfit = 
+                        (returnProduct.sale_products.price_at_sale - returnProduct.sale_products.product.wholesale_price) 
+                        * returnProduct.quantity;
+                    totalDeducedProfit += deducedProfit;
+                    return sum + deducedProfit;
+                }
+                return sum;
+            }, 0);
+            delete returnObj.return_products;
+            return returnObj;
+        });
+
+        const productSummary = {};
+
+        sales.forEach(sale => {
+            sale.sale_products.forEach(saleProduct => {
+                if (saleProduct.product) {
+                    const productName = saleProduct.product.name;
+                    if (!productSummary[productName]) {
+                        productSummary[productName] = { sold_quantity: 0, returned_quantity: 0, profit: 0, deducedProfit: 0 };
+                    }
+                    productSummary[productName].sold_quantity += saleProduct.quantity;
+                    productSummary[productName].profit += 
+                        (saleProduct.price_at_sale - saleProduct.product.wholesale_price) * saleProduct.quantity;
+                }
+            });
+        });
+
+        returns.forEach(ret => {
+            ret.return_products.forEach(returnProduct => {
+                if (returnProduct.sale_products && returnProduct.sale_products.product) {
+                    const productName = returnProduct.sale_products.product.name;
+                    if (!productSummary[productName]) {
+                        productSummary[productName] = { sold_quantity: 0, returned_quantity: 0, profit: 0, deducedProfit: 0 };
+                    }
+                    productSummary[productName].returned_quantity += returnProduct.quantity;
+                    productSummary[productName].deducedProfit += 
+                        (returnProduct.sale_products.price_at_sale - returnProduct.sale_products.product.wholesale_price) 
+                        * returnProduct.quantity;
+                  }
+            });
+        });
+
+        const productSummaryArray = Object.keys(productSummary).map(productName => ({
+            name: productName,
+            sold_quantity: productSummary[productName].sold_quantity,
+            returned_quantity: productSummary[productName].returned_quantity,
+            profit: productSummary[productName].profit,
+            deducedProfit: productSummary[productName].deducedProfit,
+            netProfit: productSummary[productName].profit - productSummary[productName].deducedProfit
+        }));
+
         const totalSalesAmount = sales.reduce((sum, sale) => sum + parseFloat(sale.discounted_total), 0);
         const totalRefundAmount = returns.reduce((sum, ret) => sum + parseFloat(ret.total_refund), 0);
         const netSales = totalSalesAmount - totalRefundAmount;
@@ -120,52 +365,17 @@ const adminSalesOverview = async (req, res) => {
 
         const netCash = totalCashSales - totalCashReturns;
 
-        const productSummary = {};
-
-        sales.forEach(sale => {
-            sale.sale_products.forEach(saleProduct => {
-                if (saleProduct.product) {
-                    const productName = saleProduct.product.name;
-                    if (!productSummary[productName]) {
-                        productSummary[productName] = { sold_quantity: 0, returned_quantity: 0 };
-                    }
-                    productSummary[productName].sold_quantity += saleProduct.quantity;
-                }
-            });
-        });
-
-        returns.forEach(ret => {
-            ret.return_products.forEach(returnProduct => {
-                if (returnProduct.sale_products && returnProduct.sale_products.product) {
-                    const productName = returnProduct.sale_products.product.name;
-                    if (!productSummary[productName]) {
-                        productSummary[productName] = { sold_quantity: 0, returned_quantity: 0 };
-                    }
-                    productSummary[productName].returned_quantity += returnProduct.quantity;
-                }
-            });
-        });
-
-        const productSummaryArray = Object.keys(productSummary).map(productName => ({
-            name: productName,
-            sold_quantity: productSummary[productName].sold_quantity,
-            returned_quantity: productSummary[productName].returned_quantity
-        }));
+        const netProfit = totalProfit - totalDeducedProfit;
 
         res.status(200).json({
-            salesOnly: sales.map(sale => {
-                const saleObj = sale.get({ plain: true });
-                delete saleObj.sale_products;
-                return saleObj;
-            }),
-            returnsOnly: returns.map(ret => {
-                const returnObj = ret.get({ plain: true });
-                delete returnObj.return_products;
-                return returnObj;
-            }),
+            salesOnly,
+            returnsOnly,
             totalSalesAmount,
             totalRefundAmount,
             netSales,
+            totalProfit,
+            totalDeducedProfit,
+            netProfit,
             totalCashSales,
             totalCashReturns,
             totalCardSales: totalSalesAmount - totalCashSales,

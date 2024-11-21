@@ -245,8 +245,6 @@ const getPatientsForNextCall = async (req, res) => {
 };
 
 
-
-
 const setPatientToActive = async (req, res) => {
     const {id} = req.params; 
 
