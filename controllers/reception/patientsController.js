@@ -197,18 +197,41 @@ const getActivePatient = async (req, res) => {
 
 const getPatientsForNextCall = async (req, res) => {
     try {
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
+        // Check if a date is provided from the frontend
+        const { date } = req.query; 
+        let startOfDay, endOfDay;
 
-        const twoDaysLater = new Date(today);
-        twoDaysLater.setDate(today.getDate() + 2);
+        if (!date) {
+            // No date provided, use the setup for today + 2 days
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
 
-        const startOfDay = new Date(twoDaysLater);
-        startOfDay.setHours(0, 0, 0, 0);
+            const twoDaysLater = new Date(today);
+            twoDaysLater.setDate(today.getDate() + 2);
 
-        const endOfDay = new Date(twoDaysLater);
-        endOfDay.setHours(23, 59, 59, 999);
+            startOfDay = new Date(twoDaysLater);
+            startOfDay.setHours(0, 0, 0, 0);
 
+            endOfDay = new Date(twoDaysLater);
+            endOfDay.setHours(23, 59, 59, 999);
+        } else {
+            // Date provided, use it to calculate the start and end of that day
+            const providedDate = new Date(date);
+            if (isNaN(providedDate)) {
+                return res.status(400).json({
+                    status: false,
+                    message: 'Invalid date format. Please provide a valid date.'
+                });
+            }
+
+            startOfDay = new Date(providedDate);
+            startOfDay.setHours(0, 0, 0, 0);
+
+            endOfDay = new Date(providedDate);
+            endOfDay.setHours(23, 59, 59, 999);
+        }
+
+        // Fetch patients with appointments within the determined range
         const patients = await Patient.findAll({
             where: {
                 next_appointment: {
@@ -221,7 +244,7 @@ const getPatientsForNextCall = async (req, res) => {
         if (!patients || patients.length === 0) {
             return res.status(200).json({
                 status: true,
-                message: 'No patients found with next appointment two days later'
+                message: 'No patients found with next appointment in the specified range'
             });
         }
 
@@ -243,6 +266,7 @@ const getPatientsForNextCall = async (req, res) => {
         });
     }
 };
+
 
 
 const setPatientToActive = async (req, res) => {
