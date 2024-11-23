@@ -197,66 +197,81 @@ const getActivePatient = async (req, res) => {
 
 const getPatientsForNextCall = async (req, res) => {
     try {
-        // Check if a date is provided from the frontend
-        const { date } = req.query; 
-        let startOfDay, endOfDay;
+        // Get 'from' and 'to' dates from query parameters
+        const { from, to } = req.query;
 
-        if (!date) {
-            // No date provided, use the setup for today + 2 days
-            const today = new Date();
-            today.setHours(0, 0, 0, 0);
+        // Helper function to adjust a date to +0500 timezone
+        const adjustToTimezone = (date) => {
+            const utc = date.getTime() + date.getTimezoneOffset() * 60000;
+            return new Date(utc + 5 * 60 * 60000); // Add 5 hours for +0500
+        };
 
-            const twoDaysLater = new Date(today);
-            twoDaysLater.setDate(today.getDate() + 2);
-
-            startOfDay = new Date(twoDaysLater);
-            startOfDay.setHours(0, 0, 0, 0);
-
-            endOfDay = new Date(twoDaysLater);
-            endOfDay.setHours(23, 59, 59, 999);
-        } else {
-            // Date provided, use it to calculate the start and end of that day
-            const providedDate = new Date(date);
-            if (isNaN(providedDate)) {
-                return res.status(400).json({
-                    status: false,
-                    message: 'Invalid date format. Please provide a valid date.'
-                });
-            }
-
-            startOfDay = new Date(providedDate);
-            startOfDay.setHours(0, 0, 0, 0);
-
-            endOfDay = new Date(providedDate);
-            endOfDay.setHours(23, 59, 59, 999);
+        if (!from || !to) {
+            return res.status(400).json({
+                status: false,
+                message: "Both 'from' and 'to' dates are required."
+            });
         }
 
-        // Fetch patients with appointments within the determined range
+        const fromDate = new Date(from);
+        const toDate = new Date(to);
+
+        if (isNaN(fromDate) || isNaN(toDate)) {
+            return res.status(400).json({
+                status: false,
+                message: "Invalid date format. Please provide valid 'from' and 'to' dates."
+            });
+        }
+
+        if (fromDate > toDate) {
+            return res.status(400).json({
+                status: false,
+                message: "'from' date cannot be later than 'to' date."
+            });
+        }
+
+        // Adjust dates to the +0500 timezone
+        const startOfFromDate = adjustToTimezone(new Date(fromDate.setHours(0, 0, 0, 0)));
+        const endOfToDate = adjustToTimezone(new Date(toDate.setHours(23, 59, 59, 999)));
+
+        // Fetch patients with appointments within the range
         const patients = await Patient.findAll({
             where: {
                 next_appointment: {
-                    [Op.between]: [startOfDay, endOfDay]
+                    [Op.between]: [startOfFromDate, endOfToDate]
                 }
             },
-            attributes: ['id', 'name', 'contact', 'address', 'next_appointment']
+            attributes: ['id', 'name', 'contact', 'address', 'next_appointment'],
+            order: [['next_appointment', 'ASC']] // Sort by date
         });
 
         if (!patients || patients.length === 0) {
             return res.status(200).json({
                 status: true,
-                message: 'No patients found with next appointment in the specified range'
+                message: 'No patients found with appointments in the specified range'
             });
         }
 
-        const updatedPatients = patients.map((patient) => {
+        // Group patients by date
+        const groupedByDate = patients.reduce((acc, patient) => {
             const patientData = patient.get({ plain: true });
-            patientData.next_appointment = new Date(patientData.next_appointment).toISOString().split('T')[0]; // Format to YYYY-MM-DD
-            return patientData;
-        });
+
+            // Adjust the appointment date to +0500 for grouping
+            const appointmentDate = adjustToTimezone(new Date(patientData.next_appointment))
+                .toISOString()
+                .split('T')[0]; // Format to YYYY-MM-DD
+
+            if (!acc[appointmentDate]) {
+                acc[appointmentDate] = [];
+            }
+            acc[appointmentDate].push(patientData);
+
+            return acc;
+        }, {});
 
         res.status(200).json({
             status: true,
-            patients: updatedPatients
+            data: groupedByDate
         });
     } catch (error) {
         return res.status(500).json({
@@ -266,6 +281,8 @@ const getPatientsForNextCall = async (req, res) => {
         });
     }
 };
+
+
 
 
 
