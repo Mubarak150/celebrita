@@ -67,10 +67,7 @@ const todaySalesAndReturns = async (req, res) => {
                 }
             ],
             attributes: ['sale_return_number', 'sales_number', 'total_refund', 'payment_method']
-        });
-
-        // console.log(sales); 
-        // res.status(200).json({sales}); 
+        }); 
 
         // Sum discounted_total from sales
         const totalSalesAmount = sales.reduce((sum, sale) => sum + parseFloat(sale.discounted_total), 0);

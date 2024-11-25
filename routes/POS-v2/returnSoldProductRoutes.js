@@ -10,7 +10,7 @@ router.post('/:ssn/pop-up', protect, getSaleBySSNforPopUp);
 
 router.post('/ammend/process', protect, isSalesMan, processReturn);
 
-router.post('/return/:srn',  getReturnBySRN); // protect, isSalesMan,
+router.post('/return/:srn', protect, getReturnBySRN); 
 
 
 module.exports = router; 
