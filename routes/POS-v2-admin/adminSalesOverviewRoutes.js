@@ -5,6 +5,6 @@ const router = express.Router();
 
 // for getting sales overview for a given  date or range thereof... 
 router.get('/', protect, forAdminOrManager, adminSalesOverview);
-router.get('/salesmen', protect, forAdminOrManager, overviewSalesmen);
+router.get('/salesmen',  overviewSalesmen); //protect, forAdminOrManager,
 
 module.exports = router;

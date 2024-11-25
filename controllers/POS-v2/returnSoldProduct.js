@@ -331,5 +331,48 @@ const calculateReturnAmount = (priceAtSale, discount, subTotalAmount, returnedQu
     return (priceAtSale) * returnedQuantity; // Return amount after discount
 };
 
+const getReturnBySRN = async (req, res) => {
+    try {
+        const { srn } = req.params;
 
-module.exports = { getSaleBySSN, getSaleBySSNforPopUp, processReturn}
+        // Fetch detailed return information
+        const detailedReturn = await SaleReturn.findOne({
+            where: { sale_return_number: srn }, // Match return_number with srn
+            attributes: { exclude: ['id', 'user_id', 'createdAt'] }, 
+            include: [
+                {
+                    model: SaleReturnProduct,
+                    as: 'return_products',
+                    attributes: { exclude: ['sale_return_id', 'createdAt', 'updatedAt'] },
+                    include: [
+                        {
+                            model: POSSaleProduct,
+                            as: 'sale_products', // Intermediate model
+                            attributes: [], // Exclude its fields if not needed
+                            include: [
+                                {
+                                    model: Product,
+                                    as: 'product', // Final product association
+                                    attributes: ['name'] // Include product name
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
+        });
+
+        if (!detailedReturn) {
+            return res.status(404).json({ success: false, message: 'Return not found' });
+        }
+
+        res.status(200).json({ status: true, returnDetails: detailedReturn });
+
+    } catch (error) {
+        res.status(500).json({ success: false, error: error.message });
+    }
+};
+
+
+
+module.exports = { getSaleBySSN, getSaleBySSNforPopUp, processReturn, getReturnBySRN}
