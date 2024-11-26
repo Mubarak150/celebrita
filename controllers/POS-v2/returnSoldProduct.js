@@ -223,7 +223,7 @@ const getReturnBySRN = async (req, res) => {
         // Fetch detailed return information
         const detailedReturn = await SaleReturn.findOne({
             where: { sale_return_number: srn }, // Match return_number with srn
-            attributes: { exclude: ['id', 'user_id', 'createdAt'] }, 
+            attributes: { exclude: ['id', 'sale_id', 'user_id', 'remarks', 'createdAt', 'updatedAt'] }, 
             include: [
                 {
                     model: SaleReturnProduct,
@@ -233,7 +233,7 @@ const getReturnBySRN = async (req, res) => {
                         {
                             model: POSSaleProduct,
                             as: 'sale_products', // Intermediate model
-                            attributes: [], // fields of it excluded.. not needed. 
+                            attributes: ['product_id'], // fields of it excluded.. not needed. 
                             include: [
                                 {
                                     model: Product,
