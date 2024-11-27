@@ -234,7 +234,6 @@ const getActivePatient = async (req, res) => {
 
 const getPatientsForNextCall = async (req, res) => {
     try {
-        // Get 'from' and 'to' dates from query parameters
         const { from, to } = req.query;
 
         // Helper function to adjust a date to +0500 timezone
@@ -267,11 +266,9 @@ const getPatientsForNextCall = async (req, res) => {
             });
         }
 
-        // Adjust dates to the +0500 timezone
         const startOfFromDate = adjustToTimezone(new Date(fromDate.setHours(0, 0, 0, 0)));
         const endOfToDate = adjustToTimezone(new Date(toDate.setHours(23, 59, 59, 999)));
 
-        // Fetch patients with appointments within the range
         const patients = await Patient.findAll({
             where: {
                 next_appointment: {
@@ -279,7 +276,7 @@ const getPatientsForNextCall = async (req, res) => {
                 }
             },
             attributes: ['id', 'name', 'contact', 'address', 'next_appointment'],
-            order: [['next_appointment', 'ASC']] // Sort by date
+            order: [['next_appointment', 'ASC']]
         });
 
         if (!patients || patients.length === 0) {
@@ -289,14 +286,15 @@ const getPatientsForNextCall = async (req, res) => {
             });
         }
 
-        // Group patients by date
         const groupedByDate = patients.reduce((acc, patient) => {
             const patientData = patient.get({ plain: true });
 
-            // Adjust the appointment date to +0500 for grouping
             const appointmentDate = adjustToTimezone(new Date(patientData.next_appointment))
                 .toISOString()
-                .split('T')[0]; // Format to YYYY-MM-DD
+                .split('T')[0]; // Extract YYYY-MM-DD format
+
+            // Add formatted date to patient data
+            patientData.next_appointment = appointmentDate;
 
             if (!acc[appointmentDate]) {
                 acc[appointmentDate] = [];
@@ -318,6 +316,7 @@ const getPatientsForNextCall = async (req, res) => {
         });
     }
 };
+
 
 
 
