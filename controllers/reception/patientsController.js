@@ -33,6 +33,43 @@ const createPatientByReceptionist = async (req, res) => { // done
     }
 };
 
+const createPatientByReceptionistAdvanceBooking = async (req, res) => { // done
+    const { name, age, gender, contact, address, next_appointment } = req.body;
+    
+    if (!name || !age || !gender || !contact || !address || !next_appointment   ) {
+        return res.status(400).json({ success: false, message: 'All fields are required.' });
+    }
+
+    // Create a new Date using the next_appointment date and the current time
+    const currentTime = new Date(); // Get the current date and time
+    const nextAppointmentDate = new Date(next_appointment);
+
+    // Set the time of the next_appointment to the current time
+    nextAppointmentDate.setHours(currentTime.getHours());
+    nextAppointmentDate.setMinutes(currentTime.getMinutes());
+    nextAppointmentDate.setSeconds(currentTime.getSeconds());
+    nextAppointmentDate.setMilliseconds(currentTime.getMilliseconds());
+
+    try {
+        const newPatient = await Patient.create({
+            name,
+            age,
+            gender, 
+            contact, 
+            address, 
+            next_appointment,
+            createdAt: nextAppointmentDate,
+            date: nextAppointmentDate,
+            fee_status: false,
+            status: 'pending', // Default status is 'pending'
+        });
+
+        return res.status(201).json({ success: true, message: 'A patient added successfully' });
+    } catch (error) {
+        return res.status(500).json({ success: false, message: 'Error creating patient', error: error.message });
+    }
+};
+
 // PUT: Update patient with procedure charges and next appointment, change status to closed
 const updatePatientbyDoctor = async (req, res) => {
     const { id } = req.params; // Patient ID from URL params
@@ -378,6 +415,7 @@ const deletePatient = async (req, res) => {
 
 module.exports = {
     createPatientByReceptionist,
+    createPatientByReceptionistAdvanceBooking,
     updatePatientbyDoctor,
     updatePatientAtReception,
     updatePatientToClose,

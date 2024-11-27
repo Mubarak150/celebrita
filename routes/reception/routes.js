@@ -1,11 +1,13 @@
 const express = require('express');
-const { createPatientByReceptionist, updatePatientbyDoctor, updatePatientAtReception, getPendingPatients, getPatientsForNextCall, getAllPatients, getPatientById, setPatientToActive, getActivePatient, deletePatient, updatePatientToClose } = require('../../controllers/reception/patientsController');
+const { createPatientByReceptionist, updatePatientbyDoctor, updatePatientAtReception, getPendingPatients, createPatientByReceptionistAdvanceBooking, getPatientsForNextCall, getAllPatients, getPatientById, setPatientToActive, getActivePatient, deletePatient, updatePatientToClose } = require('../../controllers/reception/patientsController');
 const {protect, isReceptionist, isDoctor} = require('../../middleware/auth')
 const router = express.Router();
  
 // POPULATING AND MANIPULATING PATIENT: 
 // POST: Create a new patient isReceptionist
-router.post('/', protect, isReceptionist, createPatientByReceptionist);
+router.post('/',  createPatientByReceptionist);
+
+router.post('/appointment/advance',  createPatientByReceptionistAdvanceBooking);
 
 // PATCH: Update a patient's procedure charges, next appointment, and status
 router.patch('/:id', protect, isDoctor, updatePatientbyDoctor);

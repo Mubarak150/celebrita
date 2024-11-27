@@ -69,32 +69,37 @@ const Patient = sequelize.define('Patient', {
     timestamps: true, // Adds createdAt and updatedAt
 });
 
-// Hook to generate patient_number before creating a new patient
 Patient.beforeCreate(async (patient, options) => {
-    // Get the start of the current day (12:00 AM)
-    const todayStart = moment().startOf('day').toDate();
+    // Extract date part from patient's createdAt
+    const patientCreatedAt = new Date(patient.createdAt);
+    const dayStart = new Date(patientCreatedAt);
+    dayStart.setHours(0, 0, 0, 0); // Start of the day
+    const dayEnd = new Date(patientCreatedAt);
+    dayEnd.setHours(23, 59, 59, 999); // End of the day
 
-    // Find the last patient created today
-    const lastPatientToday = await Patient.findOne({
+    // Find the last patient created on the same day as patient.createdAt
+    const lastPatient = await Patient.findOne({
         where: {
             createdAt: {
-                [Op.gte]: todayStart // Find patients created today
+                [Op.gte]: dayStart, // Same day start
+                [Op.lte]: dayEnd,   // Same day end
             }
         },
-        order: [['createdAt', 'DESC']] // Order by latest created
+        order: [['createdAt', 'DESC']], // Order by latest 'createdAt'
     });
 
-    // If no patient was created today, set the number to '001'
-    let newPatientNumber = '001';
+    let newPatientNumber = '001'; // Default to '001' if no patients for that day
 
-    if (lastPatientToday) {
-        // Increment the patient number
-        const lastPatientNumber = parseInt(lastPatientToday.patient_number, 10);
-        newPatientNumber = String(lastPatientNumber + 1).padStart(3, '0'); // Pad the number with leading zeros
+    if (lastPatient) {
+        const lastPatientNumber = parseInt(lastPatient.patient_number, 10);
+        newPatientNumber = String(lastPatientNumber + 1).padStart(3, '0'); // Increment and pad
     }
 
-    // Assign the new patient number to the patient
+    // Assign the new patient number
     patient.patient_number = newPatientNumber;
 });
+
+
+
 
 module.exports = Patient;
