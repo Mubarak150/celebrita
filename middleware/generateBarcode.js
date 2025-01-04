@@ -23,6 +23,7 @@ const generateBarcode = async (req, res, next) => {
   
       // Step 4: Attach the new barcode to the request body
       req.body.barcode = newBarcode;
+      console.log("donehere")
   
       // Step 5: Pass control to the next middleware or handler
       next();
@@ -31,6 +32,41 @@ const generateBarcode = async (req, res, next) => {
       res.status(500).json({ success: false, message: 'Error generating barcode', error: error.message });
     }
   };
-  
 
-module.exports = {generateBarcode}; 
+
+const processImages = (req, res, next) => {
+  try{
+    if (req.files) {
+        if(req.files.thumbnail) {
+          const thumbnailFile = req.files.thumbnail[0];
+          const image = `/uploads/products/${thumbnailFile.filename}`;
+          req.body.thumbnail = image; 
+        } else {
+          res.status(400).json({status: false, message: 'thumbnail cannot be null #process'})
+        }
+        
+        if(req.files.images){
+          const imagesArray = req.files.images.map(file => `/uploads/products/${file.filename}`);
+          req.body.images = JSON.stringify(imagesArray);
+        }
+    }
+    next();
+  } catch (error){
+    next(error); 
+  }
+}
+
+// commenting for future use. ... ... ... ... 
+// const convertFieldsToNumbers = (fields) => (req, res, next) => {
+//   fields.forEach((field) => {
+//     if (req.body[field] !== undefined && typeof req.body[field] === "string") {
+//       const convertedValue = parseFloat(req.body[field]);
+//       if (!isNaN(convertedValue)) {
+//         req.body[field] = convertedValue;
+//       }
+//     }
+//   });
+//   next();
+// };
+
+module.exports = {generateBarcode, processImages}; 

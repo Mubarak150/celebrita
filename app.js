@@ -7,7 +7,12 @@ const cors = require('cors');
 const bodyParser = require('body-parser');
 const fs = require('fs');
 const path = require('path');
+const rateLimit = require('express-rate-limit'); 
+const helmet = require('helmet'); 
+const xss = require('xss-clean');
 require('./models/relations');
+const {CustomError} = require('./utils/CustomError');
+const {globalErrorController} = require('./utils/globalErrorController'); 
 
 const authRoutes = require('./routes/auth');
 const categories = require('./routes/items/categoryRoutes');
@@ -40,6 +45,25 @@ const posV2TodaySalesAndReturnsRoutes = require('./routes/POS-v2/todaySalesAndRe
 const posV2AdminSalesOverviewRoutes = require('./routes/POS-v2-admin/adminSalesOverviewRoutes')
 
 //  MIDDLEWARES: 
+
+
+app.use(helmet()) // for adding security headers to requests
+
+// limiter sets a max amount of req. from an IP in a specified amount of time
+let limiter = rateLimit({
+    max: 30, // 3 req max
+    windowMs: 1000*60*60, // per hour
+    message: "we have recieved too many requests from this IP, try again in a while" // message shown when limit reaches
+}); 
+
+app.use('/api', limiter); 
+
+
+app.use(express.json({ limit: '10kb' })); // have some research on what should be the limit? it is for denial of service attack.
+
+app.use(xss()) // against malicious js in req.
+
+
 require('dotenv').config();
 app.use(express.json());
 app.use(morgan('dev'));
@@ -77,8 +101,8 @@ app.use('/api/user/v1/reviews', reviews);
 app.use('/api/deliveries', deliveries);
 
 // III. Admin APIs:  
-app.use('/api/admin/v1/categories', categories);
-app.use('/api/admin/v1/products', products);
+app.use('/api/v2/categories', categories);
+app.use('/api/v2/products', products);
 app.use('/api/admin/v1/orders', orderAdmin);
 app.use('/api/admin/v1/invoices', invoicesAdmin);
 app.use('/api/admin/v1/reviews', reviewsAdmin);
@@ -110,5 +134,14 @@ app.use('/api/pos/v2/summary', posV2TodaySalesAndReturnsRoutes);
 
 // VII>> pos v2 admin 
 app.use('/api/pos/v2/admin/summary', posV2AdminSalesOverviewRoutes);
+
+// default route: this route SHALL be placed below all the defined routes...
+app.all('*', (req, res, next) => {
+    const error = new CustomError(`the route ${process.env.NODE_ORIGIN}${req.originalUrl} does not exist on this server.`, 404);
+    next(error); 
+})
+
+// global Error Controller
+app.use(globalErrorController)
 // EXPORTING APP TO SERVER.JS
 module.exports = app; 

@@ -10,7 +10,8 @@ const Product = sequelize.define('Product', { //
   },
   name: {
     type: DataTypes.STRING,
-    allowNull: false
+    allowNull: false,
+    unique: true
   },
   company_name: {
     type: DataTypes.STRING,

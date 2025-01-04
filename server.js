@@ -3,6 +3,12 @@ const { connectDB, sequelize } = require('./config/db');
 const http = require('http'); // Import http module to create the server
 const { initializeSocket } = require('./utils/socket'); // Import socket initialization from utils
 
+// synchronously handling unchaugt exceptions
+process.on('uncaughtException', (error) => {
+    console.log( error.name, error.message ); 
+    console.log( 'an uncaught exception occured! shutting down...' ); 
+    process.exit(1)
+})
 console.log(`The App is running in ${app.get('env')} environment`);
 
 // Create an HTTP server and pass the Express app to it
@@ -29,3 +35,13 @@ const startServer = async () => {
 };
 
 startServer();
+
+// UPON unhandled error: log the error, close the server gracefully i.e. allowing it to complete pending requests and then th process is exited/ended.
+process.on('unhandledRejection', (error) => {
+    console.log( error.name, error.message ); 
+    console.log( 'an unhandled rejection occured! shutting down...' ); 
+
+    server.close(() => {
+        process.exit(1)
+    })
+})

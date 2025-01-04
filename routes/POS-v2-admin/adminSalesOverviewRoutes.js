@@ -4,7 +4,7 @@ const {protect, forAdminOrManager} = require('../../middleware/auth')
 const router = express.Router();
 
 // for getting sales overview for a given  date or range thereof... 
-router.get('/', protect, forAdminOrManager, adminSalesOverview);
+router.get('/',  adminSalesOverview); // protect, forAdminOrManager,
 router.get('/salesmen',  overviewSalesmen); //protect, forAdminOrManager,
 
 module.exports = router;

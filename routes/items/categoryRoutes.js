@@ -1,20 +1,19 @@
 const express = require('express');
 const router = express.Router();
-// const {protect, checkSignIn} = require('../middleware/auth');
+const {addCategorySchema, updateCategorySchema} = require('../../utils/validators')
+const {protect, validate, allow} = require('../../middleware/auth');
 const {
-  createCategory,
-  getAllCategories,
-  getAllCategoriesForLandingPage,
+  addCategory,
   getCategoryById,
+  getAllCategories, 
   updateCategoryById,
-  deleteCategoryById,
+  deleteCategoryById
 } = require('../../controllers/items/categoryController');
 
-router.post('/', createCategory);
-router.get('/', getAllCategories); 
-router.get('/all/active', getAllCategoriesForLandingPage); 
+router.post('/',  validate(addCategorySchema), addCategory); // protect, allow('1'),
+router.get('/',  getAllCategories); 
 router.get('/:id', getCategoryById);
-router.patch('/:id', updateCategoryById);
+router.patch('/:id', validate(updateCategorySchema), updateCategoryById);
 router.delete('/:id', deleteCategoryById);
 
 module.exports = router;

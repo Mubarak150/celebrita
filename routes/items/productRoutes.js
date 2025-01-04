@@ -1,34 +1,54 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const uploadImages = require("../../middleware/uploadImage(s)"); 
-const {generateBarcode} = require('../../middleware/generateBarcode'); 
-const {protect, forAdminOrManager} = require('../../middleware/auth');
+const uploadImages = require("../../middleware/uploadImage(s)");
+const {
+  generateBarcode,
+  processImages,
+} = require("../../middleware/generateBarcode");
+// const {protect, forAdminOrManager} = require('../../middleware/auth');
+const { protect, validate, allow } = require("../../middleware/auth");
+const {
+  createProductSchema,
+  updateProductSchema,
+} = require("../../utils/validators");
 const {
   createProduct,
-  getAllProducts,
-  getAllProductsForLandingPage,
   getProductById,
-  getAllProductsByCategoryName,
+  getAllProducts,
   updateProductById,
-  deleteProductById,
-  searchProductByName,
-  getLowStockProducts,
+  getProductsWithValuation,
+} = require("../../controllers/items/productController");
+
+router.post(
+  "/",
+  uploadImages, // Multer middleware first
+  validate(createProductSchema), // Zod validation after multer processes files and body
+  processImages,
+  generateBarcode,
+  createProduct
+);
+
+router.get("/:id", getProductById);
+router.get("/", getAllProducts);
+router.patch(
+  "/:id",
+  uploadImages,
+  validate(updateProductSchema),
+  processImages,
+  updateProductById
+);
+// router.get('/all/active', getAllProductsForLandingPage);
+// router.get("/all/low-stock",  protect, forAdminOrManager, getLowStockProducts);
+router.get(
+  "/all/valuation",
+  protect,
+  allow("1", "6"),
   getProductsWithValuation
-} = require('../../controllers/items/productController');
+); // admin manager
+// router.get('/search', searchProductByName);
 
-router.post('/', uploadImages, generateBarcode, createProduct);
+// router.get('/category/:category', getAllProductsByCategoryName); /// ? category=:category......
 
-router.get('/', getAllProducts); 
-router.get('/all/active', getAllProductsForLandingPage); 
-router.get("/all/low-stock",  protect, forAdminOrManager, getLowStockProducts); 
-router.get("/all/valuation",  protect, forAdminOrManager, getProductsWithValuation);
-router.get('/search', searchProductByName); 
-router.get('/:product', getProductById);
-router.get('/category/:category', getAllProductsByCategoryName);
-
-router.patch('/:id', uploadImages, updateProductById); // upload images is a multer middleware here||||||||||
-
-router.delete('/:id', deleteProductById);
-
+// router.delete('/:id', deleteProductById);
 
 module.exports = router;
