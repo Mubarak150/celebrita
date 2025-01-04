@@ -1,19 +1,45 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const {addCategorySchema, updateCategorySchema} = require('../../utils/validators')
-const {protect, validate, allow} = require('../../middleware/auth');
+const {
+  addCategorySchema,
+  updateCategorySchema,
+} = require("../../utils/validators");
+const { auth, validate, allow } = require("../../middleware/auth");
 const {
   addCategory,
   getCategoryById,
-  getAllCategories, 
+  getAllCategories,
   updateCategoryById,
-  deleteCategoryById
-} = require('../../controllers/items/categoryController');
+  deleteCategoryById,
+} = require("../../controllers/items/categoryController");
 
-router.post('/',  validate(addCategorySchema), addCategory); // protect, allow('1'),
-router.get('/',  getAllCategories); 
-router.get('/:id', getCategoryById);
-router.patch('/:id', validate(updateCategorySchema), updateCategoryById);
-router.delete('/:id', deleteCategoryById);
+router.post(
+  "/",
+  auth,
+  allow("1", "6"),
+  validate(addCategorySchema),
+  addCategory
+); //
+
+router.get("/", getAllCategories);
+
+router.get("/:id", auth, allow("1", "6"), getCategoryById);
+
+router.patch(
+  "/:id",
+  auth,
+  allow("1", "6"),
+  validate(updateCategorySchema),
+  updateCategoryById
+);
+
+router.delete(
+  "/:id",
+  auth,
+  allow("1", "6"),
+  auth,
+  allow("1", "6"),
+  deleteCategoryById
+);
 
 module.exports = router;

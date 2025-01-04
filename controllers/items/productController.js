@@ -58,16 +58,6 @@ const getProductById = asyncErrorHandler(
 
 */
 
-/*
-can also be used for: 
-1. getLowStockProducts                          // /?quantity[lte]=:quantity(int) use it like /?quantity[lte]=10
-2. getAllProductsForLandingPage                 // /?status=active&limit=12
-3. getAllProductsByCategory                     // /?category_id=:id(int).... meaning now pass catergory_id instead of category name
-4. searchProductByName                          // /?name_like=:name(string)
-5. getAllProducts                               // main use. 
-6. max price                                    // /?price[lte]=:price(int)
-
-*/
 // 3.
 const getAllProducts = asyncErrorHandler(
   async (req, res) =>
@@ -89,11 +79,6 @@ const getAllProducts = asyncErrorHandler(
 const updateProductById = update(Product);
 
 exports.updateProductById = handleUpdateById("products");
-
-// exports.deleteProductById = handleDeleteById(`
-//     DELETE FROM products
-//     WHERE id = :id
-// `, 'products');
 
 /*       
          *********  N O T E *********
