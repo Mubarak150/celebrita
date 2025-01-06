@@ -36,8 +36,16 @@ const sendSuccess = (
 
 // 2.1. to parse a stringified array:
 const parse = (input) => {
-  const parsefn = (input) =>
-    input.images ? { ...input, images: JSON.parse(input.images) } : input;
+  const parsefn = (input) => {
+    if (input.images) {
+      input.images = JSON.parse(input.images);
+      input.images = JSON.parse(input.images);
+      return input;
+    }
+    return input;
+  };
+
+  // input.images ? { ...input, images: JSON.parse(input.images) } : input;
 
   // actual game is here:
   if (Array.isArray(input)) return input.map((item) => parsefn(item));
@@ -63,7 +71,7 @@ const parse = (input) => {
 const create = (model) =>
   asyncErrorHandler(async (req, res, next) => {
     const transaction = await model.sequelize.transaction();
-    console.dir(req.body);
+    // console.dir(req.body);
     try {
       // let data = processImages(req);
       let newRecord;
@@ -100,18 +108,19 @@ const create = (model) =>
 
 */
 
-const getAll = async (req, res, model, { sub_model, alias }, attributes) => {
-  const features = new ApiFeatures(model, { sub_model, alias }, req.query)
+const getAll = async (req, res, model, sub_model) => {
+  const features = new ApiFeatures(model, sub_model, req.query)
     .filter()
     .sort()
     .limit_fields();
-  (await features.paginate()).includes(sub_model, alias, attributes);
+  (await features.paginate()).includes(sub_model);
 
   let results = await model.findAll(features.queryOptions);
 
   if (results.length == 0 || !results)
     sendSuccess(res, 200, "no matching data found");
   else {
+    console.dir(results);
     results = await parse(results);
     sendSuccess(res, 200, "data retrieved", {
       results: results,
@@ -128,12 +137,12 @@ const getAll = async (req, res, model, { sub_model, alias }, attributes) => {
 
 */
 
-const getOne = async (req, res, model, { sub_model, alias }, attributes) => {
-  const features = new ApiFeatures(model, { sub_model, alias }, req.params)
+const getOne = async (req, res, model, sub_model) => {
+  const features = new ApiFeatures(model, sub_model, req.params)
     .filter()
     .sort()
     .limit_fields()
-    .includes(sub_model, alias, attributes);
+    .includes(sub_model);
   let results = await model.findOne(features.queryOptions);
 
   if (!results) sendSuccess(res, 200, "no matching data found");

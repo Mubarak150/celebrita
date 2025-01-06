@@ -1,5 +1,4 @@
-const { z } = require('zod');
-
+const { z } = require("zod");
 
 /**
                           |**************************************************|
@@ -11,43 +10,42 @@ const { z } = require('zod');
 const addCategorySchema = z.object({
   category: z
     .string()
-    .min(1, 'Category name is required')
-    .regex(/^[A-Za-z]+$/, 'Invalid category format'),
+    .min(1, "Category name is required")
+    .regex(/^[A-Za-z]+$/, "Invalid category format"),
 
   description: z.string().optional(),
-  d_url: z.string().url('Invalid URL format').optional(),
-  status: z.enum(['active', 'inactive']).optional(),
+  d_url: z.string().url("Invalid URL format").optional(),
+  status: z.enum(["active", "inactive"]).optional(),
 });
 
 // Schema for updating a category
 const updateCategorySchema = z.object({
   category: z
     .string()
-    .min(1, 'Category name must not be empty')
-    .regex(/^[A-Za-z]+$/, 'Invalid category format')
+    .min(1, "Category name must not be empty")
+    .regex(/^[A-Za-z]+$/, "Invalid category format")
     .optional()
     .refine(
       (val) => !/([<>]|&lt;|&gt;|&amp;|&quot;|&apos;|&#\d+;)/.test(val),
-      'Category name contains disallowed characters'
+      "Category name contains disallowed characters"
     ),
   description: z
     .string()
     .optional()
     .refine(
       (val) => !/([<>]|&lt;|&gt;|&amp;|&quot;|&apos;|&#\d+;)/.test(val),
-      'Description contains disallowed characters'
+      "Description contains disallowed characters"
     ),
   d_url: z
     .string()
-    .url('Invalid URL format')
+    .url("Invalid URL format")
     .optional()
     .refine(
       (val) => !/([<>]|&lt;|&gt;|&amp;|&quot;|&apos;|&#\d+;)/.test(val),
-      'URL contains disallowed characters'
+      "URL contains disallowed characters"
     ),
-  status: z.enum(['active', 'inactive']).optional(),
+  status: z.enum(["active", "inactive"]).optional(),
 });
-
 
 /**
                           |**************************************************|
@@ -60,7 +58,7 @@ const disallowedCharacterValidator = z
   .string()
   .refine(
     (val) => !/([<>]|&lt;|&gt;|&amp;|&quot;|&apos;|&#\d+;)/.test(val),
-    'Field contains disallowed characters'
+    "Field contains disallowed characters"
   );
 
 // // creating a product
@@ -108,34 +106,70 @@ const disallowedCharacterValidator = z
 const createProductSchema = z.object({
   name: disallowedCharacterValidator,
   company_name: disallowedCharacterValidator,
-  price: z.coerce.number().positive('Price must be a positive number'),
-  wholesale_price: z.coerce.number().positive('Wholesale price must be a positive number'),
+  price: z.coerce.number().positive("Price must be a positive number"),
+  wholesale_price: z.coerce
+    .number()
+    .positive("Wholesale price must be a positive number"),
   discount: z.coerce.number().int().min(0).max(100),
   manufacturing_date: disallowedCharacterValidator,
   expiry_date: disallowedCharacterValidator,
   quantity: z.coerce.number().int().min(0),
   thumbnail: z.string().optional(),
   images: z.string().optional(),
-  status: z.enum(['active', 'inactive']).optional(),
-  category_id: z.coerce.number().int().positive('Category ID must be a positive integer'),
+  status: z.enum(["active", "inactive"]).optional(),
+  category_id: z.coerce
+    .number()
+    .int()
+    .positive("Category ID must be a positive integer"),
   barcode: disallowedCharacterValidator.optional(),
   supplier: disallowedCharacterValidator.optional(),
   description: z.string().optional(),
 });
 
-
 // updating a product (partial validation)
 const updateProductSchema = createProductSchema.partial();
 
+// Validation for creating a review
+const createReviewSchema = z.object({
+  product_id: z.coerce
+    .number()
+    .int()
+    .positive("no product identified for review."),
+  review: z
+    .string()
+    .min(10, "Review must be more than 10 characters.")
+    .max(80, "shorten your review.")
+    .refine(
+      (val) => !/([<>]|&lt;|&gt;|&amp;|&quot;|&apos;|&#\d+;)/.test(val),
+      "Field contains disallowed characters"
+    ),
+  stars: z.coerce
+    .number()
+    .int()
+    .min(1, "Stars must be at least 1.")
+    .max(5, "Stars cannot be more than 5.")
+    .refine(
+      (val) => !/([<>]|&lt;|&gt;|&amp;|&quot;|&apos;|&#\d+;)/.test(val),
+      "Field contains disallowed characters"
+    )
+    .optional(),
+});
 
-
+// Validation for updating a review (partial validation)
+const updateReviewSchema = createReviewSchema.partial();
 
 module.exports = {
-  // category: 
-  addCategorySchema, updateCategorySchema,
+  // category:
+  addCategorySchema,
+  updateCategorySchema,
 
-  // products: 
-  createProductSchema, updateProductSchema,
+  // products:
+  createProductSchema,
+  updateProductSchema,
 
-  // NEXT:?
-}
+  // reviews:
+  createReviewSchema,
+  updateReviewSchema,
+
+  // NEXT: ??
+};

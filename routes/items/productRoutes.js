@@ -78,15 +78,3 @@ router.get("/all/valuation", auth, allow("1", "6"), getProductsWithValuation); /
 // router.delete('/:id', deleteProductById);
 
 module.exports = router;
-
-/*
-{
-    "status": "error",
-    "message": "Unexpected token '/', \"/uploads/p\"... is not valid JSON",
-    "stackTrace": "SyntaxError: Unexpected token '/', \"/uploads/p\"... is not valid JSON\n    at JSON.parse (<anonymous>)\n    at parsefn (F:\\Mudassir shah\\celebrita\\celebrita\\utils\\helpers.js:43:27)\n    at F:\\Mudassir shah\\celebrita\\celebrita\\utils\\helpers.js:49:56\n    at Array.map (<anonymous>)\n    at parse (F:\\Mudassir shah\\celebrita\\celebrita\\utils\\helpers.js:49:42)\n    at getAll (F:\\Mudassir shah\\celebrita\\celebrita\\utils\\helpers.js:121:21)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)\n    at async F:\\Mudassir shah\\celebrita\\celebrita\\controllers\\items\\productController.js:64:5",
-    "error": {
-        "statusCode": 500,
-        "status": "error"
-    }
-}
-*/

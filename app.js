@@ -95,7 +95,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/user/v2/cart", cart);
 app.use("/api/user/v1/place-order", order);
 app.use("/api/user/v1/orders", orderUser);
-app.use("/api/user/v1/reviews", reviews);
+app.use("/reviews", reviews);
 app.use("/api/deliveries", deliveries);
 
 // III. Admin APIs:
@@ -103,7 +103,7 @@ app.use("/api/v2/categories", categories);
 app.use("/api/v2/products", products);
 app.use("/api/admin/v1/orders", orderAdmin);
 app.use("/api/admin/v1/invoices", invoicesAdmin);
-app.use("/api/admin/v1/reviews", reviewsAdmin);
+app.use("/admin/reviews", reviewsAdmin); // v2
 app.use("/api/admin/v1/pos", posAdmin);
 app.use("/api/admin/v1/password-change-logs", passwordChangeLogRoutes);
 
@@ -135,7 +135,7 @@ app.use("/api/pos/v2/admin/summary", posV2AdminSalesOverviewRoutes);
 // default route: this route SHALL be placed below all the defined routes...
 app.all("*", (req, res, next) => {
   const error = new CustomError(
-    `the route ${process.env.NODE_ORIGIN}${req.originalUrl} does not exist on this server.`,
+    `the route ${req.originalUrl} does not exist on this server.`,
     404
   );
   next(error);

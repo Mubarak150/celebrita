@@ -23,7 +23,7 @@ router.post(
 
 router.get("/", getAllCategories);
 
-router.get("/:id", auth, allow("1", "6"), getCategoryById);
+router.get("/:id", getCategoryById);
 
 router.patch(
   "/:id",

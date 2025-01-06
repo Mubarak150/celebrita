@@ -44,9 +44,8 @@ const createProduct = create(Product);
 // 2.
 const getProductById = asyncErrorHandler(
   async (req, res) =>
-    await getOne(req, res, Product, { sub_model: Category, alias: null }, [
-      "id",
-      "category",
+    await getOne(req, res, Product, [
+      { model: Category, attributes: ["id", "category"] },
     ])
 );
 
@@ -61,9 +60,8 @@ const getProductById = asyncErrorHandler(
 // 3.
 const getAllProducts = asyncErrorHandler(
   async (req, res) =>
-    await getAll(req, res, Product, { sub_model: Category, alias: null }, [
-      "id",
-      "category",
+    await getAll(req, res, Product, [
+      { model: Category, attributes: ["id", "category"] },
     ])
 );
 

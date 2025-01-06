@@ -1,12 +1,13 @@
-const express = require('express');
+const express = require("express");
 const router = express.Router();
-const { protect } = require('../../middleware/auth');
-const { createReview, getReviewById } = require('../../controllers/reviews/userController');
+const { auth, validate } = require("../../middleware/auth");
+const { createReview } = require("../../controllers/reviews/userController");
+const {
+  createReviewSchema,
+  updateReviewSchema,
+} = require("../../utils/validators");
 
 // Route for users to add reviews
-router.post('/', protect, createReview);
-
-// Route for users to view review by ID
-// router.get('/reviews/:id', protect, getReviewById);
+router.post("/", auth, validate(createReviewSchema), createReview);
 
 module.exports = router;

@@ -48,7 +48,7 @@ yarn.lock
 .yarn-integrity
 
 # dotenv environment variables file
-# .env
+.env
 
 # Bower dependency directory (if you're using Bower)
 bower_components/
