@@ -36,14 +36,8 @@ const sendSuccess = (
 
 // 2.1. to parse a stringified array:
 const parse = (input) => {
-  const parsefn = (input) => {
-    if (input.images) {
-      // Convert the double stringified images array to a proper array .. .i yet dont know what is causing the double stringificaiton but for now this is the solution.
-      input.images = JSON.parse(input.images);
-      // input.images = JSON.parse(input.images);
-    }
-    return input;
-  };
+  const parsefn = (input) =>
+    input.images ? { ...input, images: JSON.parse(input.images) } : input;
 
   // actual game is here:
   if (Array.isArray(input)) return input.map((item) => parsefn(item));
