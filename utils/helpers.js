@@ -40,7 +40,7 @@ const parse = (input) => {
     if (input.images) {
       // Convert the double stringified images array to a proper array .. .i yet dont know what is causing the double stringificaiton but for now this is the solution.
       input.images = JSON.parse(input.images);
-      input.images = JSON.parse(input.images);
+      // input.images = JSON.parse(input.images);
     }
     return input;
   };
