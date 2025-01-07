@@ -1,6 +1,7 @@
 const ApiFeatures = require("./ApiFeatures");
 const asyncErrorHandler = require("./asyncErrorHandler");
 const { makeError, CustomError } = require("./CustomError");
+const { getAverageRating } = require("../controllers/reviews/userController");
 
 /*
  _____________________________________________________________________________________
@@ -35,21 +36,31 @@ const sendSuccess = (
 */
 
 // 2.1. to parse a stringified array:
-const parse = (input) => {
-  const parsefn = (input) => {
-    if (input.images) {
-      input.images = JSON.parse(input.images);
-      input.images = JSON.parse(input.images);
-      return input;
+const parse = async (input) => {
+  const parsefn = async (item) => {
+    if (item.images) {
+      item = item.get({ plain: true });
+
+      // Parse images
+      item.images = JSON.parse(item.images);
+      item.images = JSON.parse(item.images);
+
+      // Fetch and add ratings
+      item.ratings = await getAverageRating(item.id);
     }
-    return input;
+    return item;
   };
 
-  // input.images ? { ...input, images: JSON.parse(input.images) } : input;
+  if (Array.isArray(input)) {
+    // Process each item in the array asynchronously
+    const parsedArray = await Promise.all(input.map((item) => parsefn(item)));
+    return parsedArray; // Return the modified array with ratings
+  }
 
-  // actual game is here:
-  if (Array.isArray(input)) return input.map((item) => parsefn(item));
-  if (typeof input == "object") parsefn(input);
+  if (typeof input === "object") {
+    const parsedObject = await parsefn(input);
+    return parsedObject;
+  }
 
   return input;
 };
@@ -120,7 +131,6 @@ const getAll = async (req, res, model, sub_model) => {
   if (results.length == 0 || !results)
     sendSuccess(res, 200, "no matching data found");
   else {
-    console.dir(results);
     results = await parse(results);
     sendSuccess(res, 200, "data retrieved", {
       results: results,
@@ -147,7 +157,7 @@ const getOne = async (req, res, model, sub_model) => {
 
   if (!results) sendSuccess(res, 200, "no matching data found");
   else {
-    results = parse(results);
+    results = await parse(results);
     sendSuccess(res, 200, "data retrieved", { results });
   }
 };

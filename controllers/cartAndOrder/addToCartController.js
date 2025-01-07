@@ -72,8 +72,7 @@ const getCart = asyncErrorHandler(async (req, res) => {
 
   //                                                                                                       Find the user's cart
   const cart = await Cart.findOne({ where: { user_id }, include: CartItem });
-  if (!cart || cart.CartItems.length === 0)
-    return sendSuccess(res, 200, "your cart is empty yet.");
+  if (!cart) return sendSuccess(res, 200, "your cart is empty yet.");
 
   //                                                                                                       Fetch product details for each cart item
   const cartDetails = await Promise.all(

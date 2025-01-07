@@ -19,57 +19,57 @@ const getAllReviews = asyncErrorHandler(
     ])
 ); // bahut dimagh kharch huwa es ko krtay krtay.. hahh
 
-const getReviewsByStatus = async (req, res, status) => {
-  const { page = 1, limit = 10 } = req.query; // Default pagination values
-  const limitValue = parseInt(limit, 10);
-  const offset = (parseInt(page, 10) - 1) * limitValue;
+// const getReviewsByStatus = async (req, res, status) => {
+//   const { page = 1, limit = 10 } = req.query; // Default pagination values
+//   const limitValue = parseInt(limit, 10);
+//   const offset = (parseInt(page, 10) - 1) * limitValue;
 
-  try {
-    // Fetch reviews by status with pagination
-    const reviews = await Review.findAndCountAll({
-      where: { status },
-      include: [
-        {
-          model: User,
-          attributes: ["id", "name", "email"], // Include User details
-        },
-        {
-          model: Product,
-          attributes: ["id", "name", "thumbnail"], // Include Product details
-        },
-      ],
-      limit: limitValue, // Limit the number of results per page
-      offset: offset, // Skip records for pagination
-    });
+//   try {
+//     // Fetch reviews by status with pagination
+//     const reviews = await Review.findAndCountAll({
+//       where: { status },
+//       include: [
+//         {
+//           model: User,
+//           attributes: ["id", "name", "email"], // Include User details
+//         },
+//         {
+//           model: Product,
+//           attributes: ["id", "name", "thumbnail"], // Include Product details
+//         },
+//       ],
+//       limit: limitValue, // Limit the number of results per page
+//       offset: offset, // Skip records for pagination
+//     });
 
-    // If no reviews found, return 404
-    if (!reviews.rows.length) {
-      return res.status(404).json({
-        success: false,
-        message: "No reviews found with the given status",
-      });
-    }
+//     // If no reviews found, return 404
+//     if (!reviews.rows.length) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "No reviews found with the given status",
+//       });
+//     }
 
-    // Pagination metadata
-    const totalReviews = reviews.count;
-    const totalPages = Math.ceil(totalReviews / limitValue);
-    const currentPage = parseInt(page, 10);
+//     // Pagination metadata
+//     const totalReviews = reviews.count;
+//     const totalPages = Math.ceil(totalReviews / limitValue);
+//     const currentPage = parseInt(page, 10);
 
-    // Send the response with paginated reviews and pagination details
-    res.status(200).json({
-      success: true,
-      pagination: {
-        totalReviews,
-        totalPages,
-        currentPage,
-        limit: limitValue,
-      },
-      data: reviews.rows,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
+//     // Send the response with paginated reviews and pagination details
+//     res.status(200).json({
+//       success: true,
+//       pagination: {
+//         totalReviews,
+//         totalPages,
+//         currentPage,
+//         limit: limitValue,
+//       },
+//       data: reviews.rows,
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// };
 
 // Get Review by ID
 const getReviewById = async (req, res) => {
@@ -166,7 +166,7 @@ const deleteReview = async (req, res) => {
 
 module.exports = {
   getAllReviews,
-  getReviewsByStatus,
+  // getReviewsByStatus,
   getReviewById,
   updateReview,
   deleteReview,
