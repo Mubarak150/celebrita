@@ -93,15 +93,15 @@ app.use("/api/auth", authRoutes);
 
 // II. user APIs
 app.use("/api/user/v2/cart", cart);
-app.use("/api/user/v1/place-order", order);
-app.use("/api/user/v1/orders", orderUser);
+app.use("/api/user/v2/place-order", order);
+app.use("/api/v1/orders", orderUser);
 app.use("/reviews", reviews);
 app.use("/api/deliveries", deliveries);
 
 // III. Admin APIs:
 app.use("/api/v2/categories", categories);
 app.use("/api/v2/products", products);
-app.use("/api/admin/v1/orders", orderAdmin);
+// app.use("/api/v1/orders", orderAdmin);
 app.use("/api/admin/v1/invoices", invoicesAdmin);
 app.use("/admin/reviews", reviewsAdmin); // v2
 app.use("/api/admin/v1/pos", posAdmin);
