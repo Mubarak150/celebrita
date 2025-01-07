@@ -47,7 +47,7 @@ const addToCart = asyncErrorHandler(async (req, res, next) => {
 
   //                                                                                                       if the product already exists in the cart
   if (cartItem)
-    return makeError(
+    return sendSuccess(
       res,
       200,
       "item already in cart, please visit your cart to alter quantity."

@@ -42,7 +42,7 @@ const parse = async (input) => {
       item = item.get({ plain: true });
 
       // Parse images
-      item.images = JSON.parse(item.images);
+      // item.images = JSON.parse(item.images);
       item.images = JSON.parse(item.images);
 
       // Fetch and add ratings
