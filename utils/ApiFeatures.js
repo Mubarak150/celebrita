@@ -15,7 +15,8 @@ class ApiFeatures {
     const excludeFields = ["sort", "page", "limit", "fields", "include"];
     const queryObj = { ...this.queryStr };
     excludeFields.forEach((el) => delete queryObj[el]);
-    console.log("before: ", queryObj);
+
+    // future dev:::: i am adding the followin' 2 if clauses for price range search... each step is guided.. and you can safely remove it if dont need any filteration for price
     if (queryObj.price) {
       if (queryObj.price.gte) {
         queryObj.price = {
@@ -33,7 +34,7 @@ class ApiFeatures {
         delete queryObj.price.lte;
       }
     }
-    console.log("after: ", queryObj);
+
     // i am adding this BLOCK for search compatibility... for search pass field say id as id_like and name as name_like ... i you dont want searches... then you can safely remove this block.
     for (const key in queryObj) {
       if (key.endsWith("_like")) {
@@ -86,28 +87,6 @@ class ApiFeatures {
     };
     return this;
   }
-
-  // includes(sub_model, alias=null, attributes) {
-  //     if (sub_model && alias) {
-  //         this.queryOptions.include = [
-  //             ...(this.queryOptions.include || []), // Preserve existing includes
-  //             {
-  //                 model: sub_model,
-  //                 as: alias,
-  //                 attributes: attributes || { exclude: ['createdAt'] }, // Use provided or default
-  //             },
-  //         ];
-  //     } else if (sub_model&&alias==null){
-  //         this.queryOptions.include = [
-  //             ...(this.queryOptions.include || []), // Preserve existing includes
-  //             {
-  //                 model: sub_model,
-  //                 attributes: attributes || { exclude: ['createdAt'] }, // Use provided or default
-  //             },
-  //         ];
-  //     }
-  //     return this;
-  // }
 
   includes(sub_models) {
     sub_models = sub_models.map(({ model, alias, attributes }) => ({

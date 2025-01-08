@@ -1,53 +1,87 @@
 const express = require("express");
 const router = express.Router();
 const {
-  getOrders,
+  //   getOrders,
+  getOrdersByStatus,
   updateOrderStatus,
   getOrderById,
 } = require("../../controllers/cartAndOrder/orderController");
-const { protect, isUserAdmin } = require("../../middleware/auth");
+const { protect, auth, isUserAdmin } = require("../../middleware/auth");
 const uploadImages = require("../../middleware/uploadImage(s)");
 
-router.get("/", getOrders);
 // Pending Orders
-// router.get('/pending',  protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'pending')); // done
-// router.put('/pending/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = approve || status = reject // done
+router.get("/:status", auth, getOrdersByStatus); // done
+// router.put("/pending/:id/:status", protect, isUserAdmin, updateOrderStatus); // status = approve || status = reject // done
 
 // // Approved Orders
-// router.get('/approved', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'approved')); // done
-// router.put('/approved/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = on-the-way // done
+// router.get("/approved", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "approved")
+// ); // done
+// router.put("/approved/:id/:status", protect, isUserAdmin, updateOrderStatus); // status = on-the-way // done
 
-// router.get('/rejected', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'rejected')); // done
+// router.get("/rejected", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "rejected")
+// ); // done
 
 // // On the Way Orders
-// router.get('/on-the-way',  protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'on-the-way')); // done
-// router.put('/on-the-way/:id/:status', protect, isUserAdmin, updateOrderStatus); // status: recieve
+// router.get("/on-the-way", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "on-the-way")
+// ); // done
+// router.put("/on-the-way/:id/:status", protect, isUserAdmin, updateOrderStatus); // status: recieve
 
 // // Received Orders
-// router.get('/received', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'received')); // done
+// router.get("/received", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "received")
+// ); // done
 
 // // RETURN ORDERS: pending
-// router.get('/return-pending', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-pending')); //
-// router.put('/return-pending/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-approve || status = return-reject
+// router.get("/return-pending", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "return-pending")
+// ); //
+// router.put(
+//   "/return-pending/:id/:status",
+//   protect,
+//   isUserAdmin,
+//   updateOrderStatus
+// ); // status = return-approve || status = return-reject
 // // return-rejected dont have routes... as return once rejected is sent to completed orders categoty/status.
 
 // // : approved
-// router.get('/return-approved', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-approved')); //
+// router.get("/return-approved", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "return-approved")
+// ); //
 
 // // : on-the-way
-// router.get('/return-on-the-way', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-on-the-way')); //
-// router.put('/return-on-the-way/:id/:status',  protect, isUserAdmin, updateOrderStatus); // status = return-received
+// router.get("/return-on-the-way", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "return-on-the-way")
+// ); //
+// router.put(
+//   "/return-on-the-way/:id/:status",
+//   protect,
+//   isUserAdmin,
+//   updateOrderStatus
+// ); // status = return-received
 
 // // : received
-// router.get('/return-received', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'return-received')); //
+// router.get("/return-received", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "return-received")
+// ); //
 
 // // : return paid
-// router.put('/return-received/:id/:status',  protect, isUserAdmin, uploadImages, updateOrderStatus); // status = return-payment
+// router.put(
+//   "/return-received/:id/:status",
+//   protect,
+//   isUserAdmin,
+//   uploadImages,
+//   updateOrderStatus
+// ); // status = return-payment
 
 // // Completed Orders
-// router.get('/completed', protect, isUserAdmin, (req, res) => getOrdersByStatus(req, res, 'completed')); //
+// router.get("/completed", protect, isUserAdmin, (req, res) =>
+//   getOrdersByStatus(req, res, "completed")
+// ); //
 
-// Get Order by ID
-router.get("/:id", protect, isUserAdmin, getOrderById); // done
+// // Get Order by ID
+router.get("/id/:id", auth, getOrderById); // done
 
 module.exports = router;
