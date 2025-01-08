@@ -10,6 +10,7 @@ const path = require("path");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const xss = require("xss-clean");
+const hpp = require("hpp");
 require("./models/relations");
 const { CustomError } = require("./utils/CustomError");
 const { globalErrorController } = require("./utils/globalErrorController");
@@ -62,6 +63,8 @@ app.use(express.json({ limit: "10kb" })); // have some research on what should b
 
 app.use(xss()); // against malicious js in req.
 
+// app.use(hpp({ whitelist: ["duration", "directors", "price"] }));
+
 require("dotenv").config();
 app.use(express.json());
 app.use(morgan("dev"));
@@ -101,7 +104,7 @@ app.use("/api/deliveries", deliveries);
 // III. Admin APIs:
 app.use("/api/v2/categories", categories);
 app.use("/api/v2/products", products);
-// app.use("/api/v1/orders", orderAdmin);
+app.use("/api/v1/admin/orders", orderAdmin);
 app.use("/api/admin/v1/invoices", invoicesAdmin);
 app.use("/admin/reviews", reviewsAdmin); // v2
 app.use("/api/admin/v1/pos", posAdmin);

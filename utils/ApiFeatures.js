@@ -15,7 +15,25 @@ class ApiFeatures {
     const excludeFields = ["sort", "page", "limit", "fields", "include"];
     const queryObj = { ...this.queryStr };
     excludeFields.forEach((el) => delete queryObj[el]);
+    console.log("before: ", queryObj);
+    if (queryObj.price) {
+      if (queryObj.price.gte) {
+        queryObj.price = {
+          ...queryObj.price, // Retain other existing filters (if any)
+          [Op.gte]: queryObj.price.gte, // Add gte filter
+        };
+        delete queryObj.price.gte;
+      }
 
+      if (queryObj.price.lte) {
+        queryObj.price = {
+          ...queryObj.price, // Retain other existing filters (if any)
+          [Op.lte]: queryObj.price.lte, // Add lte filter
+        };
+        delete queryObj.price.lte;
+      }
+    }
+    console.log("after: ", queryObj);
     // i am adding this BLOCK for search compatibility... for search pass field say id as id_like and name as name_like ... i you dont want searches... then you can safely remove this block.
     for (const key in queryObj) {
       if (key.endsWith("_like")) {

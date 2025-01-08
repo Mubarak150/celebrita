@@ -4,64 +4,99 @@ const Order = require("../../models/Order");
 const OrderProduct = require("../../models/OrderProduct");
 const Notification = require("../../models/Notification");
 const { sendNotificationToUser } = require("../../utils/socket"); // importiiiiiiiiiing Socket.IO instance
+const asyncErrorHandler = require("../../utils/asyncErrorHandler");
+const { getAll } = require("../../utils/helpers");
 
 // Get Orders by Status with Pagination
-const getOrdersByStatus = async (req, res, status) => {
-  const { page = 1, limit = 10 } = req.query; // Default pagination values
-  const limitValue = parseInt(limit, 10);
-  const offset = (parseInt(page, 10) - 1) * limitValue;
+// const getOrders = asyncErrorHandler(
+//   async (req, res) =>
+//     await getAll(req, res, Order, [
+//       {
+//         model: User,
+//         attributes: ["id", "name", "email"],
+//       },
+//       {
+//         model: Product,
+//         attributes: ["id", "name", "thumbnail"],
+//       },
+//     ])
+// );
 
-  try {
-    // Fetch orders by status with pagination
-    const orders = await Order.findAndCountAll({
-      where: { status },
+const getOrders = asyncErrorHandler(async (req, res) => {
+  await getAll(req, res, Order, [
+    {
+      model: User,
+      attributes: ["id", "name", "email"], // Fetch specific user attributes
+    },
+    {
+      model: Product,
+      attributes: ["id", "name", "thumbnail"], // Fetch specific product attributes
       include: [
         {
-          model: User,
-          attributes: ["id", "name", "email"],
-        },
-        {
-          model: Product,
-          attributes: ["id", "name", "thumbnail"],
-          through: {
-            attributes: ["quantity", "price_at_order"], // Include these attributes from the OrderProduct table
-          },
+          model: OrderProduct, // Include orderProducts
+          attributes: ["quantity", "price_at_order"], // Fetch specific orderProduct attributes
         },
       ],
-      limit: limitValue, // Limit the number of results per page
-      offset: offset, // Skip records for pagination
-    });
+    },
+  ]);
+});
 
-    // If no orders found, return 404
-    if (!orders.rows.length) {
-      return res
-        .status(404)
-        .json({
-          success: false,
-          message: "No orders found with the given status",
-        });
-    }
+// const getOrdersByStatus = async (req, res, status) => {
+//   const { page = 1, limit = 10 } = req.query; // Default pagination values
+//   const limitValue = parseInt(limit, 10);
+//   const offset = (parseInt(page, 10) - 1) * limitValue;
 
-    // Pagination metadata
-    const totalOrders = orders.count;
-    const totalPages = Math.ceil(totalOrders / limitValue);
-    const currentPage = parseInt(page, 10);
+//   try {
+//     // Fetch orders by status with pagination
+//     const orders = await Order.findAndCountAll({
+//       where: { status },
+//       include: [
+//         {
+//           model: User,
+//           attributes: ["id", "name", "email"],
+//         },
+//         {
+//           model: Product,
+//           attributes: ["id", "name", "thumbnail"],
+//           through: {
+//             attributes: ["quantity", "price_at_order"], // Include these attributes from the OrderProduct table
+//           },
+//         },
+//       ],
+//       limit: limitValue, // Limit the number of results per page
+//       offset: offset, // Skip records for pagination
+//     });
 
-    // Send the response with paginated orders and pagination details
-    res.status(200).json({
-      success: true,
-      data: orders.rows,
-      pagination: {
-        totalOrders,
-        totalPages,
-        currentPage,
-        limit: limitValue,
-      },
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
-  }
-};
+//     // If no orders found, return 404
+//     if (!orders.rows.length) {
+//       return res
+//         .status(404)
+//         .json({
+//           success: false,
+//           message: "No orders found with the given status",
+//         });
+//     }
+
+//     // Pagination metadata
+//     const totalOrders = orders.count;
+//     const totalPages = Math.ceil(totalOrders / limitValue);
+//     const currentPage = parseInt(page, 10);
+
+//     // Send the response with paginated orders and pagination details
+//     res.status(200).json({
+//       success: true,
+//       data: orders.rows,
+//       pagination: {
+//         totalOrders,
+//         totalPages,
+//         currentPage,
+//         limit: limitValue,
+//       },
+//     });
+//   } catch (error) {
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// };
 
 // Get Order by ID
 const getOrderById = async (req, res) => {
@@ -201,12 +236,10 @@ const updateOrderStatus = async (req, res) => {
 
       case "return-receive":
         if (order.status == "return-received") {
-          return res
-            .status(400)
-            .json({
-              status: false,
-              message: "Order already received from return",
-            });
+          return res.status(400).json({
+            status: false,
+            message: "Order already received from return",
+          });
         } else {
           order.status = "return-received";
           notificationMessage = `Your return of order #${order.id} reached our warehouse.`;
@@ -227,22 +260,18 @@ const updateOrderStatus = async (req, res) => {
       // return-user-paid route i.e. changing only payment status only... not order status which wiwl remain as return=recieved .:.:.:.:.:.:.:.:.:. check first to see if the order is in the status of return-recieved if yes then update its order.payment-status to returned
       case "return-payment":
         if (order.status !== "return-received") {
-          return res
-            .status(400)
-            .json({
-              status: false,
-              message: "this order has not been recieved yet.",
-            });
+          return res.status(400).json({
+            status: false,
+            message: "this order has not been recieved yet.",
+          });
         } else if (
           order.status === "return-received" &&
           order.payment_status === "returned"
         ) {
-          return res
-            .status(400)
-            .json({
-              status: false,
-              message: "The payment for this order has already been returned.",
-            });
+          return res.status(400).json({
+            status: false,
+            message: "The payment for this order has already been returned.",
+          });
         } else {
           const return_payment_proof =
             req.files && req.files["return_payment_proof"]
@@ -250,12 +279,10 @@ const updateOrderStatus = async (req, res) => {
               : null;
 
           if (!return_payment_proof) {
-            return res
-              .status(400)
-              .json({
-                status: false,
-                message: "providing proof image is mandatory.",
-              });
+            return res.status(400).json({
+              status: false,
+              message: "providing proof image is mandatory.",
+            });
           }
 
           if (req.files) {
@@ -276,12 +303,10 @@ const updateOrderStatus = async (req, res) => {
         break;
 
       default:
-        return res
-          .status(404)
-          .json({
-            success: false,
-            message: `order with status ${status} not found`,
-          });
+        return res.status(404).json({
+          success: false,
+          message: `order with status ${status} not found`,
+        });
     }
 
     await order.save();
@@ -296,20 +321,19 @@ const updateOrderStatus = async (req, res) => {
     // io.to(`user_${order.user_id}`).emit('notification', notification);
     sendNotificationToUser(order.user_id, order.id, notificationMessage);
 
-    return res
-      .status(200)
-      .json({
-        success: true,
-        data: order,
-        notification: { message: notificationMessage, user: order.user_id },
-      });
+    return res.status(200).json({
+      success: true,
+      data: order,
+      notification: { message: notificationMessage, user: order.user_id },
+    });
   } catch (error) {
     return res.status(500).json({ success: false, error: error.message });
   }
 };
 
 module.exports = {
-  getOrdersByStatus,
+  // getOrdersByStatus,
+  getOrders,
   updateOrderStatus,
   getOrderById,
 };
