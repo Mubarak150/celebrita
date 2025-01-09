@@ -42,6 +42,11 @@ class ApiFeatures {
         queryObj[field] = { [Op.like]: `%${queryObj[key]}%` };
         delete queryObj[key];
       }
+      if (key.endsWith("_not")) {
+        const field = key.replace("_not", "");
+        queryObj[field] = { [Op.notLike]: `%${queryObj[key]}%` };
+        delete queryObj[key];
+      }
     }
 
     this.queryOptions.where = queryObj;

@@ -10,7 +10,7 @@ const { protect, auth, isUserAdmin } = require("../../middleware/auth");
 const uploadImages = require("../../middleware/uploadImage(s)");
 
 // Pending Orders
-router.get("/:status", auth, getOrdersByStatus); // done
+router.get("/", auth, getOrdersByStatus); // done
 // router.put("/pending/:id/:status", protect, isUserAdmin, updateOrderStatus); // status = approve || status = reject // done
 
 // // Approved Orders

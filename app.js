@@ -82,7 +82,7 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
-// Ensure uploads directory exists
+// : :: ::: :: : for static files like product images : :: ::: :: :
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 //ROUTES:
