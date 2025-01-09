@@ -2,15 +2,18 @@ const express = require("express");
 const router = express.Router();
 const {
   //   getOrders,
-  getOrdersByStatus,
+  getOrders,
   updateOrderStatus,
   getOrderById,
 } = require("../../controllers/cartAndOrder/orderController");
-const { protect, auth, isUserAdmin } = require("../../middleware/auth");
+const { auth, allow } = require("../../middleware/auth");
 const uploadImages = require("../../middleware/uploadImage(s)");
 
-// Pending Orders
-router.get("/", auth, getOrdersByStatus); // done
+// get:
+router.get("/", auth, getOrders); //                                                   ?status=:status ... ?status_not=return .... ?status_like=return
+router.get("/:id", auth, getOrderById); //                                              this will also be used by users and admin so no allow mw.
+
+// updates:
 // router.put("/pending/:id/:status", protect, isUserAdmin, updateOrderStatus); // status = approve || status = reject // done
 
 // // Approved Orders
@@ -80,8 +83,5 @@ router.get("/", auth, getOrdersByStatus); // done
 // router.get("/completed", protect, isUserAdmin, (req, res) =>
 //   getOrdersByStatus(req, res, "completed")
 // ); //
-
-// // Get Order by ID
-router.get("/id/:id", auth, getOrderById); // done
 
 module.exports = router;

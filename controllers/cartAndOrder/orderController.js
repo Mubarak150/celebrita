@@ -10,9 +10,10 @@ const { sequelize } = require("../../config/db");
 const { Op } = require("sequelize");
 const ApiFeatures = require("../../utils/ApiFeatures");
 
-const readAllOrders = asyncErrorHandler(async () => {
-  const features = new ApiFeatures(Order, {}, req.query);
-
+// utility function:
+const readAllOrders = async (req, res, next, where = {}) => {
+  const features = new ApiFeatures(Order, {}, req.query).filter();
+  features.queryOptions.where = { ...features.queryOptions.where, ...where };
   features.queryOptions.include = [
     {
       model: User,
@@ -22,27 +23,34 @@ const readAllOrders = asyncErrorHandler(async () => {
       model: Product,
       attributes: ["id", "name", "thumbnail"],
       through: {
-        attributes: ["quantity", "price_at_order"], // Include these attributes from the OrderProduct table
+        attributes: ["quantity", "price_at_order"],
       },
     },
   ];
 
-  features.filter().sort().limit_fields();
+  features.sort().limit_fields();
   await features.paginate();
 
-  let results = await Order.findAll(features.queryOptions);
+  const results = await Order.findAll(features.queryOptions);
 
-  return sendSuccess(res, 200, "data retrieved", {
-    results: results,
+  return {
+    results,
     metadata: features.paginationMetadata,
+  };
+};
+
+// 1.
+const getOrders = asyncErrorHandler(async (req, res, next) => {
+  let where = {};
+  const { results, metadata } = await readAllOrders(req, res, next, where);
+
+  return sendSuccess(res, 200, "Data retrieved", {
+    results,
+    metadata,
   });
 });
-// Get Orders by Status with Pagination
-const getOrders = asyncErrorHandler(async (req, res) => {
-  await readAllOrders();
-});
 
-// Get Order by ID
+// 2. Get Order by ID
 const getOrderById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -58,6 +66,7 @@ const getOrderById = async (req, res) => {
   }
 };
 
+//3.
 const updateOrderStatus = async (req, res) => {
   const io = req.app.get("io");
   const { id, status } = req.params;
@@ -276,6 +285,7 @@ const updateOrderStatus = async (req, res) => {
 };
 
 module.exports = {
+  readAllOrders,
   getOrders,
   updateOrderStatus,
   getOrderById,

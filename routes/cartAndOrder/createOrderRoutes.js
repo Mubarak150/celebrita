@@ -3,9 +3,10 @@ const router = express.Router();
 const {
   placeOrder,
 } = require("../../controllers/cartAndOrder/createOrderController");
-const { auth } = require("../../middleware/auth");
+const { placeOrderSchema } = require("../../utils/validators");
+const { auth, validate } = require("../../middleware/auth");
 
 // order Routes
-router.post("/", auth, placeOrder);
+router.post("/", auth, validate(placeOrderSchema), placeOrder);
 
 module.exports = router;

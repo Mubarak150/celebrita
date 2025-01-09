@@ -10,6 +10,7 @@ const { z } = require("zod");
 const addCategorySchema = z.object({
   category: z
     .string()
+    .trim()
     .min(1, "Category name is required")
     .regex(/^[A-Za-z]+$/, "Invalid category format"),
 
@@ -56,6 +57,7 @@ const updateCategorySchema = z.object({
 // Common validator for disallowed characters
 const disallowedCharacterValidator = z
   .string()
+  .trim()
   .refine(
     (val) => !/([<>]|&lt;|&gt;|&amp;|&quot;|&apos;|&#\d+;)/.test(val),
     "Field contains disallowed characters"
@@ -158,6 +160,76 @@ const createReviewSchema = z.object({
 // Validation for updating a review (partial validation)
 const updateReviewSchema = createReviewSchema.partial();
 
+/**
+                          |**************************************************|
+                          |*******************   CART   *********************|
+                          |**************************************************|
+ */
+
+const cartCheckoutSchema = z.array(
+  z.object({
+    product_id: z
+      .number()
+      .nonnegative("Product ID must be a non-negative number"),
+    quantity: z.number().nonnegative("Quantity must be a non-negative number"),
+  })
+);
+
+/**
+                          |**************************************************|
+                          |*******************  ORDERS  *********************|
+                          |**************************************************|
+ */
+const OrderSchema = z.object({
+  total_amount: z.number().positive("Total amount must be a positive number"),
+  amount_with_delivery: z
+    .number()
+    .positive("Amount with delivery must be a positive number"),
+  status: z
+    .enum([
+      "pending",
+      "approved",
+      "on-the-way",
+      "received",
+      "return-pending",
+      "return-approved",
+      "return-on-the-way",
+      "return-received",
+      "completed",
+      "rejected",
+    ])
+    .default("pending"),
+  city: z.string().optional().nullable(),
+  shipping_address: z.string().optional().nullable(),
+  user_contact: z.string().min(1, "User contact is required"),
+  rejection_reason: z.string().optional().nullable(),
+  exp_delivery_date: z.string().datetime().optional().nullable(),
+  courier_company: z.string().optional().nullable(),
+  tracking_id: z.string().optional().nullable(),
+  payment_type: z.enum(["payFast", "COD"]),
+  payment_status: z.enum(["pending", "paid", "returned"]).default("pending"),
+  transaction_id: z.string().optional().nullable(),
+  transaction_date: z.string().datetime().optional().nullable(),
+  return_proof_image: z.string().optional().nullable(),
+  return_reason: z.string().optional().nullable(),
+  return_address: z.string().optional().nullable(),
+  return_rejection_reason: z.string().optional().nullable(),
+  return_company: z.string().optional().nullable(),
+  return_tracking_id: z.string().optional().nullable(),
+  return_user_account: z.string().optional().nullable(),
+  return_user_account_title: z.string().optional().nullable(),
+  return_user_account_bank: z.string().optional().nullable(),
+  return_payment_proof: z.string().optional().nullable(),
+  return_payment_date: z.string().datetime().optional().nullable(),
+});
+
+const placeOrderSchema = z.object({
+  city: z.string().optional().nullable(),
+  shipping_address: z.string().optional().nullable(),
+  user_contact: z.string().min(1, "User contact is required"),
+  payment_type: z.enum(["payFast", "COD"]),
+});
+
 module.exports = {
   // category:
   addCategorySchema,
@@ -171,5 +243,10 @@ module.exports = {
   createReviewSchema,
   updateReviewSchema,
 
-  // NEXT: ??
+  // cart:
+  cartCheckoutSchema,
+
+  // orders:
+  OrderSchema,
+  placeOrderSchema,
 };

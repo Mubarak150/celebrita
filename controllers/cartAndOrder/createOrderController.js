@@ -30,7 +30,7 @@ exports.placeOrder = async (req, res, next) => {
     });
 
     if (!cart || cart.CartItems.length === 0) {
-      await transaction.rollback(); // Rollback before responding
+      await transaction.rollback();
       return res.status(400).json({ success: false, message: "Cart is empty" });
     }
 

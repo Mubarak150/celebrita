@@ -4,6 +4,20 @@ const Order = require("../../models/Order");
 const OrderProduct = require("../../models/OrderProduct");
 const { notifyAllAdmins } = require("../../utils/socket");
 const { Op } = require("sequelize");
+const { readAllOrders } = require("./orderController");
+const ApiFeatures = require("../../utils/ApiFeatures");
+const asyncErrorHandler = require("../../utils/asyncErrorHandler");
+const { sendSuccess } = require("../../utils/helpers");
+
+const getOrdersofUser = asyncErrorHandler(async (req, res, next) => {
+  let where = { user_id: req.user_id };
+  const { results, metadata } = await readAllOrders(req, res, next, where);
+
+  return sendSuccess(res, 200, "Data retrieved", {
+    results,
+    metadata,
+  });
+});
 
 // Get orders with status containing 'return' and include pagination
 // const getReturnOrdersByUser = async (req, res) => {
@@ -139,13 +153,10 @@ const returnReceivedOrder = async (req, res) => {
       : null;
 
   if (!return_reason || !return_proof_image) {
-    return res
-      .status(400)
-      .json({
-        success: false,
-        error:
-          "reason for return and an image as a proof thereof are mandatory",
-      });
+    return res.status(400).json({
+      success: false,
+      error: "reason for return and an image as a proof thereof are mandatory",
+    });
   }
 
   try {
@@ -162,12 +173,10 @@ const returnReceivedOrder = async (req, res) => {
     }
 
     if (order.status != "received") {
-      res
-        .status(403)
-        .json({
-          status: false,
-          message: "only recieved orders can be returned",
-        });
+      res.status(403).json({
+        status: false,
+        message: "only recieved orders can be returned",
+      });
     } else {
       // Process the return_proof_image
       if (req.files) {
@@ -182,12 +191,10 @@ const returnReceivedOrder = async (req, res) => {
       notifyAllAdmins(order.id, notificationMessage);
 
       await order.save();
-      res
-        .status(200)
-        .json({
-          success: true,
-          message: "return request placed successfully.",
-        });
+      res.status(200).json({
+        success: true,
+        message: "return request placed successfully.",
+      });
     }
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -270,8 +277,7 @@ const returnOnTheWayOrder = async (req, res) => {
 };
 
 module.exports = {
-  // getReturnOrdersByUser,
-  // getNonReturnOrdersByUser,
+  getOrdersofUser,
   returnReceivedOrder,
   returnOnTheWayOrder,
 };
