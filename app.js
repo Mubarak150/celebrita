@@ -83,8 +83,14 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 // : :: ::: :: : for static files like product images : :: ::: :: :
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use(
+  "/uploads",
+  express.static(path.join(__dirname, "uploads"), {
+    setHeaders: (res) => {
+      res.set("Cross-Origin-Resource-Policy", "cross-origin");
+    },
+  })
+);
 //ROUTES:
 // test route:
 app.get("/", (req, res) => {
