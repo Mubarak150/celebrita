@@ -237,9 +237,6 @@ const validate = (schema) => (req, res, next) => {
     req.body = validatedData;
     next();
   } catch (err) {
-    //   const errorMessage = err.errors.map((e) => e.message).join(', ');
-    //   makeError(errorMessage, 400, next);
-    // let error = new CustomError(err, 501)
     next(err);
   }
 };
