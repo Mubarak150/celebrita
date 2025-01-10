@@ -166,15 +166,6 @@ const updateReviewSchema = createReviewSchema.partial();
                           |**************************************************|
  */
 
-// const cartCheckoutSchema = z.array(
-//   z.object({
-//     product_id: z
-//       .number()
-//       .nonnegative("Product ID must be a non-negative number"),
-//     quantity: z.number().nonnegative("Quantity must be a non-negative number"),
-//   })
-// );
-
 const cartCheckoutSchema = z.object({
   updatedCartItems: z.array(
     z.object({

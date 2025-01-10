@@ -3,7 +3,7 @@ const router = express.Router();
 const {
   //   getOrders,
   getOrders,
-  updateOrderStatus,
+  updateOrder,
   getOrderById,
 } = require("../../controllers/cartAndOrder/orderController");
 
@@ -12,7 +12,8 @@ const uploadImages = require("../../middleware/uploadImage(s)");
 
 // get:
 router.get("/", auth, getOrders); //                                                   ?status=:status ... ?status_not=return .... ?status_like=return
-router.get("/:id", auth, getOrderById); //                                              this will also be used by users and admin so no allow mw.
+router.get("/:id", auth, getOrderById); //
+router.patch("/:id/status/:status", auth, updateOrder);
 
 // updates:
 // router.put("/pending/:id/:status", protect, isUserAdmin, updateOrderStatus); // status = approve || status = reject // done

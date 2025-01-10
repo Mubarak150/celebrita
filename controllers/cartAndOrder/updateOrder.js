@@ -1,9 +1,16 @@
-class UpdateOrder {
-  constructor(io) {
-    this.io = io;
-  }
+const User = require("../../models/User");
+const Product = require("../../models/Product");
+const Order = require("../../models/Order");
+const OrderProduct = require("../../models/OrderProduct");
+const Invoice = require("../../models/Invoice");
+const Notification = require("../../models/Notification");
+const { sendNotificationToUser } = require("../../utils/socket"); // importiiiiiiiiiing Socket.IO instance
+const asyncErrorHandler = require("../../utils/asyncErrorHandler");
+const { makeError } = require("../../utils/CustomError");
+const { getAll, sendSuccess } = require("../../utils/helpers");
 
-  async updateOrderStatus(req, res) {
+class UpdateOrder {
+  async updateOrderStatus(req, res, next) {
     const { id, status } = req.params;
     const {
       rejection_reason,
@@ -17,11 +24,12 @@ class UpdateOrder {
     try {
       const order = await Order.findByPk(id);
 
-      if (!order) {
-        return res
-          .status(404)
-          .json({ success: false, error: "Order not found" });
-      }
+      if (!order) return makeError("Order not found", 404, next);
+      //      {
+      //     return res
+      //       .status(404)
+      //       .json({ success: false, error: "Order not found" });
+      //   }
 
       let notificationMessage = "";
 
@@ -29,19 +37,25 @@ class UpdateOrder {
         case "approve":
           notificationMessage = await this.approveOrder(
             order,
-            exp_delivery_date
+            exp_delivery_date,
+            next
           );
           break;
 
         case "reject":
-          notificationMessage = await this.rejectOrder(order, rejection_reason);
+          notificationMessage = await this.rejectOrder(
+            order,
+            rejection_reason,
+            next
+          );
           break;
 
         case "on-the-way":
           notificationMessage = await this.dispatchOrder(
             order,
             courier_company,
-            tracking_id
+            tracking_id,
+            next
           );
           break;
 
@@ -76,28 +90,30 @@ class UpdateOrder {
         default:
           return res.status(404).json({
             success: false,
-            message: `Order with status ${status} not found`,
+            message: `#IVD: Order with status ${status} not found`,
           });
       }
 
       await order.save();
+      if (notificationMessage != "" && notificationMessage != null) {
+        await sendNotificationToUser(
+          order.user_id,
+          order.id,
+          notificationMessage
+        );
 
-      this.sendNotificationToUser(order.user_id, order.id, notificationMessage);
-
-      return res.status(200).json({
-        success: true,
-        data: order,
-        notification: { message: notificationMessage, user: order.user_id },
-      });
+        return sendSuccess(res, 200, "process successful", order, "results");
+      }
     } catch (error) {
-      return res.status(500).json({ success: false, error: error.message });
+      return next(error);
     }
   }
 
-  async approveOrder(order, exp_delivery_date) {
-    if (order.status === "approved") {
-      throw new Error("Order already approved");
-    }
+  // 1.
+  async approveOrder(order, exp_delivery_date, next) {
+    if (order.status === "approved")
+      return makeError("order already approved", 400, next);
+
     order.status = "approved";
     order.exp_delivery_date = exp_delivery_date || null;
     return `Your order #${
@@ -107,10 +123,11 @@ class UpdateOrder {
     ).toDateString()}.`;
   }
 
-  async rejectOrder(order, rejection_reason) {
-    if (order.status === "rejected") {
-      throw new Error("Order already rejected");
-    }
+  // 2.
+  async rejectOrder(order, rejection_reason, next) {
+    if (order.status === "rejected")
+      return makeError("order already rejected", 400, next);
+
     order.status = "rejected";
     order.rejection_reason = rejection_reason;
 
@@ -130,16 +147,17 @@ class UpdateOrder {
     return `Your order #${order.id} has been rejected. The rejection reason provided by our team is: ${order.rejection_reason}.`;
   }
 
-  async dispatchOrder(order, courier_company, tracking_id) {
-    if (order.status === "on-the-way") {
-      throw new Error("Order already in transit");
-    }
+  async dispatchOrder(order, courier_company, tracking_id, next) {
+    if (order.status === "on-the-way")
+      return makeError("order already in transit", 400, next);
+
     order.status = "on-the-way";
     order.courier_company = courier_company;
     order.tracking_id = tracking_id;
     return `Your order #${order.id} has been dispatched successfully via ${order.courier_company} with the tracking ID: ${order.tracking_id}.`;
   }
 
+  // done.
   async receiveOrder(order) {
     if (order.status === "received") {
       throw new Error("Order already received");
@@ -157,7 +175,7 @@ class UpdateOrder {
         updatedOrder.status = "completed";
         await updatedOrder.save();
       }
-    }, 4 * 24 * 60 * 60 * 1000);
+    }, 4 * 24 * 60 * 30 * 1000); // conditionally execute after 4 days. working like a chronjob.
 
     return `Your order #${order.id} has reached successfully. Thank you for shopping at Celebrita.`;
   }
@@ -216,12 +234,12 @@ class UpdateOrder {
     return `Your payment has been returned against return of order #${order.id}.`;
   }
 
-  sendNotificationToUser(user_id, order_id, message) {
-    // Placeholder for actual notification logic
-    this.io
-      .to(`user_${user_id}`)
-      .emit("notification", { user_id, order_id, message });
-  }
+  //   sendNotificationToUser(user_id, order_id, message) {
+  //     // Placeholder for actual notification logic
+  //     this.io
+  //       .to(`user_${user_id}`)
+  //       .emit("notification", { user_id, order_id, message });
+  //   }
 }
 
 module.exports = UpdateOrder;
