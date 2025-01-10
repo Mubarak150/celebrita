@@ -85,7 +85,7 @@ exports.placeOrder = async (req, res, next) => {
         user_contact,
         payment_type,
         payment_status,
-        nextInvoiceNumber,
+        invoice_number: nextInvoiceNumber,
       },
       { transaction }
     );
