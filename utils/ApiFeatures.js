@@ -17,6 +17,14 @@ class ApiFeatures {
     excludeFields.forEach((el) => delete queryObj[el]);
 
     // future dev:::: i am adding the followin' 2 if clauses for price range search... each step is guided.. and you can safely remove it if dont need any filteration for price
+    if (queryObj?.quantity?.lte) {
+      queryObj.quantity = {
+        ...queryObj.quantity, // Retain other existing filters (if any)
+        [Op.lte]: queryObj.quantity.lte, // Add lte filter
+      };
+      delete queryObj.quantity.lte;
+    }
+
     if (queryObj.price) {
       if (queryObj.price.gte) {
         queryObj.price = {
@@ -49,6 +57,7 @@ class ApiFeatures {
       }
     }
 
+    console.log(queryObj);
     this.queryOptions.where = queryObj;
 
     return this;
