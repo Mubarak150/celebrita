@@ -9,6 +9,11 @@ const ApiFeatures = require("../../utils/ApiFeatures");
 const asyncErrorHandler = require("../../utils/asyncErrorHandler");
 const { sendSuccess } = require("../../utils/helpers");
 
+/**
+                          |**************************************************|
+                          |*******************  GET ALL  ********************|
+                          |**************************************************|
+ */
 const getOrdersofUser = asyncErrorHandler(async (req, res, next) => {
   let where = { user_id: req.user_id };
   const { results, metadata } = await readAllOrders(req, res, next, where);

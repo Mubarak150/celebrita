@@ -60,6 +60,20 @@ exports.placeOrder = async (req, res, next) => {
     }
     let AmountWithDelivery = totalAmount + deliveryCharges;
 
+    // Generate invoice number
+    const lastInvoice = await Invoice.findOne({
+      order: [["created_at", "DESC"]],
+      transaction,
+    });
+
+    let nextInvoiceNumber = "INV-0000000001"; // Default for the first invoice
+    if (lastInvoice) {
+      const lastNumber = parseInt(
+        lastInvoice.invoice_number.replace("INV-", ""),
+        10
+      );
+      nextInvoiceNumber = "INV-" + String(lastNumber + 1).padStart(10, "0");
+    }
     // Create a new order
     const order = await Order.create(
       {
@@ -71,6 +85,7 @@ exports.placeOrder = async (req, res, next) => {
         user_contact,
         payment_type,
         payment_status,
+        nextInvoiceNumber,
       },
       { transaction }
     );
@@ -96,21 +111,6 @@ exports.placeOrder = async (req, res, next) => {
 
     // Clear the cart after checkout
     await CartItem.destroy({ where: { cart_id: cart.id }, transaction });
-
-    // Generate invoice number
-    const lastInvoice = await Invoice.findOne({
-      order: [["created_at", "DESC"]],
-      transaction,
-    });
-
-    let nextInvoiceNumber = "INV-0000000001"; // Default for the first invoice
-    if (lastInvoice) {
-      const lastNumber = parseInt(
-        lastInvoice.invoice_number.replace("INV-", ""),
-        10
-      );
-      nextInvoiceNumber = "INV-" + String(lastNumber + 1).padStart(10, "0");
-    }
 
     // Create the invoice for this order
     const newInvoice = await Invoice.create(

@@ -2,6 +2,7 @@ const User = require("../../models/User");
 const Product = require("../../models/Product");
 const Order = require("../../models/Order");
 const OrderProduct = require("../../models/OrderProduct");
+const Invoice = require("../../models/Invoice");
 const Notification = require("../../models/Notification");
 const { sendNotificationToUser } = require("../../utils/socket"); // importiiiiiiiiiing Socket.IO instance
 const asyncErrorHandler = require("../../utils/asyncErrorHandler");
@@ -10,11 +11,19 @@ const { sequelize } = require("../../config/db");
 const { Op } = require("sequelize");
 const ApiFeatures = require("../../utils/ApiFeatures");
 
-// utility function:
+/**
+                          |**************************************************|
+                          |**************** UTILITY FUNC.  ******************|
+                          |**************************************************|
+ */
 const readAllOrders = async (req, res, next, where = {}) => {
   const features = new ApiFeatures(Order, {}, req.query).filter();
   features.queryOptions.where = { ...features.queryOptions.where, ...where };
   features.queryOptions.include = [
+    {
+      model: Invoice,
+      attributes: ["order_id", "invoice_number"],
+    },
     {
       model: User,
       attributes: ["id", "name", "email"],
@@ -39,6 +48,11 @@ const readAllOrders = async (req, res, next, where = {}) => {
   };
 };
 
+/**
+                          |**************************************************|
+                          |*******************  GET ALL *********************|
+                          |**************************************************|
+ */
 // 1.
 const getOrders = asyncErrorHandler(async (req, res, next) => {
   let where = {};
@@ -50,7 +64,12 @@ const getOrders = asyncErrorHandler(async (req, res, next) => {
   });
 });
 
-// 2. Get Order by ID
+/**
+                          |**************************************************|
+                          |*******************  GET ONE *********************|
+                          |**************************************************|
+ */
+// 2.
 const getOrderById = async (req, res) => {
   const { id } = req.params;
   try {
@@ -66,6 +85,11 @@ const getOrderById = async (req, res) => {
   }
 };
 
+/**
+                          |**************************************************|
+                          |***************  UPDATE STATUS  ******************|
+                          |**************************************************|
+ */
 //3.
 const updateOrderStatus = async (req, res) => {
   const io = req.app.get("io");
