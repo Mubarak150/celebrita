@@ -25,11 +25,6 @@ class UpdateOrder {
       const order = await Order.findByPk(id);
 
       if (!order) return makeError("Order not found", 404, next);
-      //      {
-      //     return res
-      //       .status(404)
-      //       .json({ success: false, error: "Order not found" });
-      //   }
 
       let notificationMessage = "";
 
@@ -60,7 +55,7 @@ class UpdateOrder {
           break;
 
         case "received":
-          notificationMessage = await this.receiveOrder(order);
+          notificationMessage = await this.receiveOrder(order, next);
           break;
 
         case "return-reject":
@@ -75,11 +70,15 @@ class UpdateOrder {
           break;
 
         case "return-receive":
-          notificationMessage = await this.receiveReturn(order);
+          notificationMessage = await this.receiveReturn(order, next);
           break;
 
         case "return-payment":
-          notificationMessage = await this.processReturnPayment(req, order);
+          notificationMessage = await this.processReturnPayment(
+            req,
+            order,
+            next
+          );
           break;
 
         case "completed":
@@ -158,10 +157,9 @@ class UpdateOrder {
   }
 
   // done.
-  async receiveOrder(order) {
-    if (order.status === "received") {
-      throw new Error("Order already received");
-    }
+  async receiveOrder(order, next) {
+    if (order.status === "received")
+      return makeError("order already recieved", 400, next);
     const currentTime = new Date();
     order.status = "received";
     order.payment_status = "completed";
@@ -194,10 +192,9 @@ class UpdateOrder {
     return `Your request to return order #${order.id} has been approved. You may return the order to ${order.return_address}.`;
   }
 
-  async receiveReturn(order) {
-    if (order.status === "return-received") {
-      throw new Error("Order already received from return");
-    }
+  async receiveReturn(order, next) {
+    if (order.status === "return-received")
+      return makeError("order already recieved from return", 400, next);
     order.status = "return-received";
 
     const orderProducts = await OrderProduct.findAll({
@@ -214,18 +211,26 @@ class UpdateOrder {
     return `Your return of order #${order.id} reached our warehouse.`;
   }
 
-  async processReturnPayment(req, order) {
-    if (order.status !== "return-received") {
-      throw new Error("This order has not been received yet.");
-    }
-    if (order.payment_status === "returned") {
-      throw new Error("The payment for this order has already been returned.");
-    }
+  async processReturnPayment(req, order, next) {
+    if (order.status !== "return-received")
+      return makeError("this order has not been recieved yet", 400, next);
+    if (order.payment_status === "returned")
+      return makeError(
+        "payment for this order has already been returned",
+        400,
+        next
+      );
 
-    const return_payment_proof = req.files?.["return_payment_proof"]?.[0]?.path;
-    if (!return_payment_proof) {
-      throw new Error("Providing proof image is mandatory.");
-    }
+    const return_payment_proof =
+      req.files && req.files["return_payment_proof"]
+        ? req.files["return_payment_proof"][0].path
+        : null;
+    if (!return_payment_proof)
+      return makeError(
+        "providing proof of payment back to user is mandatory",
+        400,
+        next
+      );
 
     order.payment_status = "returned";
     order.return_payment_proof = return_payment_proof;

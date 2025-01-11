@@ -276,9 +276,9 @@ const updateOrderSchema = {
   }),
   "return-receive": z.object({}),
   "return-payment": z.object({
-    payment_details: z
-      .string()
-      .min(1, { message: "Payment details are required" }),
+    // return_payment_proof: z
+    //   .string()
+    //   .min(1, { message: "transiction image is  required" }),
   }),
 };
 

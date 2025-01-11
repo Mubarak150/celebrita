@@ -17,9 +17,11 @@ router.get("/:id", auth, getOrderById); //
 router.patch(
   "/:id/status/:status",
   auth,
+
   dynamicSchemaMiddleware,
-  uploadImages,
+
   (req, res, next) => validate(req.selectedSchema)(req, res, next),
+  uploadImages,
   updateOrder
 );
 
@@ -35,13 +37,13 @@ router.patch(
                                                                             4.       received                                     null. 
                                                                             
                                                                             returns:
-                                                                            5. THE USER MAY SET THE RETURN TO RETURN-PENDING; 
+                                                                            5. THE USER MAY SET THE RETURN TO RETURN-PENDING: use the route `/api/v2/orders/:id/apply-for-return` to process that
                                                                              
                                                                             6.      return-approve                                return_address                string
 
                                                                             7.      return-reject                                 return_rejection_reason       string
 
-                                                                            8. THE USER WILL SET THE ORDER ON THE WAY: 
+                                                                            8. THE USER WILL SET THE ORDER ON THE WAY: use the route `/api/v2/orders/:id/dispatch-return` to process that
 
                                                                             9.      return-receive                                null.   
 
