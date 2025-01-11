@@ -5,15 +5,51 @@ const {
   getOrders,
   updateOrder,
   getOrderById,
+  dynamicSchemaMiddleware,
 } = require("../../controllers/cartAndOrder/orderController");
 
-const { auth, allow } = require("../../middleware/auth");
+const { auth, allow, validate } = require("../../middleware/auth");
 const uploadImages = require("../../middleware/uploadImage(s)");
 
 // get:
 router.get("/", auth, getOrders); //                                                   ?status=:status ... ?status_not=return .... ?status_like=return
 router.get("/:id", auth, getOrderById); //
-router.patch("/:id/status/:status", auth, updateOrder);
+router.patch(
+  "/:id/status/:status",
+  auth,
+  dynamicSchemaMiddleware,
+  uploadImages,
+  (req, res, next) => validate(req.selectedSchema)(req, res, next),
+  updateOrder
+);
+
+/*
+    DEAR FRONTEND DEV: FOLLOW THESE `NOTES` WHILE TACKELING                 #        status                                      body                            type
+                    THE UPDATED IN ORDERS                                   1.       approve                                     exp_delivery_date               date i.e. 2024-01-09
+                      =======>>>>>>>>>>>
+                                                                            2.       reject                                      rejection_reason                string
+
+                                                                            3.       on-the-way                                  courier_company                 string
+                                                                                                                                 tracking_id                     string
+                                                                           
+                                                                            4.       received                                     null. 
+                                                                            
+                                                                            returns:
+                                                                            5. THE USER MAY SET THE RETURN TO RETURN-PENDING; 
+                                                                             
+                                                                            6.      return-approve                                return_address                string
+
+                                                                            7.      return-reject                                 return_rejection_reason       string
+
+                                                                            8. THE USER WILL SET THE ORDER ON THE WAY: 
+
+                                                                            9.      return-receive                                null.   
+
+
+
+                                                                                                               
+*/
+// router.patch("/:id/status/:status", auth, updateOrder);
 
 // updates:
 // router.put("/pending/:id/:status", protect, isUserAdmin, updateOrderStatus); // status = approve || status = reject // done

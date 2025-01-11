@@ -20,7 +20,7 @@ const {
   updateReviewSchema,
 } = require("../../utils/validators");
 
-router.get("/", auth, getAllReviews);
+router.get("/", auth, getAllReviews); // ?product_id=:id&status=approved
 
 router.get("/:id", auth, allow("1"), getReviewById);
 

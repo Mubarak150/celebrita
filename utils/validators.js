@@ -234,6 +234,54 @@ const placeOrderSchema = z.object({
   payment_type: z.enum(["payFast", "COD"]),
 });
 
+const updateOrderSchema = {
+  // 1. approve:
+  approve: z.object({
+    exp_delivery_date: z
+      .string()
+      .date({ message: "Invalid date format" })
+      .or(z.literal(null)),
+  }),
+
+  // 2. reject:
+  reject: z.object({
+    rejection_reason: z
+      .string()
+      .min(1, { message: "a reason for rejection is required" }),
+  }),
+
+  // 3. on the way:
+  "on-the-way": z.object({
+    courier_company: z
+      .string()
+      .min(1, { message: "Courier company name is required" }),
+    tracking_id: z
+      .string()
+      .min(1, { message: "Tracking ID of the shipment is required" }),
+  }),
+
+  // 4. recieve:
+  received: z.object({}),
+
+  // returns:
+  "return-reject": z.object({
+    return_rejection_reason: z
+      .string()
+      .min(1, { message: "Reason is required" }),
+  }),
+  "return-approve": z.object({
+    return_address: z
+      .string()
+      .min(1, { message: "Return address is required" }),
+  }),
+  "return-receive": z.object({}),
+  "return-payment": z.object({
+    payment_details: z
+      .string()
+      .min(1, { message: "Payment details are required" }),
+  }),
+};
+
 module.exports = {
   // category:
   addCategorySchema,
@@ -253,4 +301,5 @@ module.exports = {
   // orders:
   OrderSchema,
   placeOrderSchema,
+  updateOrderSchema,
 };

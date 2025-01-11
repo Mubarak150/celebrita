@@ -59,7 +59,7 @@ class UpdateOrder {
           );
           break;
 
-        case "receive":
+        case "received":
           notificationMessage = await this.receiveOrder(order);
           break;
 
@@ -164,6 +164,7 @@ class UpdateOrder {
     }
     const currentTime = new Date();
     order.status = "received";
+    order.payment_status = "completed";
     order.reciept_date = currentTime;
     const returnExpiryDate = new Date(currentTime);
     returnExpiryDate.setDate(returnExpiryDate.getDate() + 4);

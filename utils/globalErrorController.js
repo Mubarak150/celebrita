@@ -98,7 +98,7 @@ const zodError = (err) => {
 
   // Retrieve the field name and expected type from the first error
   const field = firstError.path?.join(".") || "unknown field";
-  const expected = firstError.expected || "unknown type";
+  const expected = firstError.expected || "required";
   // console.log(field, expected)
 
   let msg;

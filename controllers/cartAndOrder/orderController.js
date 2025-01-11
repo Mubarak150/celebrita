@@ -11,6 +11,7 @@ const { sequelize } = require("../../config/db");
 const { Op } = require("sequelize");
 const ApiFeatures = require("../../utils/ApiFeatures");
 const UpdateOrder = require("./updateOrder");
+const { updateOrderSchema } = require("../../utils/validators");
 
 /**
                           |**************************************************|
@@ -92,41 +93,38 @@ const getOrderById = async (req, res) => {
                           |**************************************************|
  */
 
-// // Middleware to dynamically select schema
-// const dynamicSchemaMiddleware = (req, res, next) => {
-//   const { status } = req.body;
+// 3.1 // Middleware to dynamically select schema
+const dynamicSchemaMiddleware = (req, res, next) => {
+  const { status } = req.params;
 
-//   if (!status || !schemas[status]) {
-//     return res.status(400).json({
-//       success: false,
-//       message: `Invalid or unsupported status: ${status}`,
-//     });
-//   }
+  if (!status || !updateOrderSchema[status]) {
+    return res.status(400).json({
+      success: false,
+      message: `Invalid or unsupported status: ${status}`,
+    });
+  }
 
-//   // Attach the schema for the `validate` middleware
-//   req.selectedSchema = schemas[status];
-//   next();
-// };
+  // Attach the schema for the `validate` middleware
+  req.selectedSchema = updateOrderSchema[status];
+  next();
+};
 
-// // Route definition
-// router.post(
-//   "/update-order",
-//   dynamicSchemaMiddleware,
-//   (req, res, next) => validate(req.selectedSchema)(req, res, next),
-//   updateOrder
-// );
-
-//3.
+//3. 2
 const updateOrder = async (req, res, next) => {
   const order = new UpdateOrder();
   await order.updateOrderStatus(req, res, next);
 };
 
 module.exports = {
-  readAllOrders,
   getOrders,
   updateOrder,
   getOrderById,
+
+  // utility function:
+  readAllOrders,
+
+  // middleware
+  dynamicSchemaMiddleware,
 };
 
 // const io = req.app.get("io");
