@@ -26,30 +26,59 @@ router.patch(
 );
 
 /*
-    DEAR FRONTEND DEV: FOLLOW THESE `NOTES` WHILE TACKELING                 #        status                                      body                            type
+    DEAR FRONTEND DEV: FOLLOW THESE `NOTES` WHILE TACKELING                 #        STATUS                                      BODY                            TYPE
                     THE UPDATED IN ORDERS                                   1.       approve                                     exp_delivery_date               date i.e. 2024-01-09
                       =======>>>>>>>>>>>
                                                                             2.       reject                                      rejection_reason                string
 
-                                                                            3.       on-the-way                                  courier_company                 string
-                                                                                                                                 tracking_id                     string
-                                                                           
-                                                                            4.       received                                     null. 
-                                                                            
-                                                                            returns:
-                                                                            5. THE USER MAY SET THE RETURN TO RETURN-PENDING: use the route `/api/v2/orders/:id/apply-for-return` to process that
-                                                                             
-                                                                            6.      return-approve                                return_address                string
-
-                                                                            7.      return-reject                                 return_rejection_reason       string
-
-                                                                            8. THE USER WILL SET THE ORDER ON THE WAY: use the route `/api/v2/orders/:id/dispatch-return` to process that
-
-                                                                            9.      return-receive                                null.   
-
-
+                            pending (user)                                  3.       on-the-way                                  courier_company                 string
+                     __________|____________                                                                                     tracking_id                     string
+                    |                       |                               
+                 accept                   reject                            4.       received                                    null. 
+                    |                                                        
+                on-the-way                                                   returns:
+                    |                                                        5. THE USER MAY SET THE RETURN TO RETURN-PENDING: `/api/v2/orders/:id/apply-for-return`
+                 received                                                         
+          __________|________________                                        6.      return-approve                               return_address                string
+         |                           |
+    completed (auto)       return-pending( by user)                          7.      return-reject                                return_rejection_reason       string
+                           __________|________________
+                          |                           |                      8. THE USER WILL SET THE ORDER ON THE WAY: `/api/v2/orders/:id/dispatch-return`
+                    return-approve              return-reject
+                          |                                                  9.      return-receive                               null.   
+                    return-on-the-way
+                     ( set by user )                                        10.      return-payment                               retrn payment proof           image
+                          |
+                      return-receive
+                          |
+                    return_payment
 
                                                                                                                
+*/
+module.exports = router;
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 */
 // router.patch("/:id/status/:status", auth, updateOrder);
 
@@ -123,5 +152,3 @@ router.patch(
 // router.get("/completed", protect, isUserAdmin, (req, res) =>
 //   getOrdersByStatus(req, res, "completed")
 // ); //
-
-module.exports = router;
