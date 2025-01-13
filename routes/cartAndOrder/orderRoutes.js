@@ -26,10 +26,11 @@ router.patch(
 );
 
 /*
-    DEAR FRONTEND DEV: FOLLOW THESE `NOTES` WHILE TACKELING                 #        STATUS                                      BODY                            TYPE
-                    THE UPDATED IN ORDERS                                   1.       approve                                     exp_delivery_date               date i.e. 2024-01-09
-                      =======>>>>>>>>>>>
-                                                                            2.       reject                                      rejection_reason                string
+    ***************************************************************
+    *** DEAR FRONTEND DEV: FOLLOW THESE `NOTES` WHILE TACKELING ***         #        STATUS                                      BODY                            TYPE
+    *************** THE UPDATED IN ORDERS *************************         1.       approve                                     exp_delivery_date               date i.e. 2024-01-09
+    ***************** >>>>>>>>>>>>>>>>>> **************************
+    ***************************************************************         2.       reject                                      rejection_reason                string
 
                             pending (user)                                  3.       on-the-way                                  courier_company                 string
                      __________|____________                                                                                     tracking_id                     string

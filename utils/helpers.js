@@ -79,37 +79,46 @@ const parse = async (input) => {
 
 */
 
-const create = (model) =>
-  asyncErrorHandler(async (req, res, next) => {
-    const transaction = await model.sequelize.transaction();
-    // console.dir(req.body);
-    try {
-      // let data = processImages(req);
-      let newRecord;
-      // if(request.body.plot) {
-      //     newRecord = await model.create(request.body.plot, { transaction });
+const create = (model) => async (req, res, next) => {
+  try {
+    const newRecord = await model.create(req.body);
+    res.status(200).json({ success: true, message: "Record created" });
+  } catch (error) {
+    next(error);
+  }
+};
 
-      //     if (request.body.plot_sales && Array.isArray(request.body.plot_sales)) {
-      //         const plotSaleHistoryData = request.body.plot_sales.map(sale => ({
-      //           ...sale,
-      //           plot_alloted: request.body.plot.plot_alloted
-      //         }));
+// const create = (model) =>
+//   asyncErrorHandler(async (req, res, next) => {
+//     const transaction = await model.sequelize.transaction();
+//     // console.dir(req.body);
+//     try {
+//       // let data = processImages(req);
+//       let newRecord;
+//       // if(request.body.plot) {
+//       //     newRecord = await model.create(request.body.plot, { transaction });
 
-      //         await PlotSaleHistory.bulkCreate(plotSaleHistoryData, { transaction });
-      //       }
+//       //     if (request.body.plot_sales && Array.isArray(request.body.plot_sales)) {
+//       //         const plotSaleHistoryData = request.body.plot_sales.map(sale => ({
+//       //           ...sale,
+//       //           plot_alloted: request.body.plot.plot_alloted
+//       //         }));
 
-      // } else {
-      newRecord = await model.create(req.body, { transaction });
-      // }
+//       //         await PlotSaleHistory.bulkCreate(plotSaleHistoryData, { transaction });
+//       //       }
 
-      await transaction.commit();
+//       // } else {
+//       newRecord = await model.create(req.body, { transaction });
+//       // }
 
-      sendSuccess(res, 200, `record created successfully`);
-    } catch (error) {
-      await transaction.rollback();
-      next(error);
-    }
-  });
+//       await transaction.commit();
+
+//       sendSuccess(res, 200, `record created successfully`);
+//     } catch (error) {
+//       await transaction.rollback();
+//       next(error);
+//     }
+//   });
 
 /*
  _____________________________________________________________________________________

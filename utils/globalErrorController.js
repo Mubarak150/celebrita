@@ -92,24 +92,41 @@ const zodError = (err) => {
     return "An unexpected error occurred.";
   }
 
+  //   if (err instanceof z.ZodError) {
+  // Show only the first error
+  const firstError = err.errors[0];
+  const errorMessage = `${firstError.path.join(".")} - ${firstError.message}`;
+  return new CustomError(errorMessage, 400);
+  // console.log(`Validation failed: ${errorMessage}`);
+  //   }
+
   // Get the first error from the issues array
-  const firstError = err.issues[0];
-  // console.log("i was here")
+  //   const firstError = err.issues[0];
+  //   // console.log("i was here")
 
-  // Retrieve the field name and expected type from the first error
-  const field = firstError.path?.join(".") || "unknown field";
-  const expected = firstError.expected || "required";
-  // console.log(field, expected)
+  //   // Retrieve the field name and expected type from the first error
+  //   const field = firstError.path?.join(".") || "unknown field";
+  //   //   const expected = firstError.message || "required";
+  //   let expected;
+  //   let msg;
+  //   if (firstError.message) {
+  //     expected = firstError.message;
+  //     msg = `${expected}`;
+  //   } else {
+  //     expected = firstError.expected;
+  //     msg = `${expected} is required`;
+  //   }
+  //   // console.log(field, expected)
 
-  let msg;
-  if (firstError.message == "Required") {
-    msg = `${field} is required`;
-  } else {
-    msg = `${field} must be a ${expected}`;
-  }
+  //   let msg;
+  //   if (firstError.message == "Required") {
+  //     msg = `${field} is required`;
+  //   } else {
+  //     msg = `${field} is required`;
+  //   }
 
   // Return a formatted message for the first error
-  return new CustomError(msg, 400);
+  //   return new CustomError(msg, 400);
 };
 
 // main function:
@@ -138,3 +155,30 @@ const globalErrorController = (error, req, res, next) => {
 };
 
 module.exports = { globalErrorController };
+
+/*
+{
+    "status": "error",
+    "message": "[\n  {\n    \"code\": \"too_big\",\n    \"maximum\": 80,\n    \"type\": \"string\",\n    \"inclusive\": true,\n    \"exact\": false,\n    \"message\": \"shorten your review.\",\n    \"path\": [\n      \"review\"\n    ]\n  }\n]",
+    "stackTrace": "ZodError: [\n  {\n    \"code\": \"too_big\",\n    \"maximum\": 80,\n    \"type\": \"string\",\n    \"inclusive\": true,\n    \"exact\": false,\n    \"message\": \"shorten your review.\",\n    \"path\": [\n      \"review\"\n    ]\n  }\n]\n    at get error [as error] (E:\\doctor_project_backend\\node_modules\\zod\\lib\\types.js:55:31)\n    at ZodObject.parse (E:\\doctor_project_backend\\node_modules\\zod\\lib\\types.js:131:22)\n    at E:\\doctor_project_backend\\middleware\\auth.js:236:34\n    at Layer.handle [as handle_request] (E:\\doctor_project_backend\\node_modules\\express\\lib\\router\\layer.js:95:5)\n    at next (E:\\doctor_project_backend\\node_modules\\express\\lib\\router\\route.js:149:13)\n    at auth (E:\\doctor_project_backend\\middleware\\auth.js:207:5)\n    at process.processTicksAndRejections (node:internal/process/task_queues:95:5)",
+    "error": {
+        "issues": [
+            {
+                "code": "too_big",
+                "maximum": 80,
+                "type": "string",
+                "inclusive": true,
+                "exact": false,
+                "message": "shorten your review.",
+                "path": [
+                    "review"
+                ]
+            }
+        ],
+        "name": "ZodError",
+        "statusCode": 500,
+        "status": "error"
+    }
+}
+
+*/

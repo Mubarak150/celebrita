@@ -131,11 +131,16 @@ const createProductSchema = z.object({
 // updating a product (partial validation)
 const updateProductSchema = createProductSchema.partial();
 
+/**
+                          |**************************************************|
+                          |*******************  REVIEW  *********************|
+                          |**************************************************|
+ */
 // Validation for creating a review
 const createReviewSchema = z.object({
   product_id: z.coerce
-    .number()
-    .int()
+    .number("P# in invalid format")
+    .int("P# in invalid format")
     .positive("no product identified for review."),
   review: z
     .string()

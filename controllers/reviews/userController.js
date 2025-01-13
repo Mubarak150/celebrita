@@ -1,15 +1,12 @@
 const Review = require("../../models/Review");
-const Order = require("../../models/Order");
 const { sequelize } = require("../../config/db");
 const { Op } = require("sequelize");
-const { create, sendSuccess } = require("../../utils/helpers");
-const { makeError } = require("../../utils/CustomError");
 const asyncErrorHandler = require("../../utils/asyncErrorHandler");
 
-// Create a review
 const createReview = asyncErrorHandler(async (req, res, next) => {
   req.body.user_id = req.user_id;
-  await create(Review)(req, res, next);
+  await Review.create(req.body);
+  res.status(201).json({ status: true, message: "record created" });
 });
 
 const getAverageRating = async (product_id) => {
