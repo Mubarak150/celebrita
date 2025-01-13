@@ -96,7 +96,7 @@ exports.signIn = async (req, res) => {
   }
 };
 
-exports.register = async (req, res) => {
+exports.register = async (req, res, next) => {
   const { name, email, password, role = "2" } = req.body;
 
   // Validate required fields
@@ -130,7 +130,7 @@ exports.register = async (req, res) => {
     // Create the user
     await User.create({
       name,
-      email,
+      email, // i have to validate the email with thte above commented function... it is a must in prod.
       password: hashedPassword,
       role,
       pass_hash: passHash, // Save the generated hash to the pass_hash column
@@ -138,7 +138,8 @@ exports.register = async (req, res) => {
 
     res.status(201).json({ message: "User registered successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Server error", error: error.message });
+    // res.status(500).json({ message: "Server error", error: error.message });
+    next();
   }
 };
 

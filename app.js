@@ -51,8 +51,8 @@ app.use(helmet()); // for adding security headers to requests
 
 // limiter sets a max amount of req. from an IP in a specified amount of time
 let limiter = rateLimit({
-  max: 30, // 3 req max
-  windowMs: 1000 * 60 * 60, // per hour
+  max: 999999999999999, // 999999999999999 req max
+  windowMs: 1000 * 60 * 60, // per 1 hour
   message:
     "we have recieved too many requests from this IP, try again in a while", // message shown when limit reaches
 });
