@@ -149,7 +149,7 @@ const getOrdersofUser = asyncErrorHandler(async (req, res, next) => {
 //   };
 
 // Update Order to return-pending Status if its current status is recieved : done by user
-const returnReceivedOrder = async (req, res) => {
+const returnReceivedOrder = async (req, res, next) => {
   const { id } = req.params; // order id
   const return_reason = req.body.return_reason;
   const return_proof_image =
@@ -171,7 +171,7 @@ const returnReceivedOrder = async (req, res) => {
       return res.status(404).json({ success: false, error: "Order not found" });
     }
 
-    if (req.body.user_id != order.user_id) {
+    if (req.user_id != order.user_id) {
       return res
         .status(403)
         .json({ success: false, error: "This order does not belong to you." });
@@ -202,12 +202,13 @@ const returnReceivedOrder = async (req, res) => {
       });
     }
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    // res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 };
 
 // Update Order to return-on-the-way Status if its current status is return-approved: done by user
-const returnOnTheWayOrder = async (req, res) => {
+const returnOnTheWayOrder = async (req, res, next) => {
   const { id } = req.params; // order id
   const {
     return_company,
@@ -227,8 +228,7 @@ const returnOnTheWayOrder = async (req, res) => {
   ) {
     return res.status(400).json({
       success: false,
-      error:
-        "Return company, tracking ID, and user account related details for the refund are mandatory.",
+      error: "all fields are mandatory.",
     });
   }
 
@@ -242,7 +242,7 @@ const returnOnTheWayOrder = async (req, res) => {
     }
 
     // Verify that the order belongs to the user making the request
-    if (req.body.user_id != order.user_id) {
+    if (req.user_id != order.user_id) {
       return res
         .status(403)
         .json({ success: false, error: "This order does not belong to you." });
@@ -277,7 +277,8 @@ const returnOnTheWayOrder = async (req, res) => {
     }
   } catch (error) {
     // Handle any server errors
-    res.status(500).json({ success: false, error: error.message });
+    // res.status(500).json({ success: false, error: error.message });
+    next(error);
   }
 };
 
