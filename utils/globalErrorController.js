@@ -95,7 +95,8 @@ const zodError = (err) => {
   //   if (err instanceof z.ZodError) {
   // Show only the first error
   const firstError = err.errors[0];
-  const errorMessage = `${firstError.path.join(".")} - ${firstError.message}`;
+  const fieldName = firstError.path.join(".").replace(/_/g, " ");
+  const errorMessage = `${fieldName} - ${firstError.message}`;
   return new CustomError(errorMessage, 400);
   // console.log(`Validation failed: ${errorMessage}`);
   //   }
