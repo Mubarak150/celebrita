@@ -232,7 +232,7 @@ const allow = (...role) => {
 
 const validate = (schema) => (req, res, next) => {
   try {
-    // console.log("hello:", req.files);
+    console.log("hello:", req.body);
     const validatedData = schema.parse(req.body);
     req.body = validatedData;
     next();

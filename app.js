@@ -70,6 +70,25 @@ app.use(express.json());
 app.use(morgan("dev"));
 // app.use(express.static('./public'))
 
+// const allowedOrigins = [
+//   "https://celebrita.co.uk",
+//   "https://shop.celebrita.co.uk",
+// ];
+
+// app.use(
+//   cors({
+//     origin: function (origin, callback) {
+//       // Allow requests from allowed origins or non-browser clients with no origin
+//       if (allowedOrigins.indexOf(origin) !== -1 || !origin) {
+//         callback(null, origin);
+//       } else {
+//         callback(new Error("Not allowed by CORS"));
+//       }
+//     },
+//     credentials: true,
+//   })
+// );
+
 // Middleware setup
 app.use(
   cors({
@@ -95,7 +114,7 @@ app.use(
 //ROUTES:
 // test route:
 app.get("/", (req, res) => {
-  res.status(200).send("latest update: 2024-10-23");
+  res.status(200).send("running since 13th of January, 2025");
 });
 
 // I. auth (registration, signin, and logout):

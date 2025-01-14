@@ -160,6 +160,8 @@ const createReviewSchema = z.object({
       "Field contains disallowed characters"
     )
     .optional(),
+
+  status: z.enum(["pinned", "pending", "approved"]).optional(),
 });
 
 // Validation for updating a review (partial validation)
