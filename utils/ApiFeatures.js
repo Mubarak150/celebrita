@@ -73,7 +73,16 @@ class ApiFeatures {
   limit_fields() {
     this.queryOptions.attributes = this.queryStr.fields
       ? this.queryStr.fields.split(",")
-      : { exclude: ["updatedAt", "password"] };
+      : {
+          exclude: [
+            "updatedAt",
+            "password",
+            "otp",
+            "otp_expiry",
+            "pass_hash",
+            "send_emails",
+          ],
+        };
     return this;
   }
 

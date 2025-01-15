@@ -6,6 +6,8 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const nodemailer = require("nodemailer");
 const moment = require("moment"); // for time manipulation
+const asyncErrorHandler = require("../utils/asyncErrorHandler");
+const { getAll } = require("../utils/helpers");
 require("dotenv").config();
 
 /* helper functions */
@@ -354,79 +356,89 @@ exports.updateMe = async (req, res, next) => {
 
 /* ::::::::::::: ADMIN ROUTE HANDLERS :::::::::: */
 // users get:
-exports.getUsersbyRole = async (req, res) => {
-  let { role } = req.query;
+// exports.getUsersbyRole = async (req, res) => {
+//   // keep it the old.
+//   let { role } = req.query;
 
-  let roleValue;
-  switch (role) {
-    case "admin":
-      roleValue = "1";
-      break;
-    case "user":
-      roleValue = "2";
-      break;
-    case "salesman":
-      roleValue = "3";
-      break;
-    case "receptionist":
-      roleValue = "4";
-      break;
-    case "doctor":
-      roleValue = "5";
-      break;
-    default:
-      return null;
-  }
+//   let roleValue;
+//   switch (role) {
+//     case "admin":
+//       roleValue = "1";
+//       break;
+//     case "user":
+//       roleValue = "2";
+//       break;
+//     case "salesman":
+//       roleValue = "3";
+//       break;
+//     case "receptionist":
+//       roleValue = "4";
+//       break;
+//     case "doctor":
+//       roleValue = "5";
+//       break;
+//     default:
+//       return null;
+//   }
 
-  role = roleValue;
+//   role = roleValue;
 
-  if (!role) {
-    return res.status(400).json({ status: false, message: "role required" });
-  }
+//   if (!role) {
+//     return res.status(400).json({ status: false, message: "role required" });
+//   }
 
-  try {
-    const users = await User.findAll({ where: { role } });
-    if (!users) {
-      return res
-        .status(404)
-        .json({ status: true, message: "Users not found with this role" });
-    }
+//   try {
+//     const users = await User.findAll({ where: { role } });
+//     if (!users) {
+//       return res
+//         .status(404)
+//         .json({ status: true, message: "Users not found with this role" });
+//     }
 
-    let roles = [
-      "admin",
-      "user",
-      "salesman",
-      "receptionist",
-      "doctor",
-      "sales-manager",
-    ];
+//     let roles = [
+//       "admin",
+//       "user",
+//       "salesman",
+//       "receptionist",
+//       "doctor",
+//       "sales-manager",
+//     ];
 
-    let updatedUsers = users.map((user) => {
-      // Convert Sequelize instance to a plain object
-      let userObj = user.get({ plain: true });
-      userObj = {
-        id: userObj.id,
-        name: userObj.name,
-        email: userObj.email,
-        status: userObj.status,
-        role: userObj.role,
-        _qr: userObj.pass_hash,
-      };
+//     let updatedUsers = users.map((user) => {
+//       // Convert Sequelize instance to a plain object
+//       let userObj = user.get({ plain: true });
+//       userObj = {
+//         id: userObj.id,
+//         name: userObj.name,
+//         email: userObj.email,
+//         status: userObj.status,
+//         role: userObj.role,
+//         _qr: userObj.pass_hash,
+//       };
 
-      // :::::::: je maaro code chay :::::: assiging role for frontend purposes from the array above.
-      userObj.role = roles[Number(userObj.role) - 1];
+//       // :::::::: je maaro code chay :::::: assiging role for frontend purposes from the array above.
+//       userObj.role = roles[Number(userObj.role) - 1];
 
-      return userObj;
-    });
+//       return userObj;
+//     });
 
-    res.status(200).json({ status: true, users: updatedUsers });
-  } catch (error) {
-    console.error(error);
-    return res
-      .status(500)
-      .json({ status: false, message: "Internal server error" });
-  }
-};
+//     res.status(200).json({ status: true, users: updatedUsers });
+//   } catch (error) {
+//     console.error(error);
+//     return res
+//       .status(500)
+//       .json({ status: false, message: "Internal server error" });
+//   }
+// };
+
+/**
+                          |**************************************************|
+                          |**************   GET ALL USERS   *****************|
+                          |**************************************************|
+ */
+exports.getUsers = asyncErrorHandler(
+  async (req, res) => await getAll(req, res, User, [])
+);
 
 exports.updateStatusByAdmin = async (req, res) => {
   try {

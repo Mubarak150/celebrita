@@ -161,7 +161,9 @@ const createReviewSchema = z.object({
     )
     .optional(),
 
-  status: z.enum(["pinned", "pending", "approved"]).optional(),
+  status: z
+    .enum(["pinned", "pending", "approved"], "invalid entry for status")
+    .optional(),
 });
 
 // Validation for updating a review (partial validation)

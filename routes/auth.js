@@ -7,7 +7,8 @@ const {
   verifyOTP,
   resetPassword,
   updateMe,
-  getUsersbyRole,
+  // getUsersbyRole,
+  getUsers,
   updateStatusByAdmin,
   changePassword,
   updateSalesmanStatusByManager,
@@ -22,6 +23,7 @@ const {
 const router = express.Router();
 
 // for dev: all are defined in authController...
+router.get("/users", getUsers);
 router.post("/sign-in", signIn);
 router.post("/logout", auth, logout); // user must be logged in in order to logout. so protect is here.
 router.post("/register", register);
@@ -31,7 +33,7 @@ router.post("/verify-otp", verifyOTP);
 // user routes.. should have a separate controller and ancilliaries thereto.
 router.post("/reset-password", resetPassword);
 router.patch("/update-profile", protect, updateMe);
-router.get("/users", protect, forAdminOrManager, getUsersbyRole);
+// router.get("/users", protect, forAdminOrManager, getUsersbyRole);
 
 // admin side routes.
 // activation/deactivation of all by admin:
