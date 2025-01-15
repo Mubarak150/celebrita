@@ -32,14 +32,14 @@ router.post("/verify-otp", verifyOTP);
 
 // user routes.. should have a separate controller and ancilliaries thereto.
 router.post("/reset-password", resetPassword);
-router.patch("/update-profile", protect, updateMe);
+router.patch("/update-profile", auth, updateMe);
 // router.get("/users", protect, forAdminOrManager, getUsersbyRole);
 
 // admin side routes.
 // activation/deactivation of all by admin:
 router.patch(
   "/update-by-admin/:id",
-  protect,
+  auth,
   forAdminOrManager,
   updateStatusByAdmin
 );
