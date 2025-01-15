@@ -8,6 +8,7 @@ const nodemailer = require("nodemailer");
 const moment = require("moment"); // for time manipulation
 const asyncErrorHandler = require("../utils/asyncErrorHandler");
 const { getAll } = require("../utils/helpers");
+const { makeError } = require("../utils/CustomError");
 require("dotenv").config();
 
 /* helper functions */
@@ -154,14 +155,10 @@ exports.logout = async (req, res) => {
 
 // what if the user forgets his password
 // STEP 1:
-exports.forgotPassword = async (req, res) => {
+exports.forgotPassword = async (req, res, next) => {
   const { email } = req.body;
 
-  if (!email) {
-    return res
-      .status(400)
-      .json({ status: false, message: "Email is required" });
-  }
+  if (!email) return makeError("email is required", 400, next);
 
   try {
     const user = await User.findOne({ where: { email } });
@@ -287,7 +284,12 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-// update me: i.e. user updating his own account details.
+/**
+                          |**************************************************|
+                          |**************     update me     *****************|
+                          |**************************************************|
+ */
+// : i.e. user updating his own account details.
 exports.updateMe = async (req, res, next) => {
   try {
     const { password, change_password, new_password, confirm_password } =
@@ -300,7 +302,7 @@ exports.updateMe = async (req, res, next) => {
       });
     }
 
-    const user = await User.findOne({ where: { id: req.body.user.id } });
+    const user = await User.findOne({ where: { id: req.user_id } });
     if (!user) {
       return res
         .status(404)
@@ -335,7 +337,7 @@ exports.updateMe = async (req, res, next) => {
     }
 
     const rowsUpdated = await User.update(updateData, {
-      where: { id: req.body.user.id },
+      where: { id: req.user_id },
       validate: true,
     });
 
@@ -355,81 +357,6 @@ exports.updateMe = async (req, res, next) => {
 };
 
 /* ::::::::::::: ADMIN ROUTE HANDLERS :::::::::: */
-// users get:
-// exports.getUsersbyRole = async (req, res) => {
-//   // keep it the old.
-//   let { role } = req.query;
-
-//   let roleValue;
-//   switch (role) {
-//     case "admin":
-//       roleValue = "1";
-//       break;
-//     case "user":
-//       roleValue = "2";
-//       break;
-//     case "salesman":
-//       roleValue = "3";
-//       break;
-//     case "receptionist":
-//       roleValue = "4";
-//       break;
-//     case "doctor":
-//       roleValue = "5";
-//       break;
-//     default:
-//       return null;
-//   }
-
-//   role = roleValue;
-
-//   if (!role) {
-//     return res.status(400).json({ status: false, message: "role required" });
-//   }
-
-//   try {
-//     const users = await User.findAll({ where: { role } });
-//     if (!users) {
-//       return res
-//         .status(404)
-//         .json({ status: true, message: "Users not found with this role" });
-//     }
-
-//     let roles = [
-//       "admin",
-//       "user",
-//       "salesman",
-//       "receptionist",
-//       "doctor",
-//       "sales-manager",
-//     ];
-
-//     let updatedUsers = users.map((user) => {
-//       // Convert Sequelize instance to a plain object
-//       let userObj = user.get({ plain: true });
-//       userObj = {
-//         id: userObj.id,
-//         name: userObj.name,
-//         email: userObj.email,
-//         status: userObj.status,
-//         role: userObj.role,
-//         _qr: userObj.pass_hash,
-//       };
-
-//       // :::::::: je maaro code chay :::::: assiging role for frontend purposes from the array above.
-//       userObj.role = roles[Number(userObj.role) - 1];
-
-//       return userObj;
-//     });
-
-//     res.status(200).json({ status: true, users: updatedUsers });
-//   } catch (error) {
-//     console.error(error);
-//     return res
-//       .status(500)
-//       .json({ status: false, message: "Internal server error" });
-//   }
-// };
 
 /**
                           |**************************************************|

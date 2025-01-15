@@ -23,10 +23,6 @@ const readAllOrders = async (req, res, next, where = {}) => {
   features.queryOptions.where = { ...features.queryOptions.where, ...where };
   features.queryOptions.include = [
     {
-      model: Invoice,
-      attributes: ["order_id", "invoice_number"],
-    },
-    {
       model: User,
       attributes: ["id", "name", "email"],
     },
