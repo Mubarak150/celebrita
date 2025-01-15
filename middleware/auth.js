@@ -117,7 +117,7 @@ const isSalesMan = (req, res, next) => {
 };
 
 const forAdminOrManager = (req, res, next) => {
-  if (req.body.user.role != "1" && req.body.user.role != "6") {
+  if (req.user.role != "1" && req.user.role != "6") {
     return res
       .status(401)
       .json({ status: false, message: "unauthorized access denied" });
